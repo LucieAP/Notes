@@ -1,12 +1,24 @@
 using Microsoft.EntityFrameworkCore;
+using DotNetEnv;
+
+// Загружаем .env файл
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Строим строку подключения из переменных окружения
+// var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Получаем шаблон строки подключения
+var connTemplate = builder.Configuration.GetConnectionString("DefaultConnection");
+// Расширяем плейсхолдеры напрямую
+var connectionString = Environment.ExpandEnvironmentVariables(connTemplate);
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 var app = builder.Build();
 
