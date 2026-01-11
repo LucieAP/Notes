@@ -9,9 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-// Строим строку подключения из переменных окружения
-// var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddControllers();
 
 // Получаем шаблон строки подключения
 var connTemplate = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -30,5 +28,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseRouting();       // маршрутизация
+app.MapControllers();   // регистрирует контроллеры
 
 app.Run();
