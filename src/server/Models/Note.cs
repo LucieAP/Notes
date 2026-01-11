@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 public class Note
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -12,6 +14,7 @@ public class Note
     public DateTime DeletedAt { get; set; }
 
     // Внешние ключи 
+    [ForeignKey("User")]
     public Guid CreatedBy { get; set; } 
     public Guid? NoteGroupId  {get; set;}
 

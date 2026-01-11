@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 public class Task
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -13,6 +15,7 @@ public class Task
     public DateTime DeletedAt { get; set; }
 
     // Внешние ключи 
+    [ForeignKey("User")]
     public Guid CreatedBy { get; set; } 
     public Guid? TaskGroupId  {get; set; }
 

@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 public class Recipe
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -11,6 +13,7 @@ public class Recipe
     public DateTime DeletedAt { get; set; }
 
     // Внешние ключи 
+    [ForeignKey("User")]
     public Guid CreatedBy { get; set; }
 
     // Навигационные свойства
