@@ -12,7 +12,7 @@ public class Task
     public bool IsTrashed { get; set; }
     public BackgroundColor BackgroundColor { get; set; } = BackgroundColor.Default;
     public bool IsDeleted { get; set; } 
-    public DateTime DeletedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
 
     // Внешние ключи 
     [ForeignKey("User")]

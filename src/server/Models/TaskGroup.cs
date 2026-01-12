@@ -7,7 +7,7 @@ public class TaskGroup
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime LastModifiedAt { get; set; } 
     public bool isDeleted { get; set; }
-    public DateTime DeletedAt { get; set; } 
+    public DateTime? DeletedAt { get; set; } 
 
     // Внешние ключи 
     [ForeignKey("User")]

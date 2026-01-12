@@ -10,7 +10,7 @@ public class Recipe
     public DateTime LastModifiedAt { get; set; }
     public bool IsTrashed { get; set; }
     public bool IsDeleted { get; set; } 
-    public DateTime DeletedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
 
     // Внешние ключи 
     [ForeignKey("User")]
