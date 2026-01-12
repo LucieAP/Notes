@@ -21,46 +21,91 @@ namespace server.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GetNoteResponse>>> GetNotes(CancellationToken cancellationToken = default)
         {
-            try
-            {
-                            var notes = await _context.Notes
-                    .Include(n => n.User)
-                    .Include(n => n.NoteGroup)
-                    .Select(n => new GetNoteResponse
+            var notes = await _context.Notes
+                .AsNoTracking()
+                .Include(n => n.User)
+                .Include(n => n.NoteGroup)
+                .Select(n => new GetNoteResponse
+                {
+                    Id = n.Id,
+                    Title = n.Title,
+                    Description = n.Description,
+                    IsPinned = n.IsPinned,
+                    CreatedAt = n.CreatedAt,
+                    LastModifiedAt = n.LastModifiedAt,
+                    IsTrashed = n.IsTrashed,
+                    BackgroundColor = n.BackgroundColor,
+                    IsDeleted = n.IsDeleted,
+                    DeletedAt = n.DeletedAt,
+                    NoteGroup = new GetNoteGroup
                     {
-                        Id = n.Id,
-                        Title = n.Title,
-                        Description = n.Description,
-                        IsPinned = n.IsPinned,
-                        CreatedAt = n.CreatedAt,
-                        LastModifiedAt = n.LastModifiedAt,
-                        IsTrashed = n.IsTrashed,
-                        BackgroundColor = n.BackgroundColor,
-                        IsDeleted = n.IsDeleted,
-                        DeletedAt = n.DeletedAt,
-                        NoteGroup = new GetNoteGroup
-                        {
-                            Id = n.NoteGroup.Id,
-                            Title = n.NoteGroup.Title,
-                            CreatedAt = n.NoteGroup.CreatedAt,
-                            LastModifiedAt = n.NoteGroup.LastModifiedAt,
-                        },
-                        CreatedBy = new GetUserResponse
-                        {
-                            Id = n.User.Id,
-                            Name = n.User.Name,
-                            Email = n.User.Email,
-                            Picture = n.User.Picture
-                        }
-                    })
-                    .ToListAsync();
+                        Id = n.NoteGroup.Id,
+                        Title = n.NoteGroup.Title,
+                        CreatedAt = n.NoteGroup.CreatedAt,
+                        LastModifiedAt = n.NoteGroup.LastModifiedAt,
+                    },
+                    CreatedBy = new GetUserResponse
+                    {
+                        Id = n.User.Id,
+                        Name = n.User.Name,
+                        Email = n.User.Email,
+                        Picture = n.User.Picture
+                    }
+                })
+                .ToListAsync(cancellationToken);
 
-                return Ok(notes);
-            }
-            catch (System.Exception)
+            if (notes == null)
             {
-                throw;
-            }
+                return NotFound();  
+            } 
+
+            return Ok(notes);
         } 
+
+        // GET: api/notes/id
+        [HttpGet("{id}")]
+        public async Task<ActionResult<GetNoteResponse>> GetNote([FromRoute] Guid id, CancellationToken cancellationToken = default)
+        {
+            var note = await _context.Notes
+                .AsNoTracking()
+                .Include(n => n.User)
+                .Include(n => n.NoteGroup)
+                .Where(n => n.Id == id)
+                .Select(n => new GetNoteResponse
+                {
+                    Id = n.Id,
+                    Title = n.Title,
+                    Description = n.Description,
+                    IsPinned = n.IsPinned,
+                    CreatedAt = n.CreatedAt,
+                    LastModifiedAt = n.LastModifiedAt,
+                    IsTrashed = n.IsTrashed,
+                    BackgroundColor = n.BackgroundColor,
+                    IsDeleted = n.IsDeleted,
+                    DeletedAt = n.DeletedAt,
+                    NoteGroup = new GetNoteGroup
+                    {
+                        Id = n.NoteGroup.Id,
+                        Title = n.NoteGroup.Title,
+                        CreatedAt = n.NoteGroup.CreatedAt,
+                        LastModifiedAt = n.NoteGroup.LastModifiedAt,
+                    },
+                    CreatedBy = new GetUserResponse
+                    {
+                        Id = n.User.Id,
+                        Name = n.User.Name,
+                        Email = n.User.Email,
+                        Picture = n.User.Picture
+                    }
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+            
+            if (note == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(note);
+        }
     }
 }
