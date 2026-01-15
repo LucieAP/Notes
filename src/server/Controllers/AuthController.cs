@@ -13,11 +13,13 @@ namespace server.Controllers
     {
         private readonly AppDbContext _context;
         private readonly JwtService _jwtService;
+        private readonly UserService _userService;
 
-        public AuthController(AppDbContext context, JwtService jwtService)
+        public AuthController(AppDbContext context, JwtService jwtService, UserService userService)
         {
             _context = context;
             _jwtService = jwtService;
+            _userService = userService;
         }
 
         // Перенаправляет пользователя на страницу входа Google. 
@@ -64,7 +66,7 @@ namespace server.Controllers
             }
 
              // Шаг 3: Находим или создаём пользователя
-            var user = await FindOrCreateUser(userInfo.GoogleId, userInfo.Email, userInfo.Name, userInfo.EmailVerified, cancellationToken);
+            var user = await _userService.FindOrCreateUser(userInfo.GoogleId, userInfo.Email, userInfo.Name, userInfo.EmailVerified, _context, cancellationToken);
 
             // Шаг 4: Генерируем токен
             var jwtToken = _jwtService.GenerateJwtToken(new JwtUser 
@@ -80,35 +82,6 @@ namespace server.Controllers
 
             // TO-DO: Redirect на React с токеном
             // return Redirect($"http://localhost:3000/callback?token={jwtToken}");
-        }
-
-        // Вспомогательный метод для работы с пользователем
-        private async Task<User> FindOrCreateUser(string googleId, string email, string name, bool emailVerified, CancellationToken cancellationToken)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.GoogleId == googleId, cancellationToken);
-
-            if (user == null)
-            {
-                user = new User
-                {
-                    Id = Guid.NewGuid(),
-                    GoogleId = googleId,
-                    Name = name,
-                    Email = email,
-                    EmailVerified = emailVerified,
-                    CreatedAt = DateTime.UtcNow,
-                    LastLoginAt = DateTime.UtcNow
-                };
-                _context.Users.Add(user);
-            }
-            else
-            {
-                // Обновляем время последнего входа
-                user.LastLoginAt = DateTime.Now;
-            }
-
-            await _context.SaveChangesAsync(cancellationToken);
-            return user;
         }
     }
 }

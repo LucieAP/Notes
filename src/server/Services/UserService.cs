@@ -6,6 +6,35 @@ using Microsoft.EntityFrameworkCore;
 
 public class UserService
 {
+    // Вспомогательный метод для работы с пользователем
+    public async Task<User> FindOrCreateUser(string googleId, string email, string name, bool emailVerified, AppDbContext _context, CancellationToken cancellationToken = default)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.GoogleId == googleId, cancellationToken);
+
+        if (user == null)
+        {
+            user = new User
+            {
+                Id = Guid.NewGuid(),
+                GoogleId = googleId,
+                Name = name,
+                Email = email,
+                EmailVerified = emailVerified,
+                CreatedAt = DateTime.UtcNow,
+                LastLoginAt = DateTime.UtcNow
+            };
+            _context.Users.Add(user);
+        }
+        else
+        {
+            // Обновляем время последнего входа
+            user.LastLoginAt = DateTime.Now;
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+        return user;
+    }
+
     // Получение идентификатора пользователя
     public Guid GetUserId(ClaimsPrincipal user)
         {
