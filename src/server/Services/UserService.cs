@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 public class UserService
 {
+    // Получение идентификатора пользователя
     public Guid GetUserId(ClaimsPrincipal user)
         {
             var userIdClaim = user.Claims
@@ -19,6 +20,7 @@ public class UserService
             return userId;
         }
     
+    // Получение пользователя по его идентификатору
     public async Task<User?> GetuserByIdAsync(Guid userId, AppDbContext _context, CancellationToken cancellationToken = default)
     {
         var user = await _context.Users
