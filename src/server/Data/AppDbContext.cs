@@ -15,4 +15,12 @@ public class AppDbContext : DbContext
     public DbSet<RecipeStep> RecipeSteps { get; set; }
     public DbSet<IngredientGroup> IngredientGroups { get; set; }
     public DbSet<Ingredient> Ingredients { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<User>().HasIndex(u => u.GoogleId).IsUnique();
+        modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
+    }
 }
