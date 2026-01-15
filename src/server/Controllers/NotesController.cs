@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,11 +11,13 @@ namespace server.Controllers
     {
         private readonly AppDbContext _context;
         private readonly ILogger<NotesController> _logger;
+        private readonly UserService _userService;
 
-        public NotesController(AppDbContext context, ILogger<NotesController> logger)
+        public NotesController(AppDbContext context, ILogger<NotesController> logger, UserService userService)
         {
             _context = context;
             _logger = logger;
+            _userService = userService;
         }
 
         // GET: api/notes
@@ -54,23 +57,21 @@ namespace server.Controllers
                 })
                 .ToListAsync(cancellationToken);
 
-            if (notes == null)
-            {
-                return NotFound();  
-            } 
-
             return Ok(notes);
         } 
 
         // GET: api/notes/id
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<GetNoteResponse>> GetNote([FromRoute] Guid id, CancellationToken cancellationToken = default)
         {
+            var currentUserId = _userService.GetUserId(User);
+
             var note = await _context.Notes
                 .AsNoTracking()
                 .Include(n => n.User)
                 .Include(n => n.NoteGroup)
-                .Where(n => n.Id == id)
+                .Where(n => n.Id == id && n.CreatedBy == currentUserId)
                 .Select(n => new GetNoteResponse
                 {
                     Id = n.Id,
@@ -106,6 +107,42 @@ namespace server.Controllers
             }
 
             return Ok(note);
+        }
+        
+        // POST: api/notes/create
+        [HttpPost("create")]
+        [Authorize]
+        public async Task<IActionResult> CreateNote([FromBody] CreateNoteRequest createNoteRequest, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var currentUserId = _userService.GetUserId(User);
+
+                var note = new Note
+                {
+                    Id = Guid.NewGuid(),
+                    Title = createNoteRequest.Title,
+                    Description = createNoteRequest.Description,
+                    IsPinned = createNoteRequest.IsPinned,
+                    CreatedAt = DateTime.UtcNow,
+                    LastModifiedAt = DateTime.UtcNow,
+                    IsTrashed = false,
+                    BackgroundColor = createNoteRequest.BackgroundColor,
+                    IsDeleted = false,
+                    DeletedAt = null,
+                    CreatedBy = currentUserId,
+                    NoteGroupId = createNoteRequest.NoteGroupId
+                };
+
+                _context.Notes.Add(note);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                return Ok();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }
