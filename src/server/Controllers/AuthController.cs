@@ -28,22 +28,29 @@ namespace server.Controllers
         [AllowAnonymous]
         public IActionResult GoogleLogin()
         {
-            var redirectUrl = "/api/auth/google-callback";
+            var redirectUrl = $"{Request.Scheme}://{Request.Host}/api/auth/signin-google";
             var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
 
             return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
 
-        [HttpGet("google-callback")]
+        [HttpGet("signin-google")]
         [AllowAnonymous]
         public async Task<IActionResult> GoogleCallback(CancellationToken cancellationToken = default)
         {
             // Шаг 1: Получаем данные от Google
+            // Устанавливает аутентификацию через SignInScheme
             var googleData = await HttpContext.AuthenticateAsync("ExternalCookies");
 
             if (!googleData.Succeeded)
             {
-                return Unauthorized("Ошибка входа через Google.");
+                var errorMessage = googleData.Failure?.Message ?? "Неизвестная ошибка";
+                Console.WriteLine($"Ошибка аутентификации: {errorMessage}");
+                if (googleData.Failure != null)
+                {
+                    Console.WriteLine($"Детали ошибки: {googleData.Failure}");
+                }
+                return Unauthorized($"Ошибка входа через Google: {errorMessage}");
             }
 
             // Шаг 2: Удаляем временные куки после успешной аутентификации
