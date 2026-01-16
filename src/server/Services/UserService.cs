@@ -50,7 +50,7 @@ public class UserService
         }
     
     // Получение пользователя по его идентификатору
-    public async Task<User?> GetuserByIdAsync(Guid userId, AppDbContext _context, CancellationToken cancellationToken = default)
+    public async Task<User?> GetUserByIdAsync(Guid userId, AppDbContext _context, CancellationToken cancellationToken)
     {
         var user = await _context.Users
             .AsNoTracking()
