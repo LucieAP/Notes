@@ -83,5 +83,26 @@ namespace server.Controllers
             // TO-DO: Redirect на React с токеном
             // return Redirect($"http://localhost:3000/callback?token={jwtToken}");
         }
+
+        [HttpGet("me")]
+        [Authorize]
+        public IActionResult GetCurrentUser(CancellationToken cancellationToken = default)
+        {
+            var currentUserId = _userService.GetUserId(User);
+
+            if (string.IsNullOrEmpty(currentUserId.ToString()))
+            {
+                return Unauthorized();
+            }
+
+            var user = _userService.GetUserByIdAsync(currentUserId, _context, cancellationToken);
+
+            if (user == null)
+            {
+                return NotFound(new { error = "User not found" }); 
+            }
+
+            return Ok(user);
+        }
     }
 }
