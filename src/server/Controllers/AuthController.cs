@@ -46,7 +46,10 @@ namespace server.Controllers
                 return Unauthorized("Ошибка входа через Google.");
             }
 
-            // Шаг 2: Извлекаем информацию о пользователе
+            // Шаг 2: Удаляем временные куки после успешной аутентификации
+            await HttpContext.SignOutAsync("ExternalCookies");
+
+            // Шаг 3: Извлекаем информацию о пользователе
 
             var claims = googleData.Principal.Claims;
 
@@ -65,10 +68,10 @@ namespace server.Controllers
                 return BadRequest("Не удалось получить данные пользователя.");
             }
 
-             // Шаг 3: Находим или создаём пользователя
+             // Шаг 4: Находим или создаём пользователя
             var user = await _userService.FindOrCreateUser(userInfo.GoogleId, userInfo.Email, userInfo.Name, userInfo.EmailVerified, _context, cancellationToken);
 
-            // Шаг 4: Генерируем токен
+            // Шаг 5: Генерируем токен
             var jwtToken = _jwtService.GenerateJwtToken(new JwtUser 
             {
                 Id = user.Id,
