@@ -28,7 +28,7 @@ public class UserService
         else
         {
             // Обновляем время последнего входа
-            user.LastLoginAt = DateTime.Now;
+            user.LastLoginAt = DateTime.UtcNow;
         }
 
         await _context.SaveChangesAsync(cancellationToken);
