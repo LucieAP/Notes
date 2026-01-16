@@ -2,9 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 
 // Загружаем .env файл
 Env.Load();
@@ -48,23 +50,52 @@ builder.Services.AddAuthentication(option =>
                 options.Cookie.Name = "ExternalCookies";
                 options.Cookie.HttpOnly = true; // Предотвращает доступ к cookie через JavaScript в браузере
                 options.Cookie.SameSite = SameSiteMode.Lax;  // ограничение cross-site запросов
-                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // cookie отправляется по тому же протоколу, что и запрос (HTTP → HTTP, HTTPS → HTTPS)
+                options.Cookie.Path = "/"; // Устанавливаем path в корень для доступности на всех путях
+                
+                if (builder.Environment.IsDevelopment())
+                {
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+                }
+                else
+                {
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                }
+                
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(5); // Время жизни cookie для OAuth flow
+                options.SlidingExpiration = true; // Обновление времени истечения при активности
             })
         .AddGoogle(options => 
             {
-                var cliendId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
+                var clientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
                 var clientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET");
-                if (cliendId == null || clientSecret == null)
+                if (clientId == null || clientSecret == null)
                 {
                     throw new ArgumentNullException("Не указаны переменные окружения GOOGLE_CLIENT_ID или GOOGLE_CLIENT_SECRET");
                 }
-                options.ClientId = cliendId;
+                options.ClientId = clientId;
                 options.ClientSecret = clientSecret;
-                options.SaveTokens = true; // Сохраняем токены Google для дальнейшего использования, если нужно
+                options.SaveTokens = true; // Сохраняем токены Google для дальнейшего использования, если необходимо
                 options.SignInScheme = "ExternalCookies"; // Используем cookie-схему для временного хранения данных OAuth
+                
+                // Настройка correlation cookie для правильной работы OAuth state
+                options.CorrelationCookie.Name = ".AspNetCore.Correlation.Google";
+                options.CorrelationCookie.HttpOnly = true;
+                options.CorrelationCookie.Path = "/";
+                
+                // Так как приложение работает по HTTPS, используем Always для SecurePolicy
+                // SameSiteMode.Lax работает для OAuth редиректов в том же домене
+                if (builder.Environment.IsDevelopment())
+                {
+                    options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+                    // Используем Always, так как работаем по HTTPS
+                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+                }
+                else
+                {
+                    options.CorrelationCookie.SameSite = SameSiteMode.None;
+                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+                }
             });
-
 
 builder.Services.AddCors(options => 
     {
@@ -90,8 +121,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("Notes Client");
 app.UseRouting();       // маршрутизация
+app.UseCors("Notes Client");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();   // регистрирует контроллеры
