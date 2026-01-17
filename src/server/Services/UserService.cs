@@ -3,23 +3,26 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 public class UserService
 {
     // Вспомогательный метод для работы с пользователем
-    public async Task<User> FindOrCreateUser(string googleId, string email, string name, bool emailVerified, AppDbContext _context, CancellationToken cancellationToken = default)
+    public async Task<User> FindOrCreateUser(GoogleUserInfo userInfo, AppDbContext _context, CancellationToken cancellationToken = default)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.GoogleId == googleId, cancellationToken);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.GoogleId == userInfo.GoogleId, cancellationToken);
 
+        // Создаем нового пользователя, если его не существует
         if (user == null)
         {
             user = new User
             {
                 Id = Guid.NewGuid(),
-                GoogleId = googleId,
-                Name = name,
-                Email = email,
-                EmailVerified = emailVerified,
+                GoogleId = userInfo.GoogleId,
+                Name = userInfo.Name,
+                Email = userInfo.Email,
+                Picture = userInfo.Picture,
+                EmailVerified = userInfo.EmailVerified,
                 CreatedAt = DateTime.UtcNow,
                 LastLoginAt = DateTime.UtcNow
             };
@@ -27,6 +30,24 @@ public class UserService
         }
         else
         {
+            // Если пользователь изменил данные, меняем их в БД на новые
+            if (user.Name != userInfo.Name)
+            {
+                user.Name = userInfo.Name;
+            }
+            if (user.Picture != userInfo.Picture)
+            {
+                user.Picture = userInfo.Picture;
+            }
+            if (user.Email != userInfo.Email)
+            {
+                user.Email = userInfo.Email;
+            }
+            if (user.EmailVerified != userInfo.EmailVerified)
+            {
+                user.EmailVerified = userInfo.EmailVerified;
+            }
+
             // Обновляем время последнего входа
             user.LastLoginAt = DateTime.UtcNow;
         }
