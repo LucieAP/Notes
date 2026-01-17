@@ -188,10 +188,100 @@ namespace server.Controllers
 
             await _context.SaveChangesAsync(cancellationToken);
 
+            _logger.LogInformation("Кнопка закрепления заметки {NoteId} переключена на {IsPinned}", note.Id, note.IsPinned);
+
             return Ok(new{
                 id = note.Id,
                 isPinned = note.IsPinned,
                 lastModifiedAt = note.LastModifiedAt
+            });
+        }
+
+        // PATCH: api/notes/{id}/
+        [HttpPatch("{id}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateNote([FromRoute] Guid id, [FromBody] UpdateNoteRequest updateNoteRequest , CancellationToken cancellationToken = default)
+        {
+            if (updateNoteRequest.Title == null && 
+                updateNoteRequest.Description == null && 
+                updateNoteRequest.BackgroundColor == null)
+            {
+                return BadRequest(new { message = "Ни одного параметра не было передано" });
+            }
+
+            var currentUserId = _userService.GetUserId(User);
+
+            var note = await _context.Notes
+                .Where(n => n.Id == id && n.CreatedBy == currentUserId)
+                .FirstOrDefaultAsync(cancellationToken);
+            
+            if (note == null)
+            {
+                return NotFound();
+            }
+
+            var wasUpdated = false;
+
+            if (updateNoteRequest.Title != null)
+            {
+                var trimmedTitle = updateNoteRequest.Title.Trim();  // Удаляем пробелы с начала и конца строки
+        
+                if (string.IsNullOrWhiteSpace(trimmedTitle))        // Проверяем пустоту строки
+                {
+                    return BadRequest(new { message = "Название не может быть пустым" });
+                }
+                
+                if (trimmedTitle != note.Title)
+                {
+                    note.Title = trimmedTitle;
+                    wasUpdated = true;
+                    _logger.LogInformation(
+                        "Название заметки {NoteId} обновлено пользователем {UserId}", 
+                        note.Id, currentUserId
+                    );
+                }
+            }
+            if (updateNoteRequest.Description != null)
+            {
+                var trimmedDescription = string.IsNullOrWhiteSpace(updateNoteRequest.Description)  // Проверяем пустоту строки
+                    ? null 
+                    : updateNoteRequest.Description.Trim();     // Удаляем пробелы с начала и конца строки
+                
+                if (trimmedDescription != note.Description)
+                {
+                    note.Description = trimmedDescription;
+                    wasUpdated = true;
+                    _logger.LogInformation(
+                        "Описание заметки {NoteId} обновлено пользователем {UserId}", 
+                        note.Id, currentUserId
+                    );
+                }
+            }
+            if (updateNoteRequest.BackgroundColor.HasValue && 
+                updateNoteRequest.BackgroundColor.Value != note.BackgroundColor)
+            {
+                note.BackgroundColor = updateNoteRequest.BackgroundColor.Value;
+                wasUpdated = true;
+                _logger.LogInformation("Цвет заметки {NoteId} изменен на {BackgroundColor}", note.Id, note.BackgroundColor);
+            }
+
+            if (wasUpdated)
+            {
+                note.LastModifiedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync(cancellationToken); 
+            }
+            else
+            {
+                _logger.LogInformation("Новые данные соответсвуют старым, изменения не применены.");
+            }
+
+            return Ok(new{
+                id = note.Id,
+                title = note.Title,
+                description = note.Description,
+                backgroundColor = note.BackgroundColor,
+                lastModifiedAt = note.LastModifiedAt,
+                wasUpdated = wasUpdated
             });
         }
 
