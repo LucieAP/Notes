@@ -60,6 +60,11 @@ namespace server.Controllers
 
             var claims = googleData.Principal.Claims;
 
+            // foreach (var claim in claims)
+            // {
+            //     Console.WriteLine($"Claim Type: {claim.Type}, Value: {claim.Value}");
+            // }
+
             var userInfo = new GoogleUserInfo
             {
                 GoogleId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value,
@@ -76,7 +81,7 @@ namespace server.Controllers
             }
 
              // Шаг 4: Находим или создаём пользователя
-            var user = await _userService.FindOrCreateUser(userInfo.GoogleId, userInfo.Email, userInfo.Name, userInfo.EmailVerified, _context, cancellationToken);
+            var user = await _userService.FindOrCreateUser(userInfo, _context, cancellationToken);
 
             // Шаг 5: Генерируем токен
             var jwtToken = _jwtService.GenerateJwtToken(new JwtUser 
@@ -96,7 +101,7 @@ namespace server.Controllers
 
         [HttpGet("me")]
         [Authorize]
-        public IActionResult GetCurrentUser(CancellationToken cancellationToken = default)
+        public async Task<IActionResult> GetCurrentUserAsync(CancellationToken cancellationToken = default)
         {
             var currentUserId = _userService.GetUserId(User);
 
@@ -105,14 +110,22 @@ namespace server.Controllers
                 return Unauthorized();
             }
 
-            var user = _userService.GetUserByIdAsync(currentUserId, _context, cancellationToken);
+            var user = await _userService.GetUserByIdAsync(currentUserId, _context, cancellationToken);
 
             if (user == null)
             {
                 return NotFound(new { error = "User not found" }); 
             }
 
-            return Ok(user);
+            return Ok(new GetUserResponse
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Picture = user.Picture,
+                EmailVerified = user.EmailVerified,
+                LastLoginAt = user.LastLoginAt
+            });
         }
     }
 }
