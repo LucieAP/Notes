@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -166,6 +167,34 @@ namespace server.Controllers
                 response);
         }
 
+        // PATCH: api/notes/{id}/pin
+        [HttpPatch("{id}/pin")]
+        [Authorize]
+        public async Task<IActionResult> ToggleNotePinStatus([FromRoute] Guid id, CancellationToken cancellationToken = default)
+        {
+            var currentUserId = _userService.GetUserId(User);
+
+            var note = await _context.Notes
+                .Where(n => n.Id == id && n.CreatedBy == currentUserId)
+                .FirstOrDefaultAsync(cancellationToken);
+            
+            if (note == null)
+            {
+                return NotFound();
+            }
+
+            note.IsPinned = !note.IsPinned;
+            note.LastModifiedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Ok(new{
+                id = note.Id,
+                isPinned = note.IsPinned,
+                lastModifiedAt = note.LastModifiedAt
+            });
+        }
+
         // DELETE: api/notes/delete/{id}
         [HttpDelete("delete/{id}")]
         [Authorize]
@@ -181,6 +210,8 @@ namespace server.Controllers
             {
                 return NotFound();
             }
+
+            note.LastModifiedAt = DateTime.UtcNow;
 
             // Мягкое удаление
             note.IsDeleted = true;
