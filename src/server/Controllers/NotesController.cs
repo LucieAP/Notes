@@ -110,6 +110,8 @@ namespace server.Controllers
                 return NotFound();
             }
 
+            _logger.LogInformation("Вывод всех найденных заметок");
+
             return Ok(note);
         }
         
@@ -118,35 +120,31 @@ namespace server.Controllers
         [Authorize]
         public async Task<IActionResult> CreateNote([FromBody] CreateNoteRequest createNoteRequest, CancellationToken cancellationToken = default)
         {
-            try
+
+            var currentUserId = _userService.GetUserId(User);
+
+            var note = new Note
             {
-                var currentUserId = _userService.GetUserId(User);
+                Id = Guid.NewGuid(),
+                Title = createNoteRequest.Title,
+                Description = createNoteRequest.Description,
+                IsPinned = createNoteRequest.IsPinned,
+                CreatedAt = DateTime.UtcNow,
+                LastModifiedAt = DateTime.UtcNow,
+                IsTrashed = false,
+                BackgroundColor = createNoteRequest.BackgroundColor,
+                IsDeleted = false,
+                DeletedAt = null,
+                CreatedBy = currentUserId,
+                NoteGroupId = createNoteRequest.NoteGroupId
+            };
 
-                var note = new Note
-                {
-                    Id = Guid.NewGuid(),
-                    Title = createNoteRequest.Title,
-                    Description = createNoteRequest.Description,
-                    IsPinned = createNoteRequest.IsPinned,
-                    CreatedAt = DateTime.UtcNow,
-                    LastModifiedAt = DateTime.UtcNow,
-                    IsTrashed = false,
-                    BackgroundColor = createNoteRequest.BackgroundColor,
-                    IsDeleted = false,
-                    DeletedAt = null,
-                    CreatedBy = currentUserId,
-                    NoteGroupId = createNoteRequest.NoteGroupId
-                };
+            _context.Notes.Add(note);
+            await _context.SaveChangesAsync(cancellationToken);
 
-                _context.Notes.Add(note);
-                await _context.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation("Создана новая заметка {NoteId}", note.Id);
 
-                return Ok();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return Ok();
         }
 
         // DELETE: api/notes/delete
@@ -157,7 +155,7 @@ namespace server.Controllers
             var currentUserId = _userService.GetUserId(User);
 
             var note = await _context.Notes
-                .Where(n => n.Id == noteIdRequest.Id && n.CreatedBy == currentUserId)
+                .Where(n => n.Id == noteIdRequest.Id && n.CreatedBy == currentUserId && n.IsDeleted != true)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (note == null)
@@ -171,7 +169,9 @@ namespace server.Controllers
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            return Ok();                
+            _logger.LogInformation("Note {NotesId} была удалена пользователем {Userid}", note.Id, note.CreatedBy);
+
+            return NoContent();       
         }
     }
 }
