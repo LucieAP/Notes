@@ -77,6 +77,33 @@ builder.Services.AddAuthentication(option =>
                 options.SaveTokens = true; // Сохраняем токены Google для дальнейшего использования, если необходимо
                 options.SignInScheme = "ExternalCookies"; // Используем cookie-схему для временного хранения данных OAuth
                 
+                // Явно указываем scopes для получения всех необходимых данных
+                options.Scope.Add("openid");
+                options.Scope.Add("profile"); // Для picture, name, given_name, family_name
+                options.Scope.Add("email");   // Для email и email_verified
+                
+                // Добавляем дополнительные Claims из JSON ответа Google
+                options.Events.OnCreatingTicket = context =>
+                {
+                    // Получаем данные из JSON ответа Google (context.User - это JsonElement)
+                    if (context.User.TryGetProperty("picture", out var pictureElement))
+                    {
+                        var picture = pictureElement.GetString();
+                        if (!string.IsNullOrEmpty(picture))
+                        {
+                            context.Identity?.AddClaim(new System.Security.Claims.Claim("picture", picture));
+                        }
+                    }
+                    
+                    if (context.User.TryGetProperty("email_verified", out var emailVerifiedElement))
+                    {
+                        var emailVerified = emailVerifiedElement.GetBoolean().ToString();
+                        context.Identity?.AddClaim(new System.Security.Claims.Claim("email_verified", emailVerified));
+                    }
+                    
+                    return System.Threading.Tasks.Task.CompletedTask;
+                };
+                
                 // Настройка correlation cookie для правильной работы OAuth state
                 options.CorrelationCookie.Name = ".AspNetCore.Correlation.Google";
                 options.CorrelationCookie.HttpOnly = true;
