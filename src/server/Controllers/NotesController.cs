@@ -40,19 +40,21 @@ namespace server.Controllers
                     BackgroundColor = n.BackgroundColor,
                     IsDeleted = n.IsDeleted,
                     DeletedAt = n.DeletedAt,
-                    NoteGroup = new GetNoteGroup
+                    NoteGroup = n.NoteGroup != null ? new GetNoteGroup
                     {
                         Id = n.NoteGroup.Id,
                         Title = n.NoteGroup.Title,
                         CreatedAt = n.NoteGroup.CreatedAt,
                         LastModifiedAt = n.NoteGroup.LastModifiedAt,
-                    },
+                    } : null,
                     CreatedBy = new GetUserResponse
                     {
                         Id = n.User.Id,
                         Name = n.User.Name,
                         Email = n.User.Email,
-                        Picture = n.User.Picture
+                        Picture = n.User.Picture,
+                        EmailVerified = n.User.EmailVerified,
+                        LastLoginAt = n.User.LastLoginAt
                     }
                 })
                 .ToListAsync(cancellationToken);
@@ -84,19 +86,21 @@ namespace server.Controllers
                     BackgroundColor = n.BackgroundColor,
                     IsDeleted = n.IsDeleted,
                     DeletedAt = n.DeletedAt,
-                    NoteGroup = new GetNoteGroup
+                    NoteGroup = n.NoteGroup != null ? new GetNoteGroup
                     {
                         Id = n.NoteGroup.Id,
                         Title = n.NoteGroup.Title,
                         CreatedAt = n.NoteGroup.CreatedAt,
                         LastModifiedAt = n.NoteGroup.LastModifiedAt,
-                    },
+                    } : null,
                     CreatedBy = new GetUserResponse
                     {
                         Id = n.User.Id,
                         Name = n.User.Name,
                         Email = n.User.Email,
-                        Picture = n.User.Picture
+                        Picture = n.User.Picture,
+                        EmailVerified = n.User.EmailVerified,
+                        LastLoginAt = n.User.LastLoginAt
                     }
                 })
                 .FirstOrDefaultAsync(cancellationToken);
