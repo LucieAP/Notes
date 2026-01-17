@@ -144,5 +144,30 @@ namespace server.Controllers
                 throw;
             }
         }
+
+        // DELETE: api/notes/delete
+        [HttpDelete("delete")]
+        [Authorize]
+        public async Task<IActionResult> DeleteNoteById ([FromBody] DeleteNoteRequest noteIdRequest, CancellationToken cancellationToken = default)
+        {
+            var currentUserId = _userService.GetUserId(User);
+
+            var note = await _context.Notes
+                .Where(n => n.Id == noteIdRequest.Id && n.CreatedBy == currentUserId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (note == null)
+            {
+                return NotFound();
+            }
+
+            // Мягкое удаление
+            note.IsDeleted = true;
+            note.DeletedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Ok();                
+        }
     }
 }
