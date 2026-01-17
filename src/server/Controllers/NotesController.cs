@@ -142,20 +142,39 @@ namespace server.Controllers
             _context.Notes.Add(note);
             await _context.SaveChangesAsync(cancellationToken);
 
+            var response = new CreateNoteResponse
+            {
+                Id = note.Id,
+                Title = note.Title,
+                Description = note.Description,
+                IsPinned = note.IsPinned,
+                CreatedAt = note.CreatedAt,
+                LastModifiedAt = note.LastModifiedAt,
+                IsTrashed = note.IsTrashed,
+                BackgroundColor = note.BackgroundColor,
+                IsDeleted = note.IsDeleted,
+                DeletedAt = note.DeletedAt,
+                CreatedBy = note.CreatedBy,
+                NoteGroupId = note.NoteGroupId
+            };
+
             _logger.LogInformation("Создана новая заметка {NoteId}", note.Id);
 
-            return Ok();
+            return CreatedAtAction(
+                nameof(GetNote),
+                new {id = note.Id},
+                response);
         }
 
-        // DELETE: api/notes/delete
-        [HttpDelete("delete")]
+        // DELETE: api/notes/delete/{id}
+        [HttpDelete("delete/{id}")]
         [Authorize]
-        public async Task<IActionResult> DeleteNoteById ([FromBody] DeleteNoteRequest noteIdRequest, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> DeleteNoteById ([FromRoute] Guid id, CancellationToken cancellationToken = default)
         {
             var currentUserId = _userService.GetUserId(User);
 
             var note = await _context.Notes
-                .Where(n => n.Id == noteIdRequest.Id && n.CreatedBy == currentUserId && n.IsDeleted != true)
+                .Where(n => n.Id == id && n.CreatedBy == currentUserId && n.IsDeleted != true)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (note == null)
@@ -169,7 +188,7 @@ namespace server.Controllers
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation("Note {NotesId} была удалена пользователем {Userid}", note.Id, note.CreatedBy);
+            _logger.LogInformation("Note {NotesId} была удалена пользователем {Userid}", id, currentUserId);
 
             return NoContent();       
         }
