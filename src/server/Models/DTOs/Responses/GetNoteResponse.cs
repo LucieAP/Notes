@@ -10,6 +10,6 @@ public record GetNoteResponse
     public BackgroundColor BackgroundColor { get; set; }
     public bool IsDeleted { get; set; } 
     public DateTime? DeletedAt { get; set; }
-    public GetNoteGroup NoteGroup { get; set; }
+    public GetNoteGroup? NoteGroup { get; set; }
     public GetUserResponse CreatedBy { get; set; }
 }
