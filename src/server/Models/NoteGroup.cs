@@ -6,7 +6,7 @@ public class NoteGroup
     public required string Title { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime LastModifiedAt { get; set; } 
-    public bool isDeleted { get; set; }
+    public bool IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; } 
 
     // Внешние ключи 

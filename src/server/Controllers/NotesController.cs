@@ -313,5 +313,217 @@ namespace server.Controllers
 
             return NoContent();       
         }
+
+        // POST: api/notes/group/create
+        [HttpPost("group/create")]
+        [Authorize]
+        public async Task<IActionResult> CreateNoteGroup([FromBody]CreateNoteGroupRequest createNoteGroupRequest, CancellationToken cancellationToken = default)
+        {
+
+            var currentUserId = _userService.GetUserId(User);
+            var trimmedTitle = createNoteGroupRequest.Title.Trim();
+
+            if (string.IsNullOrEmpty(trimmedTitle))
+            {
+                return BadRequest(new { message = "Название группы не может быть пустым" });
+            }
+            
+            var noteGroup = new NoteGroup
+            {
+                Id = Guid.NewGuid(),
+                Title = trimmedTitle,
+                CreatedAt = DateTime.UtcNow,
+                LastModifiedAt = DateTime.UtcNow,
+                IsDeleted = false,
+                CreatedBy = currentUserId
+            };
+
+            _context.NoteGroups.Add(noteGroup);
+            
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var response = new CreateNoteGroupResponse
+            {
+                Id = noteGroup.Id,
+                Title = noteGroup.Title,
+                CreatedAt = noteGroup.CreatedAt,
+                LastModifiedAt = noteGroup.LastModifiedAt
+            };
+
+            return CreatedAtAction(
+                nameof(GetNoteGroup),
+                new { id = noteGroup.Id },
+                response
+            );
+        }
+
+        // GET: api/notes/group/{id}
+        [HttpGet("group/{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetNoteGroup([FromRoute] Guid id, CancellationToken cancellationToken = default)
+        {
+            var currentUserId = _userService.GetUserId(User);
+
+            var noteGroup = await _context.NoteGroups
+                .AsNoTracking()
+                .Where(g => g.Id == id && g.CreatedBy == currentUserId && !g.IsDeleted)
+                .Select(g => new GetNoteGroup
+                {
+                    Id = g.Id,
+                    Title = g.Title,
+                    CreatedAt = g.CreatedAt,
+                    LastModifiedAt = g.LastModifiedAt,
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+            
+            if (noteGroup == null)
+            {
+                return NotFound(new { message = "Группа не найдена" });
+            }
+
+            return Ok(noteGroup);
+        }
+
+        // PATCH: api/notes/{id}/group/add/{groupId}
+        [HttpPatch("{id}/group/add/{groupId}")]
+        [Authorize]
+        public async Task<IActionResult> AddToGroup([FromRoute] Guid id, [FromRoute] Guid groupId, CancellationToken cancellationToken = default)
+        {
+            var currentUserId = _userService.GetUserId(User);
+
+            var group = await _context.NoteGroups
+                .Where(g => g.Id == groupId && g.CreatedBy == currentUserId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (group == null)
+            {
+                return NotFound(new {message = "Группы с таким id не существует"});
+            }
+
+            var note = await _context.Notes
+                .Where(n => n.Id == id && n.CreatedBy == currentUserId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (note == null)
+            {
+                return NotFound();
+            }
+
+            if (note.NoteGroupId == groupId)
+            {
+                return BadRequest(new {message = "Нельзя добавить в ту же группу"});
+            }
+
+            // Если заметка была в другой группе, обновляем её timestamp
+            NoteGroup? oldGroup = null;
+
+            if (note.NoteGroupId.HasValue)
+            {
+                oldGroup = await _context.NoteGroups.FindAsync(note.NoteGroupId.Value, cancellationToken);
+                if (oldGroup != null && oldGroup.CreatedBy == currentUserId)
+                {
+                    oldGroup.LastModifiedAt = DateTime.UtcNow;
+                }
+            }
+
+            note.NoteGroupId = groupId;
+            note.LastModifiedAt = DateTime.UtcNow;
+            group.LastModifiedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Записка {noteId} добавлена в группу {groupId} (старая группа: {oldGroupId})", 
+                    note.Id, groupId, oldGroup?.Id ?? Guid.Empty);
+
+            return Ok( new
+            {
+                noteId = note.Id,
+                noteGroupId = note.NoteGroupId,
+                lastModifiedAt = note.LastModifiedAt,
+            });
+        }
+
+        // PATCH: api/notes/{id}/group/remove
+        [HttpPatch("{id}/group/remove")]
+        [Authorize]
+        public async Task<IActionResult> RemoveFromGroup([FromRoute] Guid id, CancellationToken cancellationToken = default)
+        {
+            var currentUserId = _userService.GetUserId(User);
+
+            var note = await _context.Notes
+                .Where(n => n.Id == id && n.CreatedBy == currentUserId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (note == null)
+            {
+                return NotFound(new { message = "Заметка не найдена" });
+            }
+
+            if (!note.NoteGroupId.HasValue)
+            {
+                return BadRequest(new { message = "Заметка не находится в группе" });
+            }
+
+            // Обновляем timestamp старой группы
+            var oldGroup = await _context.NoteGroups.FindAsync(note.NoteGroupId.Value);
+            if (oldGroup != null && oldGroup.CreatedBy == currentUserId)
+            {
+                oldGroup.LastModifiedAt = DateTime.UtcNow;
+            }
+
+            note.NoteGroupId = null;
+            note.LastModifiedAt = DateTime.UtcNow;
+    
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Заметка {noteId} удалена из группы {oldGroupId}", 
+                    note.Id, oldGroup?.Id ?? Guid.Empty);
+
+            return Ok( new
+            {
+                noteId = note.Id,
+                noteGroupId = note.NoteGroupId,
+                lastModifiedAt = note.LastModifiedAt,
+            });
+        }
+
+        // DELETE: api/notes/group/delete/{groupId}
+        [HttpDelete("group/delete/{groupId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteNoteGroup([FromRoute] Guid groupId, CancellationToken cancellationToken = default)
+        {
+            var currentUserId = _userService.GetUserId(User);
+
+            var noteGroup = await _context.NoteGroups
+                .Where(n => n.Id == groupId && n.CreatedBy == currentUserId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (noteGroup == null)
+            {
+                return NotFound(new { message = "Группа не найдена" });
+            }
+
+            noteGroup.IsDeleted = true;
+            noteGroup.DeletedAt = DateTime.UtcNow;
+            noteGroup.LastModifiedAt = DateTime.UtcNow;
+
+            // Сбрасываем NoteGroupId у всех заметок в группе и обновляем их timestamps
+            var notesInGroup = await _context.Notes
+                .Where(n => n.NoteGroupId == groupId && n.CreatedBy== currentUserId)
+                .ToListAsync(cancellationToken);
+
+            foreach (var note in notesInGroup)
+            {
+                note.NoteGroupId = null;
+                note.LastModifiedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Группа {groupId} удалена (soft-delete), заметки ({count}) очищены", 
+                    groupId, notesInGroup.Count);
+
+            return NoContent();
+        }  
     }
 }
