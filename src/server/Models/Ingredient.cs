@@ -1,11 +1,11 @@
 public class Ingredient 
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid Id { get; set; }
     public required string Name { get; set; } 
     public float Quantity { get; set; } 
-    public Unit Unit { get; set; } = Unit.Default;
+    public Unit Unit { get; set; }
     public string? Note { get; set; } 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
 
     // Внешние ключи
     public Guid? IngredientGroupId { get; set; } 
