@@ -1,4 +1,4 @@
-public class GetNoteGroup
+public record GetNoteGroup
 {
     public Guid Id { get; set; }
     public required string Title { get; set; }

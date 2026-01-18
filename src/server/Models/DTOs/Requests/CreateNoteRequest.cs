@@ -1,4 +1,4 @@
-public class CreateNoteRequest
+public record CreateNoteRequest
 {
     public required string Title { get; set; }
     public string? Description { get; set; }

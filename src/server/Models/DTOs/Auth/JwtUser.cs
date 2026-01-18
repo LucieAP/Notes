@@ -1,4 +1,4 @@
-public class JwtUser
+public record JwtUser
 {
     public Guid Id { get; set; } 
     public string Name { get; set; } 

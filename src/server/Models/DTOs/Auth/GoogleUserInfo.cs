@@ -1,4 +1,4 @@
-public class GoogleUserInfo
+public record GoogleUserInfo
 {
     public string GoogleId { get; set; }
     public string Email { get; set; }

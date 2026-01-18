@@ -1,4 +1,4 @@
-public class GetUserResponse 
+public record GetUserResponse 
 {
     public Guid Id { get; set; }
     public required string Name { get; set; } 
