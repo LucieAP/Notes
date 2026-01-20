@@ -41,7 +41,7 @@ namespace server.Controllers
                     BackgroundColor = n.BackgroundColor,
                     IsDeleted = n.IsDeleted,
                     DeletedAt = n.DeletedAt,
-                    NoteGroup = n.NoteGroup != null ? new GetNoteGroup
+                    NoteGroup = n.NoteGroup != null ? new GroupResponse
                     {
                         Id = n.NoteGroup.Id,
                         Title = n.NoteGroup.Title,
@@ -87,7 +87,7 @@ namespace server.Controllers
                     BackgroundColor = n.BackgroundColor,
                     IsDeleted = n.IsDeleted,
                     DeletedAt = n.DeletedAt,
-                    NoteGroup = n.NoteGroup != null ? new GetNoteGroup
+                    NoteGroup = n.NoteGroup != null ? new GroupResponse
                     {
                         Id = n.NoteGroup.Id,
                         Title = n.NoteGroup.Title,
@@ -108,7 +108,7 @@ namespace server.Controllers
             
             if (note == null)
             {
-                return NotFound();
+                return NotFound( new {message = "Заметка не найдена"});
             }
 
             _logger.LogInformation("Вывод всех найденных заметок");
@@ -180,7 +180,7 @@ namespace server.Controllers
             
             if (note == null)
             {
-                return NotFound();
+                return NotFound( new {message = "Заметка не найдена"});
             }
 
             note.IsPinned = !note.IsPinned;
@@ -200,11 +200,11 @@ namespace server.Controllers
         // PATCH: api/notes/{id}/
         [HttpPatch("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateNote([FromRoute] Guid id, [FromBody] UpdateNoteRequest updateNoteRequest , CancellationToken cancellationToken = default)
+        public async Task<IActionResult> UpdateNote([FromRoute] Guid id, [FromBody] UpdateItemRequest updateItemRequest , CancellationToken cancellationToken = default)
         {
-            if (updateNoteRequest.Title == null && 
-                updateNoteRequest.Description == null && 
-                updateNoteRequest.BackgroundColor == null)
+            if (updateItemRequest.Title == null && 
+                updateItemRequest.Description == null && 
+                updateItemRequest.BackgroundColor == null)
             {
                 return BadRequest(new { message = "Ни одного параметра не было передано" });
             }
@@ -217,14 +217,14 @@ namespace server.Controllers
             
             if (note == null)
             {
-                return NotFound();
+                return NotFound( new {message = "Заметка не найдена"});
             }
 
             var wasUpdated = false;
 
-            if (updateNoteRequest.Title != null)
+            if (updateItemRequest.Title != null)
             {
-                var trimmedTitle = updateNoteRequest.Title.Trim();  // Удаляем пробелы с начала и конца строки
+                var trimmedTitle = updateItemRequest.Title.Trim();  // Удаляем пробелы с начала и конца строки
         
                 if (string.IsNullOrWhiteSpace(trimmedTitle))        // Проверяем пустоту строки
                 {
@@ -241,11 +241,11 @@ namespace server.Controllers
                     );
                 }
             }
-            if (updateNoteRequest.Description != null)
+            if (updateItemRequest.Description != null)
             {
-                var trimmedDescription = string.IsNullOrWhiteSpace(updateNoteRequest.Description)  // Проверяем пустоту строки
+                var trimmedDescription = string.IsNullOrWhiteSpace(updateItemRequest.Description)  // Проверяем пустоту строки
                     ? null 
-                    : updateNoteRequest.Description.Trim();     // Удаляем пробелы с начала и конца строки
+                    : updateItemRequest.Description.Trim();     // Удаляем пробелы с начала и конца строки
                 
                 if (trimmedDescription != note.Description)
                 {
@@ -257,10 +257,10 @@ namespace server.Controllers
                     );
                 }
             }
-            if (updateNoteRequest.BackgroundColor.HasValue && 
-                updateNoteRequest.BackgroundColor.Value != note.BackgroundColor)
+            if (updateItemRequest.BackgroundColor.HasValue && 
+                updateItemRequest.BackgroundColor.Value != note.BackgroundColor)
             {
-                note.BackgroundColor = updateNoteRequest.BackgroundColor.Value;
+                note.BackgroundColor = updateItemRequest.BackgroundColor.Value;
                 wasUpdated = true;
                 _logger.LogInformation("Цвет заметки {NoteId} изменен на {BackgroundColor}", note.Id, note.BackgroundColor);
             }
@@ -298,7 +298,7 @@ namespace server.Controllers
 
             if (note == null)
             {
-                return NotFound();
+                return NotFound( new {message = "Заметка не найдена"});
             }
 
             note.LastModifiedAt = DateTime.UtcNow;
@@ -314,14 +314,43 @@ namespace server.Controllers
             return NoContent();       
         }
 
+        // PATCH: api/notes/{id}/trash
+        [HttpPatch("{id}/trash")]
+        [Authorize]
+        public async Task<IActionResult> TrashNote([FromRoute] Guid id, CancellationToken cancellationToken = default)
+        {
+            var currentUserId = _userService.GetUserId(User);
+
+            var note = await _context.Notes
+                .Where(n => n.Id == id && n.CreatedBy == currentUserId)
+                .FirstOrDefaultAsync(cancellationToken);
+                
+            if (note == null)
+            {
+                return NotFound( new {message = "Заметка не найдена"});
+            }
+
+            note.IsTrashed = !note.IsTrashed;
+            note.LastModifiedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Заметка {NoteId} перемещена в корзину пользователем {UserId}", note.Id, currentUserId);
+
+            return Ok( new {
+                id = note.Id,
+                isTrashed = note.IsTrashed,
+                lastModifiedAt = note.LastModifiedAt
+            });
+        }
+
         // POST: api/notes/group/create
         [HttpPost("group/create")]
         [Authorize]
-        public async Task<IActionResult> CreateNoteGroup([FromBody]CreateNoteGroupRequest createNoteGroupRequest, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> CreateNoteGroup([FromBody]CreateGroupRequest createGroupRequest, CancellationToken cancellationToken = default)
         {
 
             var currentUserId = _userService.GetUserId(User);
-            var trimmedTitle = createNoteGroupRequest.Title.Trim();
+            var trimmedTitle = createGroupRequest.Title.Trim();
 
             if (string.IsNullOrEmpty(trimmedTitle))
             {
@@ -342,7 +371,7 @@ namespace server.Controllers
             
             await _context.SaveChangesAsync(cancellationToken);
 
-            var response = new CreateNoteGroupResponse
+            var response = new CreateGroupResponse
             {
                 Id = noteGroup.Id,
                 Title = noteGroup.Title,
@@ -367,7 +396,7 @@ namespace server.Controllers
             var noteGroup = await _context.NoteGroups
                 .AsNoTracking()
                 .Where(g => g.Id == id && g.CreatedBy == currentUserId && !g.IsDeleted)
-                .Select(g => new GetNoteGroup
+                .Select(g => new GroupResponse
                 {
                     Id = g.Id,
                     Title = g.Title,
@@ -509,7 +538,7 @@ namespace server.Controllers
 
             // Сбрасываем NoteGroupId у всех заметок в группе и обновляем их timestamps
             var notesInGroup = await _context.Notes
-                .Where(n => n.NoteGroupId == groupId && n.CreatedBy== currentUserId)
+                .Where(n => n.NoteGroupId == groupId && n.CreatedBy == currentUserId)
                 .ToListAsync(cancellationToken);
 
             foreach (var note in notesInGroup)

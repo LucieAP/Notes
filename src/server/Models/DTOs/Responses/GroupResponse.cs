@@ -1,7 +1,7 @@
-public record CreateNoteGroupResponse
+public record GroupResponse 
 {
     public Guid Id { get; set; }
     public required string Title { get; set; }
     public DateTime CreatedAt { get; set; }
-    public DateTime LastModifiedAt { get; set; } 
+    public DateTime LastModifiedAt { get; set; }
 }
