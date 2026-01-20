@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
+using server.Interfaces.Services;
 
 // Загружаем .env файл
 Env.Load();
@@ -135,8 +136,8 @@ builder.Services.AddCors(options =>
         });
     });
 
-builder.Services.AddScoped<JwtService>();
-builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 

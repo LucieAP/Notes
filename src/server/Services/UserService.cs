@@ -1,14 +1,43 @@
 
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+using server.Interfaces.Services;
 
-public class UserService
+public class UserService : IUserService
 {
-    // Вспомогательный метод для работы с пользователем
-    public async Task<User> FindOrCreateUser(GoogleUserInfo userInfo, AppDbContext _context, CancellationToken cancellationToken = default)
+    private readonly AppDbContext _context;
+
+    public UserService(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    // Получение идентификатора пользователя
+    public Guid GetUserId(ClaimsPrincipal user)
+    {
+        var userIdClaim = user.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+        {
+            throw new Exception("User не найден.");
+        }
+
+        return userId;
+    }
+    
+    // Получение пользователя по его идентификатору
+    public async Task<User?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var user = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+        return user;
+    }
+
+    // Поиск или создание пользователя
+    public async Task<User> FindOrCreateUser(GoogleUserInfo userInfo, CancellationToken cancellationToken = default)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.GoogleId == userInfo.GoogleId, cancellationToken);
 
@@ -53,30 +82,6 @@ public class UserService
         }
 
         await _context.SaveChangesAsync(cancellationToken);
-        return user;
-    }
-
-    // Получение идентификатора пользователя
-    public Guid GetUserId(ClaimsPrincipal user)
-        {
-            var userIdClaim = user.Claims
-                .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
-            {
-                throw new Exception("User не найден.");
-            }
-
-            return userId;
-        }
-    
-    // Получение пользователя по его идентификатору
-    public async Task<User?> GetUserByIdAsync(Guid userId, AppDbContext _context, CancellationToken cancellationToken)
-    {
-        var user = await _context.Users
-            .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
-
         return user;
     }
 }

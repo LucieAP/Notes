@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using server.Interfaces.Services;
 
 namespace server.Controllers
 {
@@ -12,9 +13,9 @@ namespace server.Controllers
     {
         private readonly AppDbContext _context;
         private readonly ILogger<NotesController> _logger;
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
 
-        public NotesController(AppDbContext context, ILogger<NotesController> logger, UserService userService)
+        public NotesController(AppDbContext context, ILogger<NotesController> logger, IUserService userService)
         {
             _context = context;
             _logger = logger;

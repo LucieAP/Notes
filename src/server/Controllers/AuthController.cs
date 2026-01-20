@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using server.Interfaces.Services;
 
 namespace server.Controllers
 {
@@ -12,10 +12,10 @@ namespace server.Controllers
     public class AuthController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly JwtService _jwtService;
-        private readonly UserService _userService;
+        private readonly IJwtService _jwtService;
+        private readonly IUserService _userService;
 
-        public AuthController(AppDbContext context, JwtService jwtService, UserService userService)
+        public AuthController(AppDbContext context, IJwtService jwtService, IUserService userService)
         {
             _context = context;
             _jwtService = jwtService;
@@ -81,7 +81,7 @@ namespace server.Controllers
             }
 
              // Шаг 4: Находим или создаём пользователя
-            var user = await _userService.FindOrCreateUser(userInfo, _context, cancellationToken);
+            var user = await _userService.FindOrCreateUser(userInfo, cancellationToken);
 
             // Шаг 5: Генерируем токен
             var jwtToken = _jwtService.GenerateJwtToken(new JwtUser 
@@ -110,7 +110,7 @@ namespace server.Controllers
                 return Unauthorized();
             }
 
-            var user = await _userService.GetUserByIdAsync(currentUserId, _context, cancellationToken);
+            var user = await _userService.GetUserByIdAsync(currentUserId, cancellationToken);
 
             if (user == null)
             {
