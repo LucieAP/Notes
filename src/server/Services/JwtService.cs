@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using server.Interfaces.Services;
+using server.Interfaces;
 
 public class JwtService : IJwtService
 {

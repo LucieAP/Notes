@@ -1,7 +1,7 @@
 
 using System.Security.Claims;
 
-namespace server.Interfaces.Services
+namespace server.Interfaces
 {
     public interface IUserService
     {

@@ -1,7 +1,7 @@
 
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
-using server.Interfaces.Services;
+using server.Interfaces;
 
 public class UserService : IUserService
 {
