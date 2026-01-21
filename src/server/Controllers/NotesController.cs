@@ -130,7 +130,7 @@ namespace server.Controllers
                 return StatusCode(response.StatusCode ?? 500, new { message = response.ErrorMessage});
             }
 
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         // POST: api/notes/group/create
@@ -149,12 +149,12 @@ namespace server.Controllers
             return CreatedAtAction(
                 nameof(GetNoteGroup),
                 new { id = response.Value?.Id },
-                response
+                response.Value
             );
         }
 
-        // GET: api/notes/group/{id}
-        [HttpGet("group/{id}")]
+        // GET: api/notes/group/{groupId}
+        [HttpGet("group/{groupId}")]
         [Authorize]
         public async Task<IActionResult> GetNoteGroup([FromRoute] Guid groupId, CancellationToken cancellationToken = default)
         {

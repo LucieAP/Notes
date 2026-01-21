@@ -162,7 +162,7 @@ namespace server.Controllers
             return CreatedAtAction(
                 nameof(GetTaskGroup),
                 new { id = response.Value?.Id },
-                response
+                response.Value
             );
         }
 
