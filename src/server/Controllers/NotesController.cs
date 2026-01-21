@@ -11,18 +11,15 @@ namespace server.Controllers
     [ApiController]
     public class NotesController : Controller
     {
-        private readonly AppDbContext _context;
         private readonly ILogger<NotesController> _logger;
         private readonly IUserService _userService;
         private readonly INoteService _noteService;
 
         public NotesController(
-            AppDbContext context, 
             ILogger<NotesController> logger, 
             IUserService userService,
             INoteService noteService)
         {
-            _context = context;
             _logger = logger;
             _userService = userService;
             _noteService = noteService;
@@ -30,7 +27,7 @@ namespace server.Controllers
 
         // GET: api/notes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<GetNoteResponse>>> GetAllNotes(CancellationToken cancellationToken = default)
+        public async Task<ActionResult<IEnumerable<GetNoteResponse>>> GetNotes(CancellationToken cancellationToken = default)
         {
             var notes = await _noteService.GetAllNotesAsync(cancellationToken);
 
@@ -85,7 +82,7 @@ namespace server.Controllers
                 return StatusCode(response.StatusCode ?? 500, new { message = response.ErrorMessage});
             }
 
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         // PATCH: api/notes/{id}/
@@ -101,7 +98,7 @@ namespace server.Controllers
                 return StatusCode(response.StatusCode ?? 500, new { message = response.ErrorMessage });
             }
 
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         // DELETE: api/notes/delete/{id}
@@ -151,7 +148,7 @@ namespace server.Controllers
 
             return CreatedAtAction(
                 nameof(GetNoteGroup),
-                new { id = response?.Value?.Id },
+                new { id = response.Value?.Id },
                 response
             );
         }
@@ -186,7 +183,7 @@ namespace server.Controllers
                 return StatusCode(response.StatusCode ?? 500, new { message = response.ErrorMessage});
             }
 
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         // PATCH: api/notes/{id}/group/remove
@@ -202,7 +199,7 @@ namespace server.Controllers
                 return StatusCode(response.StatusCode ?? 500, new { message = response.ErrorMessage});
             }
 
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         // DELETE: api/notes/group/delete/{groupId}
