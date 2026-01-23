@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using server.Interfaces;
+using server.Services.Common;
 
 public class NoteService : INoteService
 {
@@ -163,13 +164,6 @@ public class NoteService : INoteService
 
     public async Task<OperationResult<UpdateItemResponse>> UpdateNoteAsync(Guid noteId, Guid currentUserId, UpdateItemRequest updateItemRequest, CancellationToken cancellationToken = default)
     {
-        if (updateItemRequest.Title == null && 
-            updateItemRequest.Description == null && 
-            updateItemRequest.BackgroundColor == null)
-        {
-            return OperationResult<UpdateItemResponse>.Failure("Ни одного параметра не было передано", 400);
-        }
-
         var note = await _context.Notes
             .Where(n => n.Id == noteId && n.CreatedBy == currentUserId)
             .FirstOrDefaultAsync(cancellationToken);
@@ -179,70 +173,14 @@ public class NoteService : INoteService
             return OperationResult<UpdateItemResponse>.Failure("Заметка не найдена", 404);
         }
 
-        var wasUpdated = false;
+        var response = UpdateItemHelper.ApplyUpdate(note, "Note", currentUserId, updateItemRequest, _logger);
 
-        if (updateItemRequest.Title != null)
+        if (response.IsSuccess && response.Value.WasUpdated)
         {
-            var trimmedTitle = updateItemRequest.Title.Trim();  // Удаляем пробелы с начала и конца строки
-    
-            if (string.IsNullOrWhiteSpace(trimmedTitle))        // Проверяем пустоту строки
-            {
-                return OperationResult<UpdateItemResponse>.Failure("Название не может быть пустым", 400);
-            }
-            
-            if (trimmedTitle != note.Title)
-            {
-                note.Title = trimmedTitle;
-                wasUpdated = true;
-                _logger.LogInformation(
-                    "Название заметки {NoteId} обновлено пользователем {UserId}", 
-                    note.Id, currentUserId
-                );
-            }
-        }
-        if (updateItemRequest.Description != null)
-        {
-            var trimmedDescription = string.IsNullOrWhiteSpace(updateItemRequest.Description)  // Проверяем пустоту строки
-                ? null 
-                : updateItemRequest.Description.Trim();     // Удаляем пробелы с начала и конца строки
-            
-            if (trimmedDescription != note.Description)
-            {
-                note.Description = trimmedDescription;
-                wasUpdated = true;
-                _logger.LogInformation(
-                    "Описание заметки {NoteId} обновлено пользователем {UserId}", 
-                    note.Id, currentUserId
-                );
-            }
-        }
-        if (updateItemRequest.BackgroundColor.HasValue && 
-            updateItemRequest.BackgroundColor.Value != note.BackgroundColor)
-        {
-            note.BackgroundColor = updateItemRequest.BackgroundColor.Value;
-            wasUpdated = true;
-            _logger.LogInformation("Цвет заметки {NoteId} изменен на {BackgroundColor}", note.Id, note.BackgroundColor);
-        }
-
-        if (wasUpdated)
-        {
-            note.LastModifiedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync(cancellationToken); 
         }
-        else
-        {
-            _logger.LogInformation("Новые данные соответсвуют старым, изменения не применены.");
-        }
 
-        return OperationResult<UpdateItemResponse>.Success(new UpdateItemResponse
-        {
-            Id = note.Id,
-            Title = note.Title,
-            Description = note.Description,
-            BackgroundColor = note.BackgroundColor,
-            LastModifiedAt = note.LastModifiedAt,
-            WasUpdated = wasUpdated
-        });
+        return response;
     } 
 
     public async Task<OperationResult> DeleteNoteByIdAsync(Guid noteId, Guid currentUserId, CancellationToken cancellationToken = default)
@@ -253,19 +191,15 @@ public class NoteService : INoteService
 
         if (note == null)
         {
-            // return NotFound( new {message = "Заметка не найдена"});
-            return OperationResult.Failure("Заметка не найдена", 404);
+            return OperationResult.Failure("Заметка не найдена или уже удалена", 404);
         }
 
-        note.LastModifiedAt = DateTime.UtcNow;
+        var response = SoftDeleteHelper.SoftDelete(note, "Note", currentUserId, _logger);
 
-        // Мягкое удаление
-        note.IsDeleted = true;
-        note.DeletedAt = DateTime.UtcNow;
-
-        await _context.SaveChangesAsync(cancellationToken);
-
-        _logger.LogInformation("Note {NotesId} была удалена пользователем {Userid}", noteId, currentUserId);
+        if (response.IsSuccess)
+        {
+            await _context.SaveChangesAsync(cancellationToken); 
+        }
 
         return OperationResult.Success();
     }
@@ -450,9 +384,7 @@ public class NoteService : INoteService
             return OperationResult.Failure("Группа не найдена", 404);
         }
 
-        noteGroup.IsDeleted = true;
-        noteGroup.DeletedAt = DateTime.UtcNow;
-        noteGroup.LastModifiedAt = DateTime.UtcNow;
+        var response = SoftDeleteHelper.SoftDelete(noteGroup, "Note Group", currentUserId, _logger);
 
         // Сбрасываем NoteGroupId у всех заметок в группе и обновляем их timestamps
         var notesInGroup = await _context.Notes
@@ -465,7 +397,10 @@ public class NoteService : INoteService
             note.LastModifiedAt = DateTime.UtcNow;
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        if (response.IsSuccess)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
 
         _logger.LogInformation("Группа {groupId} удалена (soft-delete), заметки ({count}) очищены", 
                 groupId, notesInGroup.Count);

@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using server.Interfaces;
 
-public class TaskGroup
+public class TaskGroup : ISoftDeletable
 {
     public Guid Id { get; set; }
 

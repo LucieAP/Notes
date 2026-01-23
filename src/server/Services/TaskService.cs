@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using server.Interfaces;
+using server.Services.Common;
 
 public class TaskService : ITaskService
 {
@@ -193,13 +194,6 @@ public class TaskService : ITaskService
 
     public async Task<OperationResult<UpdateItemResponse>> UpdateTaskAsync(Guid taskId, Guid currentUserId, UpdateItemRequest updateItemRequest, CancellationToken cancellationToken = default)
     {
-        if (updateItemRequest.Title == null &&
-            updateItemRequest.Description == null &&
-            updateItemRequest.BackgroundColor == null)
-        {
-            return OperationResult<UpdateItemResponse>.Failure("Ни одного параметра не было передано", 400);
-        }
-
         var task = await _context.Tasks
             .Where(t => t.Id == taskId && t.CreatedBy == currentUserId)
             .FirstOrDefaultAsync(cancellationToken);
@@ -209,70 +203,14 @@ public class TaskService : ITaskService
             return OperationResult<UpdateItemResponse>.Failure("Задача не найдена", 404);
         }
 
-        var wasUpdated = false;
-
-        if (updateItemRequest.Title != null)
+        var response = UpdateItemHelper.ApplyUpdate(task, "Task", currentUserId, updateItemRequest, _logger);
+        
+        if (response.IsSuccess && response.Value.WasUpdated)
         {
-            var trimmedTitle = updateItemRequest.Title.Trim();  // Удаляем пробелы с начала и конца строки
-
-            if (string.IsNullOrWhiteSpace(trimmedTitle))        // Проверяем пустоту строки
-            {
-                return OperationResult<UpdateItemResponse>.Failure("Название не может быть пустым", 400);
-            }
-
-            if (trimmedTitle != task.Title)
-            {
-                task.Title = trimmedTitle;
-                wasUpdated = true;
-                _logger.LogInformation(
-                    "Название задачи {TaskId} обновлено пользователем {UserId}",
-                    task.Id, currentUserId
-                );
-            }
-        }
-        if (updateItemRequest.Description != null)
-        {
-            var trimmedDescription = string.IsNullOrWhiteSpace(updateItemRequest.Description)  // Проверяем пустоту строки
-                ? null
-                : updateItemRequest.Description.Trim();     // Удаляем пробелы с начала и конца строки
-
-            if (trimmedDescription != task.Description)
-            {
-                task.Description = trimmedDescription;
-                wasUpdated = true;
-                _logger.LogInformation(
-                    "Описание задачи {TaskId} обновлено пользователем {UserId}",
-                    task.Id, currentUserId
-                );
-            }
-        }
-        if (updateItemRequest.BackgroundColor.HasValue &&
-            updateItemRequest.BackgroundColor.Value != task.BackgroundColor)
-        {
-            task.BackgroundColor = updateItemRequest.BackgroundColor.Value;
-            wasUpdated = true;
-            _logger.LogInformation("Цвет задачи {TaskId} изменен на {BackgroundColor}", task.Id, task.BackgroundColor);
-        }
-
-        if (wasUpdated)
-        {
-            task.LastModifiedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync(cancellationToken);
         }
-        else
-        {
-            _logger.LogInformation("Новые данные соответсвуют старым, изменения не применены.");
-        }
-
-        return OperationResult<UpdateItemResponse>.Success(new UpdateItemResponse
-        {
-            Id = task.Id,
-            Title = task.Title,
-            Description = task.Description,
-            BackgroundColor = task.BackgroundColor,
-            LastModifiedAt = task.LastModifiedAt,
-            WasUpdated = wasUpdated
-        });
+        
+        return response;
     }
 
     public async Task<OperationResult> DeleteTaskByIdAsync(Guid taskId, Guid currentUserId, CancellationToken cancellationToken = default)
@@ -283,18 +221,15 @@ public class TaskService : ITaskService
 
         if (task == null)
         {
-            return OperationResult.Failure("Задача не найдена", 404);
+            return OperationResult.Failure("Задача не найдена или уже удалена", 404);
         }
 
-        task.LastModifiedAt = DateTime.UtcNow;
+        var response = SoftDeleteHelper.SoftDelete(task, "Task", currentUserId, _logger);
 
-        // Мягкое удаление
-        task.IsDeleted = true;
-        task.DeletedAt = DateTime.UtcNow;
-
-        await _context.SaveChangesAsync(cancellationToken);
-
-        _logger.LogInformation("Task {TaskId} была удалена пользователем {UserId}", taskId, currentUserId);
+        if (response.IsSuccess)
+        {
+            await _context.SaveChangesAsync(cancellationToken); 
+        }
 
         return OperationResult.Success();
     }
@@ -312,6 +247,7 @@ public class TaskService : ITaskService
 
         task.IsTrashed = !task.IsTrashed;
         task.LastModifiedAt = DateTime.UtcNow;
+        
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Задача {TaskId} перемещена в корзину пользователем {UserId}", task.Id, currentUserId);
@@ -479,9 +415,7 @@ public class TaskService : ITaskService
             return OperationResult.Failure("Группа задач не найдена", 404);
         }
 
-        taskGroup.IsDeleted = true;
-        taskGroup.DeletedAt = DateTime.UtcNow;
-        taskGroup.LastModifiedAt = DateTime.UtcNow;
+        var response = SoftDeleteHelper.SoftDelete(taskGroup, "Task Group", currentUserId, _logger);
 
         // Сбрасываем TaskGroupId у всех задач в группе и обновляем их timestamps
         var tasksInGroup = await _context.Tasks
@@ -494,7 +428,10 @@ public class TaskService : ITaskService
             task.LastModifiedAt = DateTime.UtcNow;
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        if (response.IsSuccess)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
 
         _logger.LogInformation("Группа {groupId} удалена (soft-delete), задачи ({count}) очищены",
                 groupId, tasksInGroup.Count);

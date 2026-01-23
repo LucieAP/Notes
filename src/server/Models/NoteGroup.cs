@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using server.Interfaces;
 
-public class NoteGroup
+public class NoteGroup : ISoftDeletable
 {
     public Guid Id { get; set; }
     

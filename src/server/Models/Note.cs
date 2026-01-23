@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using server.Interfaces;
 
-public class Note
+public class Note : IUpdatableItem, ISoftDeletable
 {
     public Guid Id { get; set; }
 

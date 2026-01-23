@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using server.Interfaces;
 
-public class Task
+public class Task : IUpdatableItem, ISoftDeletable
 {
     public Guid Id { get; set; }
     [Required(ErrorMessage = "Заголовок обязателен для заполнения.")]
