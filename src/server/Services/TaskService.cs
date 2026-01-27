@@ -60,7 +60,7 @@ public class TaskService : ITaskService
             .AsNoTracking()
             .Include(t => t.User)
             .Include(t => t.TaskGroup)
-            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId)
+            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted)
             .Select(t => new GetTaskResponse
             {
                 Id = t.Id,
@@ -169,7 +169,7 @@ public class TaskService : ITaskService
     public async Task<OperationResult<ToggleCheckboxResponse?>> ToggleCheckboxAsync(Guid taskId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var task = await _context.Tasks
-            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId)
+            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (task == null)
@@ -195,7 +195,7 @@ public class TaskService : ITaskService
     public async Task<OperationResult<UpdateItemResponse>> UpdateTaskAsync(Guid taskId, Guid currentUserId, UpdateItemRequest updateItemRequest, CancellationToken cancellationToken = default)
     {
         var task = await _context.Tasks
-            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId)
+            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (task == null)
@@ -210,6 +210,27 @@ public class TaskService : ITaskService
             await _context.SaveChangesAsync(cancellationToken);
         }
         
+        return response;
+    }
+
+    public async Task<OperationResult<UpdateColorResponse>> UpdateColorAsync(Guid taskId, Guid currentUserId, UpdateColorRequest updateColorRequest, CancellationToken cancellationToken = default)
+    {
+        var task = await _context.Tasks
+            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (task == null)
+        {
+            return OperationResult<UpdateColorResponse>.Failure("Задача не найдена", 404);
+        }
+
+        var response = UpdateItemHelper.ApplyColorUpdate(task, "Task", currentUserId, updateColorRequest, _logger);
+
+        if (response.IsSuccess)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
         return response;
     }
 
@@ -234,15 +255,15 @@ public class TaskService : ITaskService
         return OperationResult.Success();
     }
 
-    public async Task<OperationResult<TrashTaskResponse>> TrashTaskAsync(Guid taskId, Guid currentUserId, CancellationToken cancellationToken = default)
+    public async Task<OperationResult<TrashResponse>> TrashTaskAsync(Guid taskId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var task = await _context.Tasks
-                .Where(t => t.Id == taskId && t.CreatedBy == currentUserId)
+                .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted)
                 .FirstOrDefaultAsync(cancellationToken);
 
         if (task == null)
         {
-            return OperationResult<TrashTaskResponse>.Failure("Задача не найдена", 404);
+            return OperationResult<TrashResponse>.Failure("Задача не найдена", 404);
         }
 
         task.IsTrashed = !task.IsTrashed;
@@ -252,7 +273,7 @@ public class TaskService : ITaskService
 
         _logger.LogInformation("Задача {TaskId} перемещена в корзину пользователем {UserId}", task.Id, currentUserId);
 
-        return OperationResult<TrashTaskResponse>.Success(new TrashTaskResponse
+        return OperationResult<TrashResponse>.Success(new TrashResponse
         {
             Id = task.Id,
             IsTrashed = task.IsTrashed,
@@ -312,7 +333,7 @@ public class TaskService : ITaskService
     public async Task<OperationResult<AddToGroupResponse>> AddToGroupAsync(Guid taskId, Guid groupId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var group = await _context.TaskGroups
-            .Where(g => g.Id == groupId && g.CreatedBy == currentUserId)
+            .Where(g => g.Id == groupId && g.CreatedBy == currentUserId && !g.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (group == null)
@@ -357,8 +378,8 @@ public class TaskService : ITaskService
 
         return OperationResult<AddToGroupResponse>.Success(new AddToGroupResponse
         {
-            NoteId = task.Id,
-            NoteGroupId = task.TaskGroupId.Value,
+            ItemId = task.Id,
+            ItemGroupId = task.TaskGroupId.Value,
             LastModifiedAt = task.LastModifiedAt,
         });
     }
@@ -366,7 +387,7 @@ public class TaskService : ITaskService
     public async Task<OperationResult<RemoveFromGroupResponse>> RemoveFromGroupAsync(Guid taskId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var task = await _context.Tasks
-            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId)
+            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (task == null)
@@ -398,8 +419,8 @@ public class TaskService : ITaskService
 
         return OperationResult<RemoveFromGroupResponse>.Success(new RemoveFromGroupResponse
         {
-            NoteId = task.Id,
-            NoteGroupId = oldGroupId,
+            ItemId = task.Id,
+            ItemGroupId = oldGroupId,
             LastModifiedAt = task.LastModifiedAt,
         });
     }
@@ -419,7 +440,7 @@ public class TaskService : ITaskService
 
         // Сбрасываем TaskGroupId у всех задач в группе и обновляем их timestamps
         var tasksInGroup = await _context.Tasks
-            .Where(t => t.TaskGroupId == groupId && t.CreatedBy == currentUserId)
+            .Where(t => t.TaskGroupId == groupId && t.CreatedBy == currentUserId && !t.IsDeleted)
             .ToListAsync(cancellationToken);
 
         foreach (var task in tasksInGroup)

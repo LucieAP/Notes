@@ -1,6 +1,6 @@
 public record AddToGroupResponse
 {
-    public Guid NoteId { get; set; }
-    public Guid NoteGroupId { get; set; }
+    public Guid ItemId { get; set; }
+    public Guid ItemGroupId { get; set; }
     public DateTime LastModifiedAt { get; set; } 
 }

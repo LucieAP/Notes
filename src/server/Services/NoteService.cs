@@ -59,7 +59,7 @@ public class NoteService : INoteService
             .AsNoTracking()
             .Include(n => n.User)
             .Include(n => n.NoteGroup)
-            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId)
+            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted)
             .Select(n => new GetNoteResponse
             {
                 Id = n.Id,
@@ -165,7 +165,7 @@ public class NoteService : INoteService
     public async Task<OperationResult<UpdateItemResponse>> UpdateNoteAsync(Guid noteId, Guid currentUserId, UpdateItemRequest updateItemRequest, CancellationToken cancellationToken = default)
     {
         var note = await _context.Notes
-            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId)
+            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (note == null)
@@ -181,7 +181,28 @@ public class NoteService : INoteService
         }
 
         return response;
-    } 
+    }
+
+    public async Task<OperationResult<UpdateColorResponse>> UpdateColorAsync(Guid noteId, Guid currentUserId, UpdateColorRequest updateColorRequest, CancellationToken cancellationToken = default)
+    {
+        var note = await _context.Notes
+            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (note == null)
+        {
+            return OperationResult<UpdateColorResponse>.Failure("Заметка не найдена", 404);
+        }
+
+        var response = UpdateItemHelper.ApplyColorUpdate(note, "Note", currentUserId, updateColorRequest, _logger);
+
+        if (response.IsSuccess)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        return response;
+    }
 
     public async Task<OperationResult> DeleteNoteByIdAsync(Guid noteId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
@@ -204,15 +225,15 @@ public class NoteService : INoteService
         return OperationResult.Success();
     }
 
-    public async Task<OperationResult<TrashNoteResponse>> TrashNoteAsync(Guid noteId, Guid currentUserId, CancellationToken cancellationToken = default)
+    public async Task<OperationResult<TrashResponse>> TrashNoteAsync(Guid noteId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var note = await _context.Notes
-                .Where(n => n.Id == noteId && n.CreatedBy == currentUserId)
+                .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted)
                 .FirstOrDefaultAsync(cancellationToken);
                 
         if (note == null)
         {
-            return OperationResult<TrashNoteResponse>.Failure("Заметка не найдена", 404);
+            return OperationResult<TrashResponse>.Failure("Заметка не найдена", 404);
         }
 
         note.IsTrashed = !note.IsTrashed;
@@ -221,7 +242,7 @@ public class NoteService : INoteService
 
         _logger.LogInformation("Заметка {NoteId} перемещена в корзину пользователем {UserId}", note.Id, currentUserId);
     
-        return OperationResult<TrashNoteResponse>.Success( new TrashNoteResponse
+        return OperationResult<TrashResponse>.Success( new TrashResponse
         {
             Id = note.Id,
             IsTrashed = note.IsTrashed,
@@ -281,7 +302,7 @@ public class NoteService : INoteService
     public async Task<OperationResult<AddToGroupResponse>> AddToGroupAsync(Guid noteId, Guid groupId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var group = await _context.NoteGroups
-            .Where(g => g.Id == groupId && g.CreatedBy == currentUserId)
+            .Where(g => g.Id == groupId && g.CreatedBy == currentUserId && !g.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (group == null)
@@ -326,8 +347,8 @@ public class NoteService : INoteService
 
         return OperationResult<AddToGroupResponse>.Success( new AddToGroupResponse
         {
-            NoteId = note.Id,
-            NoteGroupId = note.NoteGroupId.Value,
+            ItemId = note.Id,
+            ItemGroupId = note.NoteGroupId.Value,
             LastModifiedAt = note.LastModifiedAt,
         });
     }
@@ -335,7 +356,7 @@ public class NoteService : INoteService
     public async Task<OperationResult<RemoveFromGroupResponse>> RemoveFromGroupAsync(Guid noteId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var note = await _context.Notes
-            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId)
+            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (note == null)
@@ -367,8 +388,8 @@ public class NoteService : INoteService
 
         return OperationResult<RemoveFromGroupResponse>.Success( new RemoveFromGroupResponse
         {
-            NoteId = note.Id,
-            NoteGroupId = oldGroupId,
+            ItemId = note.Id,
+            ItemGroupId = oldGroupId,
             LastModifiedAt = note.LastModifiedAt,
         });
     }
@@ -388,7 +409,7 @@ public class NoteService : INoteService
 
         // Сбрасываем NoteGroupId у всех заметок в группе и обновляем их timestamps
         var notesInGroup = await _context.Notes
-            .Where(n => n.NoteGroupId == groupId && n.CreatedBy == currentUserId)
+            .Where(n => n.NoteGroupId == groupId && n.CreatedBy == currentUserId && !n.IsDeleted)
             .ToListAsync(cancellationToken);
 
         foreach (var note in notesInGroup)

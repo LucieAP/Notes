@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using server.Interfaces;
 
-public class Note : IUpdatableItem, ISoftDeletable
+public class Note : IUpdatableItem, ISoftDeletable, IUpdatableItemColor
 {
     public Guid Id { get; set; }
 
@@ -26,7 +26,7 @@ public class Note : IUpdatableItem, ISoftDeletable
     [ForeignKey("User")]
     [Required(ErrorMessage = "Идентификатор создателя обязателен для заполнения.")]
     public Guid CreatedBy { get; set; } 
-    public Guid? NoteGroupId  {get; set;}
+    public Guid? NoteGroupId  { get; set;}
 
     // Навигационные свойства
     public User User { get; set; }

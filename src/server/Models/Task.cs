@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using server.Interfaces;
 
-public class Task : IUpdatableItem, ISoftDeletable
+public class Task : IUpdatableItem, ISoftDeletable, IUpdatableItemColor
 {
     public Guid Id { get; set; }
     [Required(ErrorMessage = "Заголовок обязателен для заполнения.")]

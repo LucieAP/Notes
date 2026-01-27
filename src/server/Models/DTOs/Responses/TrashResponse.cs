@@ -1,4 +1,4 @@
-public record TrashTaskResponse
+public record TrashResponse
 {
     public Guid Id { get; set; }
     public bool IsTrashed { get; set; }
