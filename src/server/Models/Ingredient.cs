@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-public class Ingredient 
+public class Ingredient
 {
     public Guid Id { get; set; }
 
