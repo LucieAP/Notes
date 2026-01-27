@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
     public DbSet<Note> Notes { get; set; }
     public DbSet<NoteGroup> NoteGroups { get; set; }
     public DbSet<TaskGroup> TaskGroups { get; set; }
+    public DbSet<RecipeGroup> RecipeGroups { get; set; }
     public DbSet<Recipe> Recipes { get; set; }
     public DbSet<RecipeStep> RecipeSteps { get; set; }
     public DbSet<IngredientGroup> IngredientGroups { get; set; }
