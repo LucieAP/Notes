@@ -6,7 +6,7 @@ namespace server.Controllers;
 
 [Route("api/tasks")]
 [ApiController]
-public class TasksController : Controller
+public class TasksController : ControllerBase
 {
     private readonly ILogger<TasksController> _logger;
     private readonly IUserService _userService;

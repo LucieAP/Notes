@@ -9,7 +9,7 @@ namespace server.Controllers
 {
     [ApiController]
     [Route("api/auth")]
-    public class AuthController : Controller
+    public class AuthController : ControllerBase
     {
         private readonly IJwtService _jwtService;
         private readonly IUserService _userService;

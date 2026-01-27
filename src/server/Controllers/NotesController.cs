@@ -6,7 +6,8 @@ namespace server.Controllers;
 
 [Route("api/notes")]
 [ApiController]
-public class NotesController : Controller
+public class NotesController : ControllerBase
+
 {
     private readonly ILogger<NotesController> _logger;
     private readonly IUserService _userService;

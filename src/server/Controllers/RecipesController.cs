@@ -6,7 +6,7 @@ namespace server.Controllers;
 
 [Route("api/recipes")]
 [ApiController]
-public class RecipesController : Controller
+public class RecipesController : ControllerBase
 {
     private readonly ILogger<RecipesController> _logger;
     private readonly IUserService _userService;
