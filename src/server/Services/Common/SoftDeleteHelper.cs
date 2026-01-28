@@ -25,7 +25,7 @@ internal class SoftDeleteHelper
         entity.LastModifiedAt = DateTime.UtcNow;
 
         logger.LogInformation(
-            "{EntityName} (id: {EntityId}) была удалена (soft-delete) пользователем {UserId}",
+            "{EntityName} (id: {EntityId}) был помечен как удалённый (soft-delete) пользователем {UserId}",
             entityName, entity.Id, currentUserId);
 
         return OperationResult.Success();

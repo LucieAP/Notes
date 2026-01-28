@@ -5,5 +5,4 @@ public record CreateIngredientRequest
     public Unit Unit { get; set; }
     public string? Note { get; set; } 
     public Guid? IngredientGroupId { get; set; } 
-    public Guid RecipeId { get; set; }
 }

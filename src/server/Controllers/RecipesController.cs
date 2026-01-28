@@ -45,7 +45,7 @@ public class RecipesController : ControllerBase
             return NotFound( new {message = "Рецепт не найден"});
         }
 
-        _logger.LogInformation("Найден рецепт {recipeId}", recipe.Id);
+        _logger.LogInformation("Найден рецепт {recipeId} пользователя {currentUserId}", recipe.Id, recipe.CreatedBy);
 
         return Ok(recipe);
     }
@@ -55,15 +55,25 @@ public class RecipesController : ControllerBase
     [Authorize]
     public async Task<IActionResult> CreateRecipe([FromBody] CreateRecipeRequest createRecipeRequest, CancellationToken cancellationToken = default)
     {
-
         var currentUserId = _userService.GetUserId(User);
 
-        var response = await _recipeService.CreateRecipeAsync(createRecipeRequest, currentUserId, cancellationToken);
+        try
+        {
+            var response = await _recipeService.CreateRecipeAsync(createRecipeRequest, currentUserId, cancellationToken);
 
-        return CreatedAtAction(
-            nameof(GetRecipeById),
-            new {id = response.Id},
-            response);
+            return CreatedAtAction(
+                nameof(GetRecipeById),
+                new {id = response.Id},
+                response);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
     }
 
     // PATCH: api/recipes/{id}/favorite
@@ -82,7 +92,7 @@ public class RecipesController : ControllerBase
         return Ok(response.Value);
     }
 
-    // PATCH: api/recipes/{id}/
+    // PATCH: api/recipes/{id}
     [HttpPatch("{id}")]
     [Authorize]
     public async Task<IActionResult> UpdateRecipe([FromRoute] Guid id, [FromBody] UpdateItemRequest updateItemRequest , CancellationToken cancellationToken = default)
@@ -114,13 +124,13 @@ public class RecipesController : ControllerBase
         return NoContent();       
     }
 
-    // PATCH: api/recipes/{id}/trash
-    [HttpPatch("{id}/trash")]
+    // PATCH: api/recipes/trash/{id}
+    [HttpPatch("trash/{id}")]
     [Authorize]
-    public async Task<IActionResult> TrashRecipe([FromRoute] Guid id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> TrashRecipeById([FromRoute] Guid id, CancellationToken cancellationToken = default)
     {
         var currentUserId = _userService.GetUserId(User);
-        var response = await _recipeService.TrashRecipeAsync(id, currentUserId, cancellationToken);
+        var response = await _recipeService.TrashRecipeByIdAsync(id, currentUserId, cancellationToken);
 
         if (!response.IsSuccess)
         {
@@ -146,8 +156,8 @@ public class RecipesController : ControllerBase
         }
 
         return CreatedAtAction(
-            nameof(GetRecipeGroup),
-            new { id = response.Value?.Id },
+            nameof(GetRecipeGroupById),
+            new { groupId = response.Value?.Id },
             response.Value
         );
     }
@@ -155,7 +165,7 @@ public class RecipesController : ControllerBase
     // GET: api/recipes/group/{groupId}
     [HttpGet("group/{groupId}")]
     [Authorize]
-    public async Task<IActionResult> GetRecipeGroup([FromRoute] Guid groupId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetRecipeGroupById([FromRoute] Guid groupId, CancellationToken cancellationToken = default)
     {
         var currentUserId = _userService.GetUserId(User);
 
@@ -204,10 +214,10 @@ public class RecipesController : ControllerBase
     // DELETE: api/recipes/group/delete/{groupId}
     [HttpDelete("group/delete/{groupId}")]
     [Authorize]
-    public async Task<IActionResult> DeleteRecipeGroup([FromRoute] Guid groupId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> DeleteRecipeGroupById([FromRoute] Guid groupId, CancellationToken cancellationToken = default)
     {
         var currentUserId = _userService.GetUserId(User);
-        var response = await _recipeService.DeleteRecipeGroupAsync(groupId, currentUserId, cancellationToken);
+        var response = await _recipeService.DeleteRecipeGroupByIdAsync(groupId, currentUserId, cancellationToken);
 
         if (!response.IsSuccess)
         {
@@ -220,6 +230,26 @@ public class RecipesController : ControllerBase
     // ********************************************** /
 
     // Ингредиенты рецепта
+
+    // POST: api/recipes/ingredient/create
+    [HttpPost("{recipeId}/ingredient/create")]
+    [Authorize]
+    public async Task<IActionResult> CreateIngredient([FromRoute] Guid recipeId, [FromBody] CreateIngredientRequest createIngredientRequest, CancellationToken cancellationToken = default)
+    {
+        var currentUserId = _userService.GetUserId(User);
+
+        var response = await _recipeService.CreateIngredientAsync(recipeId, createIngredientRequest, currentUserId, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            return StatusCode(response.StatusCode ?? 500, new { message = response.ErrorMessage });
+        }
+
+        return CreatedAtAction(
+            nameof(GetIngredientById),
+            new {id = response.Value.Id},
+            response.Value);
+    }
 
     // GET: api/recipes/ingredient/id
     [HttpGet("ingredient/{id}")]
@@ -238,27 +268,6 @@ public class RecipesController : ControllerBase
         _logger.LogInformation("Найден ингредиент {ingredientId}", ingredient.Id);
 
         return Ok(ingredient);
-    }
-
-    // POST: api/recipes/ingredient/create
-    [HttpPost("ingredient/create")]
-    [Authorize]
-    public async Task<IActionResult> CreateIngredient([FromBody] CreateIngredientRequest createIngredientRequest, CancellationToken cancellationToken = default)
-    {
-
-        var currentUserId = _userService.GetUserId(User);
-
-        var response = await _recipeService.CreateIngredientAsync(createIngredientRequest, currentUserId, cancellationToken);
-
-        if (!response.IsSuccess)
-        {
-            return StatusCode(response.StatusCode ?? 500, new { message = response.ErrorMessage });
-        }
-
-        return CreatedAtAction(
-            nameof(GetIngredientById),
-            new {id = response.Value.Id},
-            response.Value);
     }
 
     // PATCH: api/recipes/ingredient/{id}/
@@ -315,13 +324,13 @@ public class RecipesController : ControllerBase
     }
 
     // POST: api/recipes/ingredient/group/create
-    [HttpPost("ingredient/group/create")]
+    [HttpPost("{recipeId}/ingredient/group/create")]
     [Authorize]
-    public async Task<IActionResult> CreateIngredientGroup([FromBody] CreateIngredientGroupRequest createIngredientGroupRequest, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> CreateIngredientGroup([FromRoute] Guid recipeId, [FromBody] CreateIngredientGroupRequest createIngredientGroupRequest, CancellationToken cancellationToken = default)
     {
         var currentUserId = _userService.GetUserId(User);
 
-        var response = await _recipeService.CreateIngredientGroupAsync(createIngredientGroupRequest, currentUserId, cancellationToken);
+        var response = await _recipeService.CreateIngredientGroupAsync(recipeId, createIngredientGroupRequest, currentUserId, cancellationToken);
 
         if (!response.IsSuccess)
         {
@@ -387,15 +396,15 @@ public class RecipesController : ControllerBase
     }
 
     // POST: api/recipes/step/create
-    [HttpPost("step/create")]
+    [HttpPost("{recipeId}/step/create")]
     [Authorize]
-    public async Task<IActionResult> CreateRecipeStep([FromBody] CreateRecipeStepRequest createRecipeStepRequest, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> CreateRecipeStep([FromRoute] Guid recipeId, [FromBody] CreateRecipeStepRequest createRecipeStepRequest, CancellationToken cancellationToken = default)
     {
         var currentUserId = _userService.GetUserId(User);
 
         try
         {
-            var response = await _recipeService.CreateRecipeStepAsync(createRecipeStepRequest, currentUserId, cancellationToken);
+            var response = await _recipeService.CreateRecipeStepAsync(recipeId, createRecipeStepRequest, currentUserId, cancellationToken);
 
             return CreatedAtAction(
                 nameof(GetRecipeStepById),

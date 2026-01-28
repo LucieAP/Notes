@@ -91,13 +91,26 @@ public class RecipeService : IRecipeService
             })
             .FirstOrDefaultAsync(cancellationToken);
 
-        _logger.LogInformation("Вывод всех найденных рецептов пользователя {currentUserId}", currentUserId);
-
         return recipe;
     }
 
     public async Task<CreateRecipeResponse> CreateRecipeAsync(CreateRecipeRequest createRecipeRequest, Guid currentUserId, CancellationToken cancellationToken)
     {
+        if (createRecipeRequest.RecipeGroupId != null)
+        {
+            var groupExists = await _context.RecipeGroups
+                .AnyAsync(
+                    rg => rg.Id == createRecipeRequest.RecipeGroupId
+                          && rg.CreatedBy == currentUserId
+                          && !rg.IsDeleted,
+                    cancellationToken);
+
+            if (!groupExists)
+            {
+                throw new InvalidOperationException("Группа не найдена");
+            }
+        }
+
         var recipe = new Recipe
         {
             Id = Guid.NewGuid(),
@@ -201,7 +214,7 @@ public class RecipeService : IRecipeService
         return OperationResult.Success();
     }
 
-    public async Task<OperationResult<TrashResponse>> TrashRecipeAsync(Guid recipeId, Guid currentUserId, CancellationToken cancellationToken = default)
+    public async Task<OperationResult<TrashResponse>> TrashRecipeByIdAsync(Guid recipeId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var recipe = await _context.Recipes
                 .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted)
@@ -372,7 +385,7 @@ public class RecipeService : IRecipeService
         });
     }
 
-    public async Task<OperationResult> DeleteRecipeGroupAsync(Guid groupId, Guid currentUserId, CancellationToken cancellationToken = default)
+    public async Task<OperationResult> DeleteRecipeGroupByIdAsync(Guid groupId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var RecipeGroup = await _context.RecipeGroups
             .Where(r => r.Id == groupId && r.CreatedBy == currentUserId && !r.IsDeleted)
@@ -409,7 +422,7 @@ public class RecipeService : IRecipeService
 
     // Ингредиенты рецепта
 
-    public async Task<OperationResult<CreateIngredientResponse>> CreateIngredientAsync(CreateIngredientRequest createIngredientRequest, Guid currentUserId, CancellationToken cancellationToken = default)
+    public async Task<OperationResult<CreateIngredientResponse>> CreateIngredientAsync(Guid recipeId, CreateIngredientRequest createIngredientRequest, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var trimmedName = createIngredientRequest.Name.Trim();
         var trimmedNote = createIngredientRequest.Note?.Trim();
@@ -417,6 +430,32 @@ public class RecipeService : IRecipeService
         if (string.IsNullOrEmpty(trimmedName))
         {
             return OperationResult<CreateIngredientResponse>.Failure("Название ингредиента не может быть пустым", 400);
+        }
+
+        var recipe = await _context.Recipes
+            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (recipe == null)
+        {
+            return OperationResult<CreateIngredientResponse>.Failure("Рецепт не найден", 404);
+        }
+
+        if (createIngredientRequest.IngredientGroupId != null)
+        {
+            var groupExists = await _context.IngredientGroups
+                .Include(ig => ig.Recipe)
+                .AnyAsync(
+                    ig => ig.Id == createIngredientRequest.IngredientGroupId
+                          && ig.RecipeId == recipeId
+                          && ig.Recipe.CreatedBy == currentUserId
+                          && !ig.Recipe.IsDeleted,
+                    cancellationToken);
+
+            if (!groupExists)
+            {
+                return OperationResult<CreateIngredientResponse>.Failure("Группа ингредиентов не найдена", 404);
+            }
         }
         
         var ingredient = new Ingredient
@@ -428,7 +467,7 @@ public class RecipeService : IRecipeService
             Note = trimmedNote,
             CreatedAt = DateTime.UtcNow,
             IngredientGroupId = createIngredientRequest.IngredientGroupId,
-            RecipeId = createIngredientRequest.RecipeId
+            RecipeId = recipeId
         };
 
         _context.Ingredients.Add(ingredient);
@@ -517,7 +556,7 @@ public class RecipeService : IRecipeService
 
     // Группа ингредиентов 
 
-    public async Task<OperationResult<CreateIngredientGroupResponse>> CreateIngredientGroupAsync(CreateIngredientGroupRequest createIngredientGroupRequest, Guid currentUserId, CancellationToken cancellationToken = default)
+    public async Task<OperationResult<CreateIngredientGroupResponse>> CreateIngredientGroupAsync(Guid recipeId, CreateIngredientGroupRequest createIngredientGroupRequest, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var trimmedTitle = createIngredientGroupRequest.Title.Trim();
 
@@ -528,7 +567,7 @@ public class RecipeService : IRecipeService
 
         // Проверяем, что рецепт существует и принадлежит пользователю
         var recipe = await _context.Recipes
-            .Where(r => r.Id == createIngredientGroupRequest.RecipeId && r.CreatedBy == currentUserId && !r.IsDeleted)
+            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (recipe == null)
@@ -541,7 +580,7 @@ public class RecipeService : IRecipeService
             Id = Guid.NewGuid(),
             Title = trimmedTitle,
             CreatedAt = DateTime.UtcNow,
-            RecipeId = createIngredientGroupRequest.RecipeId
+            RecipeId = recipeId
         };
 
         _context.IngredientGroups.Add(ingredientGroup);
@@ -687,7 +726,7 @@ public class RecipeService : IRecipeService
         return recipeStep;
     }
 
-    public async Task<CreateRecipeStepResponse> CreateRecipeStepAsync(CreateRecipeStepRequest createRecipeStepRequest, Guid currentUserId, CancellationToken cancellationToken = default)
+    public async Task<CreateRecipeStepResponse> CreateRecipeStepAsync(Guid recipeId, CreateRecipeStepRequest createRecipeStepRequest, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var trimmedDescription = createRecipeStepRequest.Description.Trim();
 
@@ -698,7 +737,7 @@ public class RecipeService : IRecipeService
 
         // Проверяем, что рецепт существует и принадлежит пользователю
         var recipe = await _context.Recipes
-            .Where(r => r.Id == createRecipeStepRequest.RecipeId && r.CreatedBy == currentUserId && !r.IsDeleted)
+            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (recipe == null)
@@ -711,7 +750,7 @@ public class RecipeService : IRecipeService
             Id = Guid.NewGuid(),
             Description = trimmedDescription,
             CreatedAt = DateTime.UtcNow,
-            RecipeId = createRecipeStepRequest.RecipeId
+            RecipeId = recipeId
         };
 
         _context.RecipeSteps.Add(recipeStep);
