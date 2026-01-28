@@ -59,12 +59,23 @@ public class NotesController : ControllerBase
 
         var currentUserId = _userService.GetUserId(User);
 
-        var response = await _noteService.CreateNoteAsync(createNoteRequest, currentUserId, cancellationToken);
+        try
+        {
+            var response = await _noteService.CreateNoteAsync(createNoteRequest, currentUserId, cancellationToken);
 
-        return CreatedAtAction(
-            nameof(GetNoteById),
-            new {id = response.Id},
-            response);
+            return CreatedAtAction(
+                nameof(GetNoteById),
+                new {id = response.Id},
+                response);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
     }
 
     // PATCH: api/notes/{id}/pin
