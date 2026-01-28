@@ -100,6 +100,21 @@ public class TaskService : ITaskService
 
     public async Task<CreateTaskResponse> CreateTaskAsync(CreateTaskRequest createTaskRequest, Guid currentUserId, CancellationToken cancellationToken)
     {
+        if (createTaskRequest.TaskGroupId != null)
+        {
+            var groupExists = await _context.TaskGroups
+                .AnyAsync(
+                    tg => tg.Id == createTaskRequest.TaskGroupId
+                          && tg.CreatedBy == currentUserId
+                          && !tg.IsDeleted,
+                    cancellationToken);
+
+            if (!groupExists)
+            {
+                throw new InvalidOperationException("Группа не найдена");
+            }
+        }
+
         var task = new Task
         {
             Id = Guid.NewGuid(),

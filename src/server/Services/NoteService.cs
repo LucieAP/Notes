@@ -98,6 +98,21 @@ public class NoteService : INoteService
 
     public async Task<CreateNoteResponse> CreateNoteAsync(CreateNoteRequest createNoteRequest, Guid currentUserId, CancellationToken cancellationToken)
     {
+        if (createNoteRequest.NoteGroupId != null)
+        {
+            var groupExists = await _context.NoteGroups
+                .AnyAsync(
+                    ng => ng.Id == createNoteRequest.NoteGroupId
+                          && ng.CreatedBy == currentUserId
+                          && !ng.IsDeleted,
+                    cancellationToken);
+
+            if (!groupExists)
+            {
+                throw new InvalidOperationException("Группа не найдена");
+            }
+        }
+
         var note = new Note
         {
             Id = Guid.NewGuid(),
