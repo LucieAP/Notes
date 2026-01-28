@@ -616,7 +616,7 @@ public class RecipeService : IRecipeService
         return ingredientGroup;
     }
 
-    public async Task<OperationResult<UpdateItemResponse>> UpdateIngredientGroupAsync(Guid ingredientGroupId, Guid currentUserId, UpdateItemRequest updateItemRequest, CancellationToken cancellationToken = default)
+    public async Task<OperationResult<UpdateIngredientGroupResponse>> UpdateIngredientGroupAsync(Guid ingredientGroupId, Guid currentUserId, UpdateIngredientGroupRequest updateIngredientGroupRequest, CancellationToken cancellationToken = default)
     {
         var ingredientGroup = await _context.IngredientGroups
             .Include(ig => ig.Recipe)
@@ -625,24 +625,19 @@ public class RecipeService : IRecipeService
 
         if (ingredientGroup == null)
         {
-            return OperationResult<UpdateItemResponse>.Failure("Группа ингредиентов не найдена", 404);
+            return OperationResult<UpdateIngredientGroupResponse>.Failure("Группа ингредиентов не найдена", 404);
         }
 
-        if (updateItemRequest.Title == null && updateItemRequest.Description != null)
+        if (updateIngredientGroupRequest.Title == null)
         {
-            return OperationResult<UpdateItemResponse>.Failure("Группа ингредиентов не имеет поля Description", 400);
+            return OperationResult<UpdateIngredientGroupResponse>.Failure("Ни одного параметра не было передано", 400);
         }
 
-        if (updateItemRequest.Title == null)
-        {
-            return OperationResult<UpdateItemResponse>.Failure("Ни одного параметра не было передано", 400);
-        }
-
-        var trimmedTitle = updateItemRequest.Title.Trim();
+        var trimmedTitle = updateIngredientGroupRequest.Title.Trim();
 
         if (string.IsNullOrWhiteSpace(trimmedTitle))
         {
-            return OperationResult<UpdateItemResponse>.Failure("Название не может быть пустым", 400);
+            return OperationResult<UpdateIngredientGroupResponse>.Failure("Название не может быть пустым", 400);
         }
 
         var wasUpdated = false;
@@ -666,12 +661,10 @@ public class RecipeService : IRecipeService
             _logger.LogInformation("Новые данные соответствуют старым, изменения не применены.");
         }
 
-        return OperationResult<UpdateItemResponse>.Success(new UpdateItemResponse
+        return OperationResult<UpdateIngredientGroupResponse>.Success(new UpdateIngredientGroupResponse
         {
             Id = ingredientGroup.Id,
             Title = ingredientGroup.Title,
-            Description = null,
-            LastModifiedAt = ingredientGroup.CreatedAt, // IngredientGroup не имеет LastModifiedAt
             WasUpdated = wasUpdated
         });
     }
@@ -767,7 +760,7 @@ public class RecipeService : IRecipeService
         };
     }
 
-    public async Task<OperationResult<UpdateItemResponse>> UpdateRecipeStepAsync(Guid recipeStepId, Guid currentUserId, UpdateItemRequest updateItemRequest, CancellationToken cancellationToken = default)
+    public async Task<OperationResult<UpdateRecipeStepResponse>> UpdateRecipeStepAsync(Guid recipeStepId, Guid currentUserId, UpdateRecipeStepRequest updateRecipeStepRequest, CancellationToken cancellationToken = default)
     {
         var recipeStep = await _context.RecipeSteps
             .Include(rs => rs.Recipe)
@@ -776,24 +769,19 @@ public class RecipeService : IRecipeService
 
         if (recipeStep == null)
         {
-            return OperationResult<UpdateItemResponse>.Failure("Шаг рецепта не найден", 404);
+            return OperationResult<UpdateRecipeStepResponse>.Failure("Шаг рецепта не найден", 404);
         }
 
-        if (updateItemRequest.Title != null)
+        if (updateRecipeStepRequest.Description == null)
         {
-            return OperationResult<UpdateItemResponse>.Failure("Шаг рецепта не имеет поля Title", 400);
+            return OperationResult<UpdateRecipeStepResponse>.Failure("Ни одного параметра не было передано", 400);
         }
 
-        if (updateItemRequest.Description == null)
-        {
-            return OperationResult<UpdateItemResponse>.Failure("Ни одного параметра не было передано", 400);
-        }
-
-        var trimmedDescription = updateItemRequest.Description.Trim();
+        var trimmedDescription = updateRecipeStepRequest.Description.Trim();
 
         if (string.IsNullOrWhiteSpace(trimmedDescription))
         {
-            return OperationResult<UpdateItemResponse>.Failure("Описание не может быть пустым", 400);
+            return OperationResult<UpdateRecipeStepResponse>.Failure("Описание не может быть пустым", 400);
         }
 
         var wasUpdated = false;
@@ -817,12 +805,10 @@ public class RecipeService : IRecipeService
             _logger.LogInformation("Новые данные соответствуют старым, изменения не применены.");
         }
 
-        return OperationResult<UpdateItemResponse>.Success(new UpdateItemResponse
+        return OperationResult<UpdateRecipeStepResponse>.Success(new UpdateRecipeStepResponse
         {
             Id = recipeStep.Id,
-            Title = null, // RecipeStep не имеет Title
             Description = recipeStep.Description,
-            LastModifiedAt = recipeStep.CreatedAt, // RecipeStep не имеет LastModifiedAt
             WasUpdated = wasUpdated
         });
     }

@@ -20,10 +20,10 @@ public interface IRecipeService
     public Task<OperationResult> DeleteIngredientByIdAsync(Guid ingredientId, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<CreateIngredientGroupResponse>> CreateIngredientGroupAsync(Guid recipeId, CreateIngredientGroupRequest createIngredientGroupRequest, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<GetIngredientGroupResponse?> GetIngredientGroupByIdAsync(Guid ingredientGroupId, Guid currentUserId, CancellationToken cancellationToken = default);
-    public Task<OperationResult<UpdateItemResponse>> UpdateIngredientGroupAsync(Guid ingredientGroupId, Guid currentUserId, UpdateItemRequest updateItemRequest, CancellationToken cancellationToken = default);
+    public Task<OperationResult<UpdateIngredientGroupResponse>> UpdateIngredientGroupAsync(Guid ingredientGroupId, Guid currentUserId, UpdateIngredientGroupRequest updateIngredientGroupRequest, CancellationToken cancellationToken = default);
     public Task<OperationResult> DeleteIngredientGroupByIdAsync(Guid ingredientGroupId, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<GetRecipeStepResponse?> GetRecipeStepAsync(Guid recipeStepId, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<CreateRecipeStepResponse> CreateRecipeStepAsync(Guid recipeId, CreateRecipeStepRequest createRecipeStepRequest, Guid currentUserId, CancellationToken cancellationToken = default);
-    public Task<OperationResult<UpdateItemResponse>> UpdateRecipeStepAsync(Guid recipeStepId, Guid currentUserId, UpdateItemRequest updateItemRequest, CancellationToken cancellationToken = default);
+    public Task<OperationResult<UpdateRecipeStepResponse>> UpdateRecipeStepAsync(Guid recipeStepId, Guid currentUserId, UpdateRecipeStepRequest updateRecipeStepRequest, CancellationToken cancellationToken = default);
     public Task<OperationResult> DeleteRecipeStepByIdAsync(Guid recipeStepId, Guid currentUserId, CancellationToken cancellationToken = default);
 }

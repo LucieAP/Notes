@@ -231,7 +231,7 @@ public class RecipesController : ControllerBase
 
     // Ингредиенты рецепта
 
-    // POST: api/recipes/ingredient/create
+    // POST: api/recipes/{recipeId}/ingredient/create
     [HttpPost("{recipeId}/ingredient/create")]
     [Authorize]
     public async Task<IActionResult> CreateIngredient([FromRoute] Guid recipeId, [FromBody] CreateIngredientRequest createIngredientRequest, CancellationToken cancellationToken = default)
@@ -343,13 +343,13 @@ public class RecipesController : ControllerBase
             response.Value);
     }
 
-    // PATCH: api/recipes/ingredient/group/{id}/
+    // PATCH: api/recipes/ingredient/group/{id}
     [HttpPatch("ingredient/group/{id}")]
     [Authorize]
-    public async Task<IActionResult> UpdateIngredientGroup([FromRoute] Guid id, [FromBody] UpdateItemRequest updateItemRequest , CancellationToken cancellationToken = default)
+    public async Task<IActionResult> UpdateIngredientGroup([FromRoute] Guid id, [FromBody] UpdateIngredientGroupRequest updateIngredientGroupRequest , CancellationToken cancellationToken = default)
     {
         var currentUserId = _userService.GetUserId(User);
-        var response = await _recipeService.UpdateIngredientGroupAsync(id, currentUserId, updateItemRequest, cancellationToken);
+        var response = await _recipeService.UpdateIngredientGroupAsync(id, currentUserId, updateIngredientGroupRequest, cancellationToken);
 
         if (!response.IsSuccess)
         {
@@ -395,7 +395,7 @@ public class RecipesController : ControllerBase
         return Ok(step);
     }
 
-    // POST: api/recipes/step/create
+    // POST: api/recipes/{recipeId}/step/create
     [HttpPost("{recipeId}/step/create")]
     [Authorize]
     public async Task<IActionResult> CreateRecipeStep([FromRoute] Guid recipeId, [FromBody] CreateRecipeStepRequest createRecipeStepRequest, CancellationToken cancellationToken = default)
@@ -424,10 +424,10 @@ public class RecipesController : ControllerBase
     // PATCH: api/recipes/step/{id}
     [HttpPatch("step/{id}")]
     [Authorize]
-    public async Task<IActionResult> UpdateRecipeStep([FromRoute] Guid id, [FromBody] UpdateItemRequest updateItemRequest , CancellationToken cancellationToken = default)
+    public async Task<IActionResult> UpdateRecipeStep([FromRoute] Guid id, [FromBody] UpdateRecipeStepRequest updateRecipeStepRequest , CancellationToken cancellationToken = default)
     {
         var currentUserId = _userService.GetUserId(User);
-        var response = await _recipeService.UpdateRecipeStepAsync(id, currentUserId, updateItemRequest, cancellationToken);
+        var response = await _recipeService.UpdateRecipeStepAsync(id, currentUserId, updateRecipeStepRequest, cancellationToken);
 
         if (!response.IsSuccess)
         {
