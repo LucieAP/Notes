@@ -8,19 +8,22 @@ import TasksPage from "../components/tasks/TasksPage";
 import RecipesPage from "../components/recipes/RecipesPage";
 import LoginPage from "../components/auth/LoginPage";
 import NotFoundPage from "../components/common/NotFoundPage";
+import Sidebar from "@/components/common/SideBar";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<WorkspaceLayout />}>
-          <Route path="workspace" element={<WorkspacePage />} />
-          <Route path="notes" element={<NotesPage />} />
-          <Route path="tasks" element={<TasksPage />} />
-          <Route path="recipes" element={<RecipesPage />} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route element={<Sidebar />}>
+            <Route path="workspace" element={<WorkspacePage />} />
+            <Route path="notes" element={<NotesPage />} />
+            <Route path="tasks" element={<TasksPage />} />
+            <Route path="recipes" element={<RecipesPage />} />
+          </Route>
         </Route>
 
+        <Route path="/login" element={<LoginPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
