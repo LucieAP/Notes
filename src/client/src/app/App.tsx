@@ -8,14 +8,14 @@ import TasksPage from "../components/tasks/TasksPage";
 import RecipesPage from "../components/recipes/RecipesPage";
 import LoginPage from "../components/auth/LoginPage";
 import NotFoundPage from "../components/common/NotFoundPage";
-import Sidebar from "@/components/common/SideBar";
+import ContentArea from "@/components/content/ContentArea";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<WorkspaceLayout />}>
-          <Route element={<Sidebar />}>
+          <Route element={<ContentArea />}>
             <Route path="workspace" element={<WorkspacePage />} />
             <Route path="notes" element={<NotesPage />} />
             <Route path="tasks" element={<TasksPage />} />
