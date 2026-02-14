@@ -1,4 +1,4 @@
-function HeaderPage() {
+function SidebarHeader() {
   return (
     <div className="flex flex-col px-2 pb-5">
       <div className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-neutral-700 cursor-pointer transition-colors select-none">
@@ -11,4 +11,4 @@ function HeaderPage() {
   );
 }
 
-export default HeaderPage;
+export default SidebarHeader;

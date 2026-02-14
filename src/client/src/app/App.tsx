@@ -1,7 +1,12 @@
 import "../styles/App.css";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
-import WorkspaceLayout from "../components/common/WorkspaceLayout";
+import WorkspaceLayout from "../components/layout/WorkspaceLayout";
 import WorkspacePage from "../components/workspace/WorkspacePage";
 import NotesPage from "../components/notes/NotesPage";
 import TasksPage from "../components/tasks/TasksPage";
@@ -16,6 +21,7 @@ function App() {
       <Routes>
         <Route path="/" element={<WorkspaceLayout />}>
           <Route element={<ContentArea />}>
+            <Route index element={<Navigate to="workspace" replace />} />
             <Route path="workspace" element={<WorkspacePage />} />
             <Route path="notes" element={<NotesPage />} />
             <Route path="tasks" element={<TasksPage />} />
