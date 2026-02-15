@@ -13,14 +13,17 @@ function Sidebar() {
         <div className="flex flex-col px-1 rounded select-none text-sm transition-colors">
           {mainNavItems.map((item) => (
             <SidebarNavLink
+              key={item.to}
               to={item.to}
               icon={<item.icon />}
               label={item.label}
+              showAddButton={item.showAddButton}
             />
           ))}
 
-          <SidebarNavLink to="/search" icon=<SearchIcon /> label="Search" />
+          <SidebarNavLink to="/search" icon={<SearchIcon />} label="Search" showAddButton={false} />
           <SidebarSection navItems={privateNavItems} title="Private" />
+          <SidebarSection title="Favorite" />
         </div>
         <SidebarFooter />
       </div>

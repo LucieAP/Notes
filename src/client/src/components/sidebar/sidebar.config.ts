@@ -7,10 +7,12 @@ export interface NavItem {
   to: string;
   icon: React.ComponentType;
   label: string;
+  /** Показывать кнопку «добавить». По умолчанию true */
+  showAddButton?: boolean;
 }
 
 export const mainNavItems: NavItem[] = [
-  { to: "/workspace", icon: WorkspaceIcon, label: "Workspace" },
+  { to: "/workspace", icon: WorkspaceIcon, label: "Workspace", showAddButton: false },
 ];
 
 export const privateNavItems: NavItem[] = [

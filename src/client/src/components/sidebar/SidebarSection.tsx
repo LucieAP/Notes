@@ -1,10 +1,11 @@
 import DropdownIcon from "../common/icons/DropdownIcon";
+import TrashIcon from "../common/icons/TrashIcon";
 import { NavItem } from "./sidebar.config";
 import SidebarNavLink from "./SidebarNavLink";
 import { useState } from "react";
 
 interface Props {
-  navItems: NavItem[];
+  navItems?: NavItem[];
   title: string;
   defaultOpen?: boolean;
 }
@@ -16,7 +17,7 @@ function SidebarSection({ navItems, title, defaultOpen = true }: Props) {
     <div className="flex flex-col mt-5">
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex rounded-lg hover:bg-neutral-700 px-1 py-1 space-x-2 text-xs cursor-pointer"
+        className="flex rounded-lg hover:bg-neutral-700 px-1 py-1 space-x-0.5 text-xs cursor-pointer"
       >
         <span>{title}</span>
         <DropdownIcon isOpen={isOpen} />
@@ -24,13 +25,19 @@ function SidebarSection({ navItems, title, defaultOpen = true }: Props) {
 
       {isOpen && (
         <>
-          {navItems.map((item) => (
-            <SidebarNavLink
-              to={item.to}
-              icon={<item.icon />}
-              label={item.label}
-            />
-          ))}
+          {navItems &&
+            navItems.map((item) => {
+              if (!item) return null;
+              return (
+                <SidebarNavLink
+                  key={item.to}
+                  to={item.to}
+                  icon={<item.icon />}
+                  label={item.label}
+                  showAddButton={item.showAddButton}
+                />
+              );
+            })}
         </>
       )}
     </div>
