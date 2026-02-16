@@ -1,11 +1,18 @@
-import SearchIcon from "../common/icons/SearchIcon";
 import SidebarHeader from "./SidebarHeader";
 import SidebarNavLink from "./SidebarNavLink";
 import { mainNavItems, privateNavItems } from "./sidebar.config";
 import SidebarSection from "./SidebarSection";
 import SidebarFooter from "./SidebarFooter";
+import SearchButton from "../common/buttons/SearchButton";
+import { MouseEvent, useState } from "react";
 
 function Sidebar() {
+  // function handleClick(e: MouseEvent<HTMLButtonElement>) {
+  //   e.preventDefault();
+
+  //   console.log("SearchButton Clicked!");
+  // }
+
   return (
     <div className="w-60 h-screen border-r border-neutral-800 shrink-0 bg-neutral-800">
       <div className="flex flex-col h-full p-2 gap-0.5">
@@ -21,7 +28,8 @@ function Sidebar() {
             />
           ))}
 
-          <SidebarNavLink to="/search" icon={<SearchIcon />} label="Search" showAddButton={false} />
+          <SearchButton />
+
           <SidebarSection navItems={privateNavItems} title="Private" />
           <SidebarSection title="Favorite" />
         </div>
