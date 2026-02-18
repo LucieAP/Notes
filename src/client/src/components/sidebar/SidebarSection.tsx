@@ -1,5 +1,4 @@
 import DropdownIcon from "../common/icons/DropdownIcon";
-import TrashIcon from "../common/icons/TrashIcon";
 import { NavItem } from "./sidebar.config";
 import SidebarNavLink from "./SidebarNavLink";
 import { useState } from "react";
