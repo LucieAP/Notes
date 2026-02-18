@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 interface Props {
   initialWidth?: number;
@@ -16,14 +16,17 @@ function useResizableSidebar({
   );
   const isDragging = useRef(false);
 
-  const onMouseMove = (e: MouseEvent) => {
-    if (!isDragging.current) return;
+  const onMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isDragging.current) return;
 
-    setWidth((prev) => {
-      const next = prev + e.movementX;
-      return Math.min(Math.max(next, minWidth), maxWidth);
-    });
-  };
+      setWidth((prev) => {
+        const next = prev + e.movementX;
+        return Math.min(Math.max(next, minWidth), maxWidth);
+      });
+    },
+    [minWidth, maxWidth],
+  );
 
   const onMouseDown = () => {
     isDragging.current = true;
@@ -34,14 +37,14 @@ function useResizableSidebar({
     document.body.style.cursor = "col-resize";
   };
 
-  const onMouseUp = () => {
+  const onMouseUp = useCallback(() => {
     isDragging.current = false;
     window.removeEventListener("mousemove", onMouseMove);
     window.removeEventListener("mouseup", onMouseUp);
 
     document.body.style.userSelect = "";
     document.body.style.cursor = "";
-  };
+  }, [onMouseMove]);
 
   return [width, setWidth, onMouseDown] as const;
 }
