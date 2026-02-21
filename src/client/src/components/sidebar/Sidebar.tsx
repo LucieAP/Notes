@@ -5,7 +5,7 @@ import SidebarSection from "./SidebarSection";
 import SidebarFooter from "./SidebarFooter";
 import SearchButton from "../common/buttons/SearchButton";
 import useResizableSidebar from "@/shared/hooks/useResizableSidebar";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
 const DEFAULT_WIDTH = 240;
@@ -21,6 +21,8 @@ function Sidebar() {
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, width.toString());
   }, [width]);
+
+  function handleAddPage() {}
 
   return (
     <div
@@ -38,6 +40,7 @@ function Sidebar() {
               icon={<item.icon />}
               label={item.label}
               showAddButton={item.showAddButton}
+              onAdd={handleAddPage}
             />
           ))}
 
@@ -48,6 +51,7 @@ function Sidebar() {
         </div>
         <SidebarFooter />
       </div>
+
       {/* Resize Handle */}
       <div
         onMouseDown={onMouseDown}

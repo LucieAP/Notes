@@ -9,9 +9,9 @@ function TaskIcon() {
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       >
         <path d="M9 11l3 3L22 4M2 7h6M2 12h6M2 17h6" />
       </svg>

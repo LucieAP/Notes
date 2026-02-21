@@ -10,9 +10,9 @@ function DropdownIcon({ isOpen = true }: { isOpen?: boolean }) {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
           <path d="M9 6l6 6-6 6" />
         </svg>
@@ -25,9 +25,9 @@ function DropdownIcon({ isOpen = true }: { isOpen?: boolean }) {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
           <path d="M6 9l6 6 6-6" />
         </svg>

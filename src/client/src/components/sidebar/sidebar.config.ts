@@ -12,7 +12,12 @@ export interface NavItem {
 }
 
 export const mainNavItems: NavItem[] = [
-  { to: "/workspace", icon: WorkspaceIcon, label: "Workspace", showAddButton: false },
+  {
+    to: "/workspace",
+    icon: WorkspaceIcon,
+    label: "Workspace",
+    showAddButton: false,
+  },
 ];
 
 export const privateNavItems: NavItem[] = [
