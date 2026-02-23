@@ -5,6 +5,7 @@ import FailedAuthIcon from "../common/icons/FailedAuthIcon";
 function LoginPage() {
   const [searchParams] = useSearchParams();
   const error = searchParams.get("error");
+
   const handleLogin = () => {
     window.location.href = `${import.meta.env.VITE_BASE_URL}/auth/google-login`;
   };

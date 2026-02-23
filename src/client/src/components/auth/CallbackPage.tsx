@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 function CallbackPage() {
@@ -6,14 +6,18 @@ function CallbackPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = searchParams.get("token");
+    const handleCallback = async () => {
+      const token = searchParams.get("token");
 
-    if (token) {
-      localStorage.setItem("token", token);
-      navigate("/", { replace: true });
-    } else {
-      navigate("/login?error=auth_failed", { replace: true });
-    }
+      if (token) {
+        await cookieStore.set("token", token);
+        navigate("/", { replace: true });
+      } else {
+        navigate("/login?error=auth_failed", { replace: true });
+      }
+    };
+
+    handleCallback();
   }, []);
 
   return (

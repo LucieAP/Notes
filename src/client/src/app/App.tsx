@@ -15,27 +15,38 @@ import NotFoundPage from "../components/common/pages/NotFoundPage";
 import ContentArea from "@/components/content/ContentArea";
 import LoginPage from "@/components/auth/LoginPage";
 import CallbackPage from "@/components/auth/CallbackPage";
+import AuthProvider from "./providers/AuthProvider";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/callback" element={<CallbackPage />} />
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/callback" element={<CallbackPage />} />
 
-        <Route path="/" element={<WorkspaceLayout />}>
-          <Route element={<ContentArea />}>
-            <Route index element={<Navigate to="workspace" replace />} />
-            <Route path="workspace" element={<WorkspacePage />} />
-            <Route path="notes" element={<NotesPage />} />
-            <Route path="tasks" element={<TasksPage />} />
-            <Route path="recipes" element={<RecipesPage />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <WorkspaceLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route element={<ContentArea />}>
+              <Route index element={<Navigate to="workspace" replace />} />
+              <Route path="workspace" element={<WorkspacePage />} />
+              <Route path="notes" element={<NotesPage />} />
+              <Route path="tasks" element={<TasksPage />} />
+              <Route path="recipes" element={<RecipesPage />} />
+            </Route>
           </Route>
-        </Route>
 
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </Router>
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

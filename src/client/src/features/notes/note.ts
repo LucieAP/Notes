@@ -1,5 +1,5 @@
-import { NoteGroup } from "./NoteGroup";
-import { User } from "./user";
+import { NoteGroup } from "./noteGroup";
+import { User } from "../../shared/types/user";
 
 /** Заметка — ответ API (GetNoteResponse) */
 export interface Note {
