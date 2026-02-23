@@ -89,12 +89,12 @@ namespace server.Controllers
                 Email = user.Email
             });
 
-            // Возвращаем JWT (в реальном проекте можно redirect на frontend с токеном в query или cookie)
+            // Возвращаем JWT
             // Для API просто возвращаем JSON
-            return Ok(new { Token = jwtToken });
+            // return Ok(new { Token = jwtToken });
 
-            // TO-DO: Redirect на React с токеном
-            // return Redirect($"http://localhost:3000/callback?token={jwtToken}");
+            // Redirect на React с токеном
+            return Redirect($"http://localhost:5173/callback?token={jwtToken}");
         }
 
         [HttpGet("me")]

@@ -129,7 +129,7 @@ builder.Services.AddCors(options =>
     {
         options.AddPolicy("Notes Client", policy =>
         {
-            policy.WithOrigins("http://localhost:3000")
+            policy.WithOrigins("http://localhost:5173")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();
