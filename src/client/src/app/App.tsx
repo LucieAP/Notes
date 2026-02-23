@@ -11,14 +11,18 @@ import WorkspacePage from "../components/workspace/WorkspacePage";
 import NotesPage from "../components/notes/NotesPage";
 import TasksPage from "../components/tasks/TasksPage";
 import RecipesPage from "../components/recipes/RecipesPage";
-import LoginPage from "../components/auth/LoginPage";
-import NotFoundPage from "../components/common/NotFoundPage";
+import NotFoundPage from "../components/common/pages/NotFoundPage";
 import ContentArea from "@/components/content/ContentArea";
+import LoginPage from "@/components/auth/LoginPage";
+import CallbackPage from "@/components/auth/CallbackPage";
 
 function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/callback" element={<CallbackPage />} />
+
         <Route path="/" element={<WorkspaceLayout />}>
           <Route element={<ContentArea />}>
             <Route index element={<Navigate to="workspace" replace />} />
@@ -29,7 +33,6 @@ function App() {
           </Route>
         </Route>
 
-        <Route path="/login" element={<LoginPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
