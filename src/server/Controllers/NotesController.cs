@@ -97,10 +97,10 @@ public class NotesController : ControllerBase
     // PATCH: api/notes/{id}/
     [HttpPatch("{id}")]
     [Authorize]
-    public async Task<IActionResult> UpdateNote([FromRoute] Guid id, [FromBody] UpdateItemRequest updateItemRequest , CancellationToken cancellationToken = default)
+    public async Task<IActionResult> UpdateNote([FromRoute] Guid id, [FromBody] UpdateNoteRequest updateNoteRequest , CancellationToken cancellationToken = default)
     {
         var currentUserId = _userService.GetUserId(User);
-        var response = await _noteService.UpdateNoteAsync(id, currentUserId, updateItemRequest, cancellationToken);
+        var response = await _noteService.UpdateNoteAsync(id, currentUserId, updateNoteRequest, cancellationToken);
 
         if (!response.IsSuccess)
         {

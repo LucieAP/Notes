@@ -23,7 +23,7 @@ public class TaskService : ITaskService
             {
                 Id = t.Id,
                 Title = t.Title,
-                Description = t.Description,
+                Description = t.Content,
                 CheckBox = t.CheckBox,
                 IsFavorite = t.IsFavorite,
                 CreatedAt = t.CreatedAt,
@@ -65,7 +65,7 @@ public class TaskService : ITaskService
             {
                 Id = t.Id,
                 Title = t.Title,
-                Description = t.Description,
+                Description = t.Content,
                 CheckBox = t.CheckBox,
                 IsFavorite = t.IsFavorite,
                 CreatedAt = t.CreatedAt,
@@ -119,7 +119,7 @@ public class TaskService : ITaskService
         {
             Id = Guid.NewGuid(),
             Title = createTaskRequest.Title,
-            Description = createTaskRequest.Description,
+            Content = createTaskRequest.Description,
             CheckBox = createTaskRequest.CheckBox,
             IsFavorite = createTaskRequest.IsFavorite,
             CreatedAt = DateTime.UtcNow,
@@ -141,7 +141,7 @@ public class TaskService : ITaskService
         {
             Id = task.Id,
             Title = task.Title,
-            Description = task.Description,
+            Description = task.Content,
             CheckBox = task.CheckBox,
             IsFavorite = task.IsFavorite,
             CreatedAt = task.CreatedAt,

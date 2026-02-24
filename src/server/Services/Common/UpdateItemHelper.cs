@@ -4,6 +4,76 @@ namespace server.Services.Common;
 
 internal class UpdateItemHelper
 {
+    public static OperationResult<UpdateNoteResponse> ApplyNoteUpdate(
+        Note item,
+        Guid currentUserId,
+        UpdateNoteRequest updateNoteRequest,
+        ILogger logger)
+    {
+        if (updateNoteRequest.Title == null &&
+            updateNoteRequest.Content == null)
+        {
+            return OperationResult<UpdateNoteResponse>.Failure("Ни одного параметра не было передано", 400);
+        }
+
+        var wasUpdated = false;
+
+        if (updateNoteRequest.Title != null)
+        {
+            var trimmedTitle = updateNoteRequest.Title.Trim();
+
+            if (string.IsNullOrWhiteSpace(trimmedTitle))
+            {
+                return OperationResult<UpdateNoteResponse>.Failure("Название не может быть пустым", 400);
+            }
+
+            if (trimmedTitle != item.Title)
+            {
+                item.Title = trimmedTitle;
+                wasUpdated = true;
+                logger.LogInformation(
+                    "Название сущности {entityName} {itemId} обновлено пользователем {userId}",
+                    "Note", item.Id, currentUserId
+                );
+            }
+        }
+
+        if (updateNoteRequest.Content != null)
+        {
+            var trimmedContent = string.IsNullOrWhiteSpace(updateNoteRequest.Content)
+                ? null
+                : updateNoteRequest.Content.Trim();
+
+            if (trimmedContent != item.Content)
+            {
+                item.Content = trimmedContent;
+                wasUpdated = true;
+                logger.LogInformation(
+                    "Описание сущности {entityName} {itemId} обновлено пользователем {userId}",
+                    "Note", item.Id, currentUserId
+                );
+            }
+        }
+
+        if (wasUpdated)
+        {
+            item.LastModifiedAt = DateTime.UtcNow;
+        }
+        else
+        {
+            logger.LogInformation("Новые данные соответствуют старым, изменения не применены.");
+        }
+
+        return OperationResult<UpdateNoteResponse>.Success(new UpdateNoteResponse
+        {
+            Id = item.Id,
+            Title = item.Title,
+            Content = item.Content,
+            LastModifiedAt = item.LastModifiedAt,
+            WasUpdated = wasUpdated
+        });
+    }
+
     public static OperationResult<UpdateItemResponse> ApplyUpdate<T>(
         T item,
         string entityName,
@@ -46,9 +116,9 @@ internal class UpdateItemHelper
                 ? null 
                 : updateItemRequest.Description.Trim();     // Удаляем пробелы с начала и конца строки
             
-            if (trimmedDescription != item.Description)
+            if (trimmedDescription != item.Content)
             {
-                item.Description = trimmedDescription;
+                item.Content = trimmedDescription;
                 wasUpdated = true;
                 logger.LogInformation(
                     "Описание сущности {entityName} {itemId} обновлено пользователем {userId}", 
@@ -70,7 +140,7 @@ internal class UpdateItemHelper
         {
             Id = item.Id,
             Title = item.Title,
-            Description = item.Description,
+            Description = item.Content,
             LastModifiedAt = item.LastModifiedAt,
             WasUpdated = wasUpdated
         });

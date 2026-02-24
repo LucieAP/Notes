@@ -23,7 +23,7 @@ public class RecipeService : IRecipeService
             {
                 Id = r.Id,
                 Title = r.Title,
-                Description = r.Description,
+                Description = r.Content,
                 IsFavorite = r.IsFavorite,
                 CreatedAt = r.CreatedAt,
                 LastModifiedAt = r.LastModifiedAt,
@@ -65,7 +65,7 @@ public class RecipeService : IRecipeService
             {
                 Id = r.Id,
                 Title = r.Title,
-                Description = r.Description,
+                Description = r.Content,
                 IsFavorite = r.IsFavorite,
                 CreatedAt = r.CreatedAt,
                 LastModifiedAt = r.LastModifiedAt,
@@ -115,7 +115,7 @@ public class RecipeService : IRecipeService
         {
             Id = Guid.NewGuid(),
             Title = createRecipeRequest.Title,
-            Description = createRecipeRequest.Description,
+            Content = createRecipeRequest.Description,
             IsFavorite = createRecipeRequest.IsFavorite,
             CreatedAt = DateTime.UtcNow,
             LastModifiedAt = DateTime.UtcNow,
@@ -135,7 +135,7 @@ public class RecipeService : IRecipeService
         {
             Id = recipe.Id,
             Title = recipe.Title,
-            Description = recipe.Description,
+            Description = recipe.Content,
             IsFavorite = recipe.IsFavorite,
             CreatedAt = recipe.CreatedAt,
             LastModifiedAt = recipe.LastModifiedAt,

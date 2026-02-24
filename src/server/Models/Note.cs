@@ -11,7 +11,7 @@ public class Note : IUpdatableItem, ISoftDeletable, IUpdatableItemColor
     public required string Title { get; set; }
     
     [StringLength(5000, ErrorMessage = "Описание не может превышать 5000 символов.")]
-    public string? Description { get; set; }
+    public string? Content { get; set; }
     public bool IsPinned { get; set; }
     public DateTime CreatedAt { get; set; } 
     public DateTime LastModifiedAt { get; set; }

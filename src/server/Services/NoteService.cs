@@ -23,7 +23,7 @@ public class NoteService : INoteService
             {
                 Id = n.Id,
                 Title = n.Title,
-                Description = n.Description,
+                Content = n.Content,
                 IsPinned = n.IsPinned,
                 CreatedAt = n.CreatedAt,
                 LastModifiedAt = n.LastModifiedAt,
@@ -64,7 +64,7 @@ public class NoteService : INoteService
             {
                 Id = n.Id,
                 Title = n.Title,
-                Description = n.Description,
+                Content = n.Content,
                 IsPinned = n.IsPinned,
                 CreatedAt = n.CreatedAt,
                 LastModifiedAt = n.LastModifiedAt,
@@ -117,7 +117,7 @@ public class NoteService : INoteService
         {
             Id = Guid.NewGuid(),
             Title = createNoteRequest.Title,
-            Description = createNoteRequest.Description,
+            Content = createNoteRequest.Content,
             IsPinned = createNoteRequest.IsPinned,
             CreatedAt = DateTime.UtcNow,
             LastModifiedAt = DateTime.UtcNow,
@@ -138,7 +138,7 @@ public class NoteService : INoteService
         {
             Id = note.Id,
             Title = note.Title,
-            Description = note.Description,
+            Content = note.Content,
             IsPinned = note.IsPinned,
             CreatedAt = note.CreatedAt,
             LastModifiedAt = note.LastModifiedAt,
@@ -177,7 +177,7 @@ public class NoteService : INoteService
         });
     }
 
-    public async Task<OperationResult<UpdateItemResponse>> UpdateNoteAsync(Guid noteId, Guid currentUserId, UpdateItemRequest updateItemRequest, CancellationToken cancellationToken = default)
+    public async Task<OperationResult<UpdateNoteResponse>> UpdateNoteAsync(Guid noteId, Guid currentUserId, UpdateNoteRequest updateNoteRequest, CancellationToken cancellationToken = default)
     {
         var note = await _context.Notes
             .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted)
@@ -185,10 +185,10 @@ public class NoteService : INoteService
 
         if (note == null)
         {
-            return OperationResult<UpdateItemResponse>.Failure("Заметка не найдена", 404);
+            return OperationResult<UpdateNoteResponse>.Failure("Заметка не найдена", 404);
         }
 
-        var response = UpdateItemHelper.ApplyUpdate(note, "Note", currentUserId, updateItemRequest, _logger);
+        var response = UpdateItemHelper.ApplyNoteUpdate(note, currentUserId, updateNoteRequest, _logger);
 
         if (response.IsSuccess && response.Value.WasUpdated)
         {
