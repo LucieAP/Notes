@@ -13,12 +13,13 @@ public class NoteService : INoteService
         _logger = logger;
     }
 
-    public async Task<IEnumerable<GetNoteResponse>> GetAllNotesAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<GetNoteResponse>> GetAllNotesAsync(Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var notes = await _context.Notes
             .AsNoTracking()
             .Include(n => n.User)
             .Include(n => n.NoteGroup)
+            .Where(n => n.CreatedBy == currentUserId && !n.IsDeleted)
             .Select(n => new GetNoteResponse
             {
                 Id = n.Id,

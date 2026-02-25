@@ -25,9 +25,12 @@ public class NotesController : ControllerBase
 
     // GET: api/notes
     [HttpGet]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<GetNoteResponse>>> GetNotes(CancellationToken cancellationToken = default)
     {
-        var notes = await _noteService.GetAllNotesAsync(cancellationToken);
+        var currentUserId = _userService.GetUserId(User);
+
+        var notes = await _noteService.GetAllNotesAsync(currentUserId, cancellationToken);
 
         return Ok(notes);
     } 

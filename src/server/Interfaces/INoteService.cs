@@ -2,7 +2,7 @@ namespace server.Interfaces;
 
 public interface INoteService
 {
-    public Task<IEnumerable<GetNoteResponse>> GetAllNotesAsync(CancellationToken cancellationToken = default);
+    public Task<IEnumerable<GetNoteResponse>> GetAllNotesAsync(Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<GetNoteResponse?> GetNoteByIdAsync(Guid noteId, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<CreateNoteResponse> CreateNoteAsync(CreateNoteRequest createNoteRequest, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<TogglePinResponse?>> TogglePinAsync(Guid noteId, Guid currentUserId, CancellationToken cancellationToken = default);
