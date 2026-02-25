@@ -1,11 +1,15 @@
 import SidebarHeader from "./SidebarHeader";
 import SidebarNavLink from "./SidebarNavLink";
-import { mainNavItems, privateNavItems } from "./sidebar.config";
+import { mainNavItems, NavItem } from "./sidebar.config";
 import SidebarSection from "./SidebarSection";
 import SidebarFooter from "./SidebarFooter";
 import SearchButton from "../common/buttons/SearchButton";
 import useResizableSidebar from "@/shared/hooks/useResizableSidebar";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
+import NoteIcon from "../common/icons/NoteIcon";
+import TaskIcon from "../common/icons/TaskIcon";
+import RecipeIcon from "../common/icons/RecipeIcon";
+import useNotes from "@/shared/hooks/useNotes";
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
 const DEFAULT_WIDTH = 240;
@@ -13,6 +17,26 @@ const DEFAULT_WIDTH = 240;
 function Sidebar() {
   const raw = Number(localStorage.getItem(SIDEBAR_WIDTH_KEY));
   const savedWidth = Number.isFinite(raw) ? raw : DEFAULT_WIDTH; // isFinite - если число и не NaN
+  const { notesData, createNote } = useNotes();
+
+  const privateNavItems = useMemo<NavItem[]>(
+    () => [
+      {
+        to: "/notes",
+        icon: NoteIcon,
+        label: "Notes",
+        onCreate: createNote,
+        children: notesData.map((note) => ({
+          itemId: note.id,
+          to: `/notes/${note.id}`,
+          label: note.title || "Untitled",
+        })),
+      },
+      { to: "/tasks", icon: TaskIcon, label: "Tasks" },
+      { to: "/recipes", icon: RecipeIcon, label: "Recipes" },
+    ],
+    [notesData, createNote],
+  );
 
   const [width, setWidth, onMouseDown] = useResizableSidebar({
     initialWidth: savedWidth,
@@ -21,8 +45,6 @@ function Sidebar() {
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, width.toString());
   }, [width]);
-
-  function handleAddPage() {}
 
   return (
     <div
@@ -40,7 +62,6 @@ function Sidebar() {
               icon={<item.icon />}
               label={item.label}
               showAddButton={item.showAddButton}
-              onAdd={handleAddPage}
             />
           ))}
 

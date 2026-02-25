@@ -14,8 +14,10 @@ const config: CreateAxiosDefaults = {
 const api = axios.create(config);
 
 // Динамически подставляем токен перед каждым запросом
+// request.use() добавляет функцию, которая запускается перед отправкой любого запроса
+// config - объект с настройками текущего запроса (url, method, headers и т.д.)
 api.interceptors.request.use(async (config) => {
-  const token = await cookieStore.get("token"); // cookieStore.get тоже async!
+  const token = await cookieStore.get("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token.value}`;
   }

@@ -1,38 +1,24 @@
-import { useEffect, useState } from "react";
-import { Outlet, useLocation, useMatch } from "react-router-dom";
-import api from "@/shared/api/axios";
-import { notesApi } from "@/shared/api/note.api";
-import { Note } from "@/shared/types/note";
+import { NavLink, Outlet, useMatch } from "react-router-dom";
 import NoteCard from "../notes/NoteCard";
+import useNotes from "@/shared/hooks/useNotes";
 
 function ContentArea() {
-  const [notesData, setNotesData] = useState<Note[]>([]);
-
-  // const match = useMatch();
-  const location = useLocation();
-
-  useEffect(() => {
-    async function fetchNotes() {
-      try {
-        const data = await notesApi.getAll();
-        setNotesData(data ?? []);
-        console.log("fetched:", data);
-      } catch (err) {
-        console.log(err instanceof Error ? err.message : err);
-      }
-    }
-    fetchNotes();
-  }, []);
+  const matchNotes = useMatch("/notes");
+  const { notesData } = useNotes();
 
   return (
     <>
       <Outlet />
-      {location.pathname === "/notes" && (
+      {matchNotes && (
         <div className="flex overflow-y-auto w-full justify-center">
           <div className="flex flex-col px-24 py-20 max-w-md w-full justify-center">
             <span className="text-2xl pl-2 font-bold">Notes</span>
             {notesData.map((note) => {
-              return <NoteCard key={note.id} note={note} />;
+              return (
+                <NavLink key={note.id} to={`/notes/${note.id}`}>
+                  <NoteCard note={note} />
+                </NavLink>
+              );
             })}
           </div>
         </div>

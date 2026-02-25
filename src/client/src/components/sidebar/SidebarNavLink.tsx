@@ -1,24 +1,30 @@
 import cn from "@/shared/utils/cn";
 import { NavLink, useMatch } from "react-router-dom";
-import AddItemButton from "../common/buttons/AddItemButton";
+import CreateItemButton from "../common/buttons/CreateItemButton";
+import useNotes from "@/shared/hooks/useNotes";
+import DeleteItemButton from "../common/buttons/DeleteItemButton";
 
 interface Props {
+  itemId?: string;
   to: string;
   icon: React.ReactNode;
   label: string;
   showAddButton?: boolean;
-  onAdd?: () => void;
+  showDeleteButton?: boolean;
 }
 
 function SidebarNavLink({
+  itemId,
   to,
   icon,
   label,
   showAddButton = true,
-  onAdd,
+  showDeleteButton = false,
 }: Props) {
   const match = useMatch(to); // совпадает ли текущий URL с заданным маршрутом
   const isActive = Boolean(match);
+
+  const { createNote, deleteNote } = useNotes();
 
   return (
     <div
@@ -32,7 +38,10 @@ function SidebarNavLink({
         <span>{label}</span>
       </NavLink>
 
-      {showAddButton && <AddItemButton onAdd={onAdd} />}
+      {showAddButton && <CreateItemButton onCreateNote={createNote} />}
+      {showDeleteButton && itemId && (
+        <DeleteItemButton onDeleteNote={() => deleteNote(itemId)} />
+      )}
     </div>
   );
 }

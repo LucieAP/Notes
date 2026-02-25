@@ -1,17 +1,18 @@
-import { Note } from "@/shared/types/note";
-import { NavLink } from "react-router-dom";
+import { GetNoteResponse } from "@/features/notes/note";
 import NoteIcon from "../common/icons/NoteIcon";
+import type { MouseEvent } from "react";
 
-function NoteCard({ note }: { note: Note }) {
+interface Props {
+  note: GetNoteResponse;
+}
+
+function NoteCard({ note }: Props) {
   return (
-    <div className="flex space-x-1 p-2 hover:bg-neutral-600 cursor-pointer rounded-lg">
+    <div className="flex space-x-1 p-2 hover:bg-neutral-600 rounded-lg">
       <NoteIcon />
-      <NavLink
-        to={"/notes"}
-        className="select-none underline decoration-neutral-600 underline-offset-3"
-      >
+      <span className="select-none underline decoration-neutral-600 underline-offset-3">
         {note.title}
-      </NavLink>
+      </span>
     </div>
   );
 }

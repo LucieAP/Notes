@@ -24,21 +24,32 @@ function SidebarSection({ navItems, title, defaultOpen = true }: Props) {
 
       {isOpen && (
         <div className="flex flex-col">
-          {navItems &&
-            navItems.map((item) => {
-              if (!item) return null;
-              return (
-                <div key={item.to} className="flex flex-col">
-                  <SidebarNavLink
-                    key={item.to}
-                    to={item.to}
-                    icon={<item.icon />}
-                    label={item.label}
-                    showAddButton={item.showAddButton}
-                  />
-                </div>
-              );
-            })}
+          {navItems?.map((item) => {
+            if (!item) return null;
+            return (
+              <div key={item.to} className="flex flex-col">
+                <SidebarNavLink
+                  to={item.to}
+                  icon={<item.icon />}
+                  label={item.label}
+                  showAddButton={item.showAddButton}
+                />
+                {/* Дочерние элементы */}
+                {item.children?.map((child) => (
+                  <div key={child.to} className="pl-4">
+                    <SidebarNavLink
+                      itemId={child.itemId}
+                      to={child.to}
+                      icon={<item.icon />}
+                      label={child.label}
+                      showAddButton={false}
+                      showDeleteButton={true}
+                    />
+                  </div>
+                ))}
+              </div>
+            );
+          })}
           {!navItems && (
             <div className="flex items-center text-xs px-2 py-1 text-neutral-500">
               No pages.

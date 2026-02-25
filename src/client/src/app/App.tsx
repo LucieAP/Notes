@@ -17,6 +17,7 @@ import LoginPage from "@/components/auth/LoginPage";
 import CallbackPage from "@/components/auth/CallbackPage";
 import AuthProvider from "./providers/AuthProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import NotesProvider from "./providers/NotesProvider";
 
 function App() {
   return (
@@ -30,7 +31,9 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <WorkspaceLayout />
+                <NotesProvider>
+                  <WorkspaceLayout />
+                </NotesProvider>
               </ProtectedRoute>
             }
           >
