@@ -43,7 +43,6 @@ function SidebarSection({ navItems, title, defaultOpen = true }: Props) {
                       icon={<item.icon />}
                       label={child.label}
                       showAddButton={false}
-                      showDeleteButton={true}
                     />
                   </div>
                 ))}
