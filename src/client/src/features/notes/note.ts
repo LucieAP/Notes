@@ -48,9 +48,25 @@ export interface TogglePinResponse {
   lastModifiedAt: string;
 }
 
-export interface UpdateNoteResponse {
+export interface UpdateNoteTitleRequest {
+  id: string;
+  title: string;
+}
+
+export interface UpdateNoteContentRequest {
+  id: string;
+  content: string;
+}
+
+export interface UpdateNoteTitleResponse {
   id: string;
   title: string | null;
+  lastModifiedAt: string;
+  wasUpdated: boolean;
+}
+
+export interface UpdateNoteContentResponse {
+  id: string;
   content: string | null;
   lastModifiedAt: string;
   wasUpdated: boolean;

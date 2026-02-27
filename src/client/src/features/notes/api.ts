@@ -3,7 +3,10 @@ import {
   CreateNoteRequest,
   GetNoteResponse,
   TogglePinResponse,
-  UpdateNoteResponse,
+  UpdateNoteContentRequest,
+  UpdateNoteContentResponse,
+  UpdateNoteTitleRequest,
+  UpdateNoteTitleResponse,
 } from "./note";
 
 export const notesApi = {
@@ -26,21 +29,15 @@ export const notesApi = {
   updateTitle({
     id,
     title,
-  }: {
-    id: string;
-    title: string;
-  }): Promise<UpdateNoteResponse> {
-    return api.patch(`notes/${id}`, title);
+  }: UpdateNoteTitleRequest): Promise<UpdateNoteTitleResponse> {
+    return api.patch(`notes/${id}`, { title });
   },
 
   updateContent({
     id,
     content,
-  }: {
-    id: string;
-    content: string;
-  }): Promise<UpdateNoteResponse> {
-    return api.patch(`notes/${id}`, content);
+  }: UpdateNoteContentRequest): Promise<UpdateNoteContentResponse> {
+    return api.patch(`notes/${id}`, { content });
   },
 
   delete(id: string) {

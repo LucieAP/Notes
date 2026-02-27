@@ -5,6 +5,8 @@ interface NotesContextTypes {
   notesData: GetNoteResponse[];
   fetchNotes: () => Promise<void>;
   createNote: () => Promise<void>;
+  updateTitle: ({ id, title }: { id: string; title: string }) => Promise<void>;
+  // updateContent: () => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
 }
 

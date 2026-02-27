@@ -5,9 +5,10 @@ import KebabMenu from "../menus/KebabMenu";
 
 interface Props {
   itemId?: string;
+  onRename?: () => void;
 }
 
-function KebabButton({ itemId }: Props) {
+function KebabButton({ itemId, onRename }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -41,6 +42,7 @@ function KebabButton({ itemId }: Props) {
             itemId={itemId}
             position={position}
             onClose={() => setIsOpen(false)}
+            onRename={onRename}
           />,
           document.body,
         )}

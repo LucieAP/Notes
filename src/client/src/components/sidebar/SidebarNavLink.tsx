@@ -3,6 +3,8 @@ import { NavLink, useMatch } from "react-router-dom";
 import CreateItemButton from "../common/buttons/CreateItemButton";
 import useNotes from "@/shared/hooks/useNotes";
 import KebabButton from "../common/buttons/KebabButton";
+import { useRef, useState } from "react";
+import { notesApi } from "@/features/notes/api";
 
 interface Props {
   itemId?: string;
@@ -24,6 +26,29 @@ function SidebarNavLink({
 
   const { createNote } = useNotes();
 
+  const [value, setValue] = useState(label);
+  const [isEditing, setIsEditing] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const { updateTitle } = useNotes();
+
+  const handleRenameStart = () => {
+    setIsEditing(true);
+    // выделение текста после рендера
+    setTimeout(() => inputRef.current?.select(), 0);
+  };
+
+  const handleRenameSubmit = async () => {
+    const trimmed = value.trim();
+    if (trimmed && trimmed !== label && itemId) {
+      await updateTitle({ id: itemId, title: trimmed });
+    } else {
+      setValue(label); // откат
+    }
+
+    setIsEditing(false);
+  };
+
   return (
     <div
       className={cn(
@@ -31,12 +56,34 @@ function SidebarNavLink({
         isActive ? "bg-neutral-700" : "hover:bg-neutral-700",
       )}
     >
-      <NavLink to={to} className="flex flex-1 items-center space-x-2">
+      <div className="flex flex-1 items-center space-x-2">
         {icon}
-        <span>{label}</span>
-      </NavLink>
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            type="text"
+            spellCheck={false}
+            onBlur={handleRenameSubmit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleRenameSubmit();
+              if (e.key === "Escape") {
+                setValue(label);
+                setIsEditing(false);
+              }
+            }}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            className="bg-neutral-600 text-white text-sm rounded px-1 outline-none w-full"
+            autoFocus
+          />
+        ) : (
+          <NavLink to={to} className="flex flex-1 items-center space-x-2">
+            <span>{label}</span>
+          </NavLink>
+        )}
+      </div>
 
-      {itemId && <KebabButton itemId={itemId} />}
+      {itemId && <KebabButton itemId={itemId} onRename={handleRenameStart} />}
       {showAddButton && <CreateItemButton onCreateNote={createNote} />}
     </div>
   );

@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import AddToFavoritesButton from "../buttons/AddToFavoritesButton";
-import RenameButton from "../buttons/RenameButton";
+import RenameNoteButton from "../buttons/RenameNoteButton";
 import MoveToTrashButton from "../buttons/MoveToTrashButton";
 import DeleteButton from "../buttons/DeleteButton";
 
@@ -8,9 +8,10 @@ interface Props {
   itemId?: string;
   position: { top: number; left: number };
   onClose?: () => void;
+  onRename?: () => void;
 }
 
-function KebabMenu({ itemId, position, onClose }: Props) {
+function KebabMenu({ itemId, position, onClose, onRename }: Props) {
   const backdropRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -29,7 +30,7 @@ function KebabMenu({ itemId, position, onClose }: Props) {
         className="flex flex-col fixed rounded-lg p-1 bg-neutral-700 border border-neutral-800 overflow-hidden"
       >
         <AddToFavoritesButton />
-        <RenameButton />
+        <RenameNoteButton onRename={onRename} onClose={onClose} />
         <MoveToTrashButton />
         <DeleteButton itemId={itemId} />
       </div>

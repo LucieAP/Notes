@@ -73,6 +73,11 @@ public class NotesController : ControllerBase
         }
         catch (ArgumentException ex)
         {
+            _logger.LogWarning(
+                ex,
+                "Ошибка при создании заметки. Пользователь {UserId}. Тело запроса {@Request}",
+                currentUserId,
+                createNoteRequest);
             return BadRequest(new { message = ex.Message });
         }
         catch (InvalidOperationException ex)

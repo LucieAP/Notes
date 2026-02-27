@@ -46,6 +46,19 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
   //     }
   //   };
 
+  const updateTitle = useCallback(
+    async ({ id, title }: { id: string; title: string }) => {
+      try {
+        if (!id) return;
+        await notesApi.updateTitle({ id, title });
+        fetchNotes();
+      } catch (err) {
+        console.log(err instanceof Error ? err.message : err);
+      }
+    },
+    [],
+  );
+
   const deleteNote = useCallback(
     async (id: string) => {
       try {
@@ -62,8 +75,8 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo(() => {
-    return { notesData, fetchNotes, createNote, deleteNote };
-  }, [notesData, fetchNotes, createNote, deleteNote]);
+    return { notesData, fetchNotes, createNote, updateTitle, deleteNote };
+  }, [notesData, fetchNotes, createNote, updateTitle, deleteNote]);
 
   return <NotesContext value={value}> {children}</NotesContext>;
 }
