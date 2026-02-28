@@ -10,6 +10,7 @@ public interface INoteService
     public Task<OperationResult<UpdateColorResponse>> UpdateColorAsync(Guid noteId, Guid currentUserId, UpdateColorRequest updateColorRequest, CancellationToken cancellationToken = default);
     public Task<OperationResult> DeleteNoteByIdAsync(Guid noteId, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<TrashResponse>> TrashNoteAsync(Guid noteId, Guid currentUserId, CancellationToken cancellationToken = default);
+    public Task<OperationResult<TrashedNotesResponse>> GetTrashedNotesAsync(Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<CreateGroupResponse>> CreateNoteGroupAsync(Guid currentUserId, CreateGroupRequest createGroupRequest, CancellationToken cancellationToken = default);
     public Task<GroupResponse?> GetNoteGroupAsync(Guid groupId, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<AddToGroupResponse>> AddToGroupAsync(Guid noteId, Guid groupId, Guid currentUserId, CancellationToken cancellationToken = default);

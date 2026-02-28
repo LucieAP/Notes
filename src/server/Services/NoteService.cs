@@ -19,7 +19,7 @@ public class NoteService : INoteService
             .AsNoTracking()
             .Include(n => n.User)
             .Include(n => n.NoteGroup)
-            .Where(n => n.CreatedBy == currentUserId && !n.IsDeleted)
+            .Where(n => n.CreatedBy == currentUserId && !n.IsDeleted && !n.IsTrashed)
             .Select(n => new GetNoteResponse
             {
                 Id = n.Id,
@@ -263,6 +263,51 @@ public class NoteService : INoteService
             Id = note.Id,
             IsTrashed = note.IsTrashed,
             LastModifiedAt = note.LastModifiedAt
+        });
+    }
+
+    public async Task<OperationResult<TrashedNotesResponse>> GetTrashedNotesAsync(Guid currentUserId, CancellationToken cancellationToken)
+    {
+        var trashedNotes = await _context.Notes
+            .AsNoTracking()
+            .Include(n => n.User)
+            .Include(n => n.NoteGroup)
+            .Where(n => n.IsTrashed && n.CreatedBy == currentUserId && !n.IsDeleted)
+            .OrderByDescending(n => n.LastModifiedAt)
+            .Select(n => new GetNoteResponse
+            {
+                Id = n.Id,
+                Title = n.Title,
+                Content = n.Content,
+                IsPinned = n.IsPinned,
+                CreatedAt = n.CreatedAt,
+                LastModifiedAt = n.LastModifiedAt,
+                IsTrashed = n.IsTrashed,
+                BackgroundColor = n.BackgroundColor,
+                IsDeleted = n.IsDeleted,
+                DeletedAt = n.DeletedAt,
+                NoteGroup = n.NoteGroup != null ? new GroupResponse
+                {
+                    Id = n.NoteGroup.Id,
+                    Title = n.NoteGroup.Title,
+                    CreatedAt = n.NoteGroup.CreatedAt,
+                    LastModifiedAt = n.NoteGroup.LastModifiedAt,
+                } : null,
+                CreatedBy = new GetUserResponse
+                {
+                    Id = n.User.Id,
+                    Name = n.User.Name,
+                    Email = n.User.Email,
+                    Picture = n.User.Picture,
+                    EmailVerified = n.User.EmailVerified,
+                    LastLoginAt = n.User.LastLoginAt
+                }
+            })
+            .ToListAsync(cancellationToken);
+
+        return OperationResult<TrashedNotesResponse>.Success(new TrashedNotesResponse
+        {
+            Notes = trashedNotes
         });
     }
 
