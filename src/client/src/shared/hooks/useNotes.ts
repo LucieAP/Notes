@@ -8,6 +8,8 @@ interface NotesContextTypes {
   updateTitle: ({ id, title }: { id: string; title: string }) => Promise<void>;
   // updateContent: () => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
+  trashNote: (id: string) => Promise<void>;
+  getTrashed: () => Promise<GetNoteResponse[]>;
 }
 
 export const NotesContext = createContext<NotesContextTypes | null>(null);

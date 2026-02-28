@@ -22,7 +22,7 @@ function SidebarSection({ navItems, title, defaultOpen = true }: Props) {
         <DropdownIcon isOpen={isOpen} />
       </button>
 
-      {isOpen && (
+      {isOpen && title === "Private" && (
         <div className="flex flex-col">
           {navItems?.map((item) => {
             if (!item) return null;
@@ -49,11 +49,23 @@ function SidebarSection({ navItems, title, defaultOpen = true }: Props) {
               </div>
             );
           })}
-          {!navItems && (
-            <div className="flex items-center text-xs px-2 py-1 text-neutral-500">
-              No pages.
-            </div>
-          )}
+        </div>
+      )}
+      {/* {isOpen && title === "Favorite" && (
+        <div className="flex flex-col">
+          {navItems?.map((item) => {
+            if (!item) return;
+            if (!item.)
+            return <div key={item.to} className="flex flex-col">
+
+            </div>;
+          })}
+        </div>
+      )} */}
+
+      {!navItems && (
+        <div className="flex items-center text-xs px-2 py-1 text-neutral-500">
+          No pages.
         </div>
       )}
     </div>

@@ -6,7 +6,7 @@ interface Props {
 }
 
 function RenameNoteButton({ onRename, onClose }: Props) {
-  if (!onRename) return null;
+  if (!onRename) return;
 
   return (
     <button

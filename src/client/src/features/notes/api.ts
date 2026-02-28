@@ -43,4 +43,12 @@ export const notesApi = {
   delete(id: string) {
     return api.delete(`notes/delete/${id}`);
   },
+
+  trash(id: string) {
+    return api.patch(`notes/${id}/trash`);
+  },
+
+  getTrashed(): Promise<GetNoteResponse[]> {
+    return api.get("/notes/trashed");
+  },
 };

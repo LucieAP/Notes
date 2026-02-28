@@ -31,7 +31,7 @@ function KebabMenu({ itemId, position, onClose, onRename }: Props) {
       >
         <AddToFavoritesButton />
         <RenameNoteButton onRename={onRename} onClose={onClose} />
-        <MoveToTrashButton />
+        <MoveToTrashButton itemId={itemId} onClose={onClose} />
         <DeleteButton itemId={itemId} />
       </div>
     </div>

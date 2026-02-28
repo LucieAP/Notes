@@ -56,7 +56,7 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
         console.log(err instanceof Error ? err.message : err);
       }
     },
-    [],
+    [fetchNotes],
   );
 
   const deleteNote = useCallback(
@@ -74,9 +74,49 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
     [fetchNotes],
   );
 
+  const trashNote = useCallback(
+    async (id: string) => {
+      try {
+        if (!id) return;
+
+        await notesApi.trash(id);
+        fetchNotes();
+      } catch (err) {
+        console.log(err instanceof Error ? err.message : err);
+      }
+    },
+    [fetchNotes],
+  );
+
+  const getTrashed = useCallback(async () => {
+    try {
+      const data = await notesApi.getTrashed();
+      return data ?? [];
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
+      return [];
+    }
+  }, []);
+
   const value = useMemo(() => {
-    return { notesData, fetchNotes, createNote, updateTitle, deleteNote };
-  }, [notesData, fetchNotes, createNote, updateTitle, deleteNote]);
+    return {
+      notesData,
+      fetchNotes,
+      createNote,
+      updateTitle,
+      deleteNote,
+      trashNote,
+      getTrashed,
+    };
+  }, [
+    notesData,
+    fetchNotes,
+    createNote,
+    updateTitle,
+    deleteNote,
+    trashNote,
+    getTrashed,
+  ]);
 
   return <NotesContext value={value}> {children}</NotesContext>;
 }
