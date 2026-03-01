@@ -1,16 +1,32 @@
+import useNotes from "@/shared/hooks/useNotes";
 import DropdownIcon from "../common/icons/DropdownIcon";
+import NoteIcon from "../common/icons/NoteIcon";
 import { NavItem } from "./sidebar.config";
 import SidebarNavLink from "./SidebarNavLink";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { GetNoteResponse } from "@/features/notes/note";
 
 interface Props {
   navItems?: NavItem[];
   title: string;
   defaultOpen?: boolean;
+  type?: "private" | "favorite";
 }
 
-function SidebarSection({ navItems, title, defaultOpen = true }: Props) {
+function SidebarSection({ navItems, title, defaultOpen = true, type }: Props) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [pinnedNotes, setPinned] = useState<GetNoteResponse[]>([]);
+
+  const { notesData } = useNotes();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (type !== "favorite") return;
+
+    const pinnedNotes = notesData.filter((n) => n.isPinned);
+    setPinned(pinnedNotes);
+    setIsLoading(false);
+  }, [notesData, type]);
 
   return (
     <div className="flex flex-col mt-5">
@@ -22,7 +38,7 @@ function SidebarSection({ navItems, title, defaultOpen = true }: Props) {
         <DropdownIcon isOpen={isOpen} />
       </button>
 
-      {isOpen && title === "Private" && (
+      {isOpen && type === "private" && (
         <div className="flex flex-col">
           {navItems?.map((item) => {
             if (!item) return null;
@@ -51,21 +67,26 @@ function SidebarSection({ navItems, title, defaultOpen = true }: Props) {
           })}
         </div>
       )}
-      {/* {isOpen && title === "Favorite" && (
-        <div className="flex flex-col">
-          {navItems?.map((item) => {
-            if (!item) return;
-            if (!item.)
-            return <div key={item.to} className="flex flex-col">
-
-            </div>;
-          })}
-        </div>
-      )} */}
-
-      {!navItems && (
-        <div className="flex items-center text-xs px-2 py-1 text-neutral-500">
-          No pages.
+      {isOpen && type === "favorite" && (
+        <div className="flex flex-col mt-1">
+          {isLoading ? (
+            <p className="text-xs text-neutral-500 px-2 py-2">Loading...</p>
+          ) : pinnedNotes.length === 0 ? (
+            <p className="text-xs text-neutral-500 px-2 py-2">
+              No favorites yet
+            </p>
+          ) : (
+            pinnedNotes.map((note) => (
+              <SidebarNavLink
+                key={note.id}
+                itemId={note.id}
+                to={`/notes/${note.id}`}
+                icon={<NoteIcon />}
+                label={note.title || "Untitled"}
+                showAddButton={false}
+              />
+            ))
+          )}
         </div>
       )}
     </div>

@@ -311,6 +311,51 @@ public class NoteService : INoteService
         });
     }
 
+    public async Task<OperationResult<PinnedNotesResponse>> GetPinnedNotesAsync(Guid currentUserId, CancellationToken cancellationToken)
+    {
+        var pinnedNotes = await _context.Notes
+            .AsNoTracking()
+            .Include(n => n.User)
+            .Include(n => n.NoteGroup)
+            .Where(n => n.IsPinned && n.CreatedBy == currentUserId && !n.IsDeleted && !n.IsTrashed)
+            .OrderByDescending(n => n.LastModifiedAt)
+            .Select(n => new GetNoteResponse
+            {
+                Id = n.Id,
+                Title = n.Title,
+                Content = n.Content,
+                IsPinned = n.IsPinned,
+                CreatedAt = n.CreatedAt,
+                LastModifiedAt = n.LastModifiedAt,
+                IsTrashed = n.IsTrashed,
+                BackgroundColor = n.BackgroundColor,
+                IsDeleted = n.IsDeleted,
+                DeletedAt = n.DeletedAt,
+                NoteGroup = n.NoteGroup != null ? new GroupResponse
+                {
+                    Id = n.NoteGroup.Id,
+                    Title = n.NoteGroup.Title,
+                    CreatedAt = n.NoteGroup.CreatedAt,
+                    LastModifiedAt = n.NoteGroup.LastModifiedAt,
+                } : null,
+                CreatedBy = new GetUserResponse
+                {
+                    Id = n.User.Id,
+                    Name = n.User.Name,
+                    Email = n.User.Email,
+                    Picture = n.User.Picture,
+                    EmailVerified = n.User.EmailVerified,
+                    LastLoginAt = n.User.LastLoginAt
+                }
+            })
+            .ToListAsync(cancellationToken);
+
+        return OperationResult<PinnedNotesResponse>.Success(new PinnedNotesResponse
+        {
+            Notes = pinnedNotes
+        });
+    }
+
     public async Task<OperationResult<CreateGroupResponse>> CreateNoteGroupAsync(Guid currentUserId, CreateGroupRequest createGroupRequest, CancellationToken cancellationToken = default)
     {
         var trimmedTitle = createGroupRequest.Title.Trim();

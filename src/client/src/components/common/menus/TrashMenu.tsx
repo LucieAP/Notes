@@ -75,7 +75,7 @@ function TrashMenu({ position, onClose }: Props) {
             />
           </div>
         </div>
-        <div className="flex flex-col max-h-64 overflow-y-auto">
+        <div className="flex flex-col max-h-64 min-h-40 overflow-y-auto">
           {isLoading ? (
             <div className="text-sm text-neutral-500 text-center py-4">
               Loading...

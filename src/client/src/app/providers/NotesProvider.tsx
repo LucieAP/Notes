@@ -94,7 +94,20 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
       return data ?? [];
     } catch (err) {
       console.log(err instanceof Error ? err.message : err);
-      return [];
+      throw err;
+    }
+  }, []);
+
+  const pinNote = useCallback(async (id: string) => {
+    try {
+      const data = await notesApi.togglePin(id);
+      setNotesData((prev) =>
+        prev.map((note) =>
+          note.id === id ? { ...note, isPinned: data.isPinned } : note,
+        ),
+      );
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
     }
   }, []);
 
@@ -107,6 +120,7 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
       deleteNote,
       trashNote,
       getTrashed,
+      pinNote,
     };
   }, [
     notesData,
@@ -116,6 +130,7 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
     deleteNote,
     trashNote,
     getTrashed,
+    pinNote,
   ]);
 
   return <NotesContext value={value}> {children}</NotesContext>;

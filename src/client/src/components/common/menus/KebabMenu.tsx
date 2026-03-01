@@ -27,9 +27,9 @@ function KebabMenu({ itemId, position, onClose, onRename }: Props) {
       <div
         style={{ top: position.top, left: position.left }}
         onClick={(e) => e.stopPropagation()}
-        className="flex flex-col fixed rounded-lg p-1 bg-neutral-700 border border-neutral-800 overflow-hidden"
+        className="flex flex-col fixed rounded-lg p-1 bg-neutral-700 border border-neutral-800 overflow-hidden whitespace-nowrap"
       >
-        <AddToFavoritesButton />
+        <AddToFavoritesButton itemId={itemId} onClose={onClose} />
         <RenameNoteButton onRename={onRename} onClose={onClose} />
         <MoveToTrashButton itemId={itemId} onClose={onClose} />
         <DeleteButton itemId={itemId} />

@@ -102,6 +102,22 @@ public class NotesController : ControllerBase
         return Ok(response.Value);
     }
 
+    // GET: api/notes/pinned
+    [HttpGet("pinned")]
+    [Authorize]
+    public async Task<IActionResult> GetPinnedNotes(CancellationToken cancellationToken)
+    {
+        var currentUserId = _userService.GetUserId(User);
+        var response = await _noteService.GetPinnedNotesAsync(currentUserId, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            return StatusCode(response.StatusCode ?? 500, new { message = response.ErrorMessage});
+        }
+
+        return Ok(response.Value!.Notes);
+    }
+
     // PATCH: api/notes/{id}/
     [HttpPatch("{id}")]
     [Authorize]
@@ -169,7 +185,6 @@ public class NotesController : ControllerBase
     // GET: api/notes/trashed
     [HttpGet("trashed")]
     [Authorize]
-
     public async Task<IActionResult> GetTrashedNotes(CancellationToken cancellationToken)
     {
         var currentUserId = _userService.GetUserId(User);
@@ -180,7 +195,7 @@ public class NotesController : ControllerBase
             return StatusCode(response.StatusCode ?? 500, new { message = response.ErrorMessage});
         }
 
-        return Ok(response.Value.Notes);
+        return Ok(response.Value!.Notes);
     }
 
     // POST: api/notes/group/create

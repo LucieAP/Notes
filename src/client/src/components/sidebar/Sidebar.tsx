@@ -67,8 +67,12 @@ function Sidebar() {
 
           <SearchButton />
 
-          <SidebarSection navItems={privateNavItems} title="Private" />
-          <SidebarSection title="Favorite" />
+          <SidebarSection
+            navItems={privateNavItems}
+            title="Private"
+            type="private"
+          />
+          <SidebarSection title="Favorite" type="favorite" />
         </div>
         <SidebarFooter />
       </div>

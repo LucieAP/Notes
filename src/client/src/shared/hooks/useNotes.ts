@@ -10,6 +10,7 @@ interface NotesContextTypes {
   deleteNote: (id: string) => Promise<void>;
   trashNote: (id: string) => Promise<void>;
   getTrashed: () => Promise<GetNoteResponse[]>;
+  pinNote: (id: string) => Promise<void>;
 }
 
 export const NotesContext = createContext<NotesContextTypes | null>(null);
