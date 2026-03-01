@@ -182,6 +182,22 @@ public class NotesController : ControllerBase
         return Ok(response.Value);
     }
 
+    // PATCH: api/notes/{id}/restore
+    [HttpPatch("{id}/restore")]
+    [Authorize]
+    public async Task<IActionResult> RestoreNote([FromRoute] Guid id, CancellationToken cancellationToken = default)
+    {
+        var currentUserId = _userService.GetUserId(User);
+        var response = await _noteService.RestoreNoteAsync(id, currentUserId, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            return StatusCode(response.StatusCode ?? 500, new { message = response.ErrorMessage});
+        }
+
+        return Ok(response.Value);
+    }
+
     // GET: api/notes/trashed
     [HttpGet("trashed")]
     [Authorize]

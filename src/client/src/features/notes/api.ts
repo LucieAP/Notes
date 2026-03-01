@@ -48,6 +48,10 @@ export const notesApi = {
     return api.patch(`notes/${id}/trash`);
   },
 
+  restore(id: string) {
+    return api.patch(`notes/${id}/restore`);
+  },
+
   getTrashed(): Promise<GetNoteResponse[]> {
     return api.get("/notes/trashed");
   },

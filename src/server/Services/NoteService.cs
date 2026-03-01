@@ -265,6 +265,31 @@ public class NoteService : INoteService
             LastModifiedAt = note.LastModifiedAt
         });
     }
+    
+    public async Task<OperationResult<TrashResponse>> RestoreNoteAsync(Guid noteId, Guid currentUserId, CancellationToken cancellationToken = default)
+    {
+        var note = await _context.Notes
+                .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted && n.IsTrashed)
+                .FirstOrDefaultAsync(cancellationToken);
+                
+        if (note == null)
+        {
+            return OperationResult<TrashResponse>.Failure("Заметка не найдена или уже восстановлена", 404);
+        }
+
+        note.IsTrashed = false;
+        note.LastModifiedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Заметка {NoteId} восстановлена пользователем {UserId}", note.Id, currentUserId);
+    
+        return OperationResult<TrashResponse>.Success( new TrashResponse
+        {
+            Id = note.Id,
+            IsTrashed = note.IsTrashed,
+            LastModifiedAt = note.LastModifiedAt
+        });
+    }
 
     public async Task<OperationResult<TrashedNotesResponse>> GetTrashedNotesAsync(Guid currentUserId, CancellationToken cancellationToken)
     {

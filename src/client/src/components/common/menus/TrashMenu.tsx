@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import SearchIcon from "../icons/SearchIcon";
 import useNotes from "@/shared/hooks/useNotes";
 import { GetNoteResponse } from "@/features/notes/note";
-import { notesApi } from "@/features/notes/api";
 
 interface Props {
   position?: { bottom: number; left: number };
@@ -15,7 +14,7 @@ function TrashMenu({ position, onClose }: Props) {
 
   const [trashedNotes, setTrashed] = useState<GetNoteResponse[]>([]);
 
-  const { deleteNote, getTrashed } = useNotes();
+  const { deleteNote, getTrashed, restoreNote } = useNotes();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -29,6 +28,11 @@ function TrashMenu({ position, onClose }: Props) {
 
   const handleDelete = async (id: string) => {
     await deleteNote(id);
+    setTrashed((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const handleRestore = async (id: string) => {
+    await restoreNote(id);
     setTrashed((prev) => prev.filter((n) => n.id !== id));
   };
 
@@ -99,6 +103,12 @@ function TrashMenu({ position, onClose }: Props) {
                     className="text-xs text-red-400 hover:text-red-300 px-1.5 py-0.5 rounded hover:bg-neutral-700"
                   >
                     Delete
+                  </button>
+                  <button
+                    onClick={() => handleRestore(note.id)}
+                    className="text-xs text-green-400 hover:text-green-300 px-1.5 py-0.5 rounded hover:bg-neutral-700"
+                  >
+                    Restore
                   </button>
                 </div>
               </div>

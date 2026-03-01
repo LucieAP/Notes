@@ -88,6 +88,20 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
     [fetchNotes],
   );
 
+  const restoreNote = useCallback(
+    async (id: string) => {
+      try {
+        if (!id) return;
+
+        await notesApi.restore(id);
+        fetchNotes();
+      } catch (err) {
+        console.log(err instanceof Error ? err.message : err);
+      }
+    },
+    [fetchNotes],
+  );
+
   const getTrashed = useCallback(async () => {
     try {
       const data = await notesApi.getTrashed();
@@ -119,6 +133,7 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
       updateTitle,
       deleteNote,
       trashNote,
+      restoreNote,
       getTrashed,
       pinNote,
     };
@@ -129,6 +144,7 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
     updateTitle,
     deleteNote,
     trashNote,
+    restoreNote,
     getTrashed,
     pinNote,
   ]);
