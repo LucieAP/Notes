@@ -8,7 +8,7 @@ import {
 
 import WorkspaceLayout from "../components/layout/WorkspaceLayout";
 import WorkspacePage from "../components/workspace/WorkspacePage";
-import NotesPage from "../components/notes/NotesPage";
+import NotesEditorPage from "../components/notes/NotesEditor";
 import TasksPage from "../components/tasks/TasksPage";
 import RecipesPage from "../components/recipes/RecipesPage";
 import NotFoundPage from "../components/common/pages/NotFoundPage";
@@ -40,7 +40,10 @@ function App() {
             <Route element={<ContentArea />}>
               <Route index element={<Navigate to="workspace" replace />} />
               <Route path="workspace" element={<WorkspacePage />} />
-              <Route path="notes" element={<NotesPage />} />
+
+              <Route path="notes">
+                <Route path=":id" element={<NotesEditorPage />} />
+              </Route>
               <Route path="tasks" element={<TasksPage />} />
               <Route path="recipes" element={<RecipesPage />} />
             </Route>

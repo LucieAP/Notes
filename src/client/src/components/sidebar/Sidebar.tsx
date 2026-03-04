@@ -49,7 +49,7 @@ function Sidebar() {
   return (
     <div
       style={{ width }}
-      className="relative h-screen border-r border-neutral-800 shrink-0 bg-neutral-800"
+      className="relative h-screen border-r border-neutral-800 shrink-0 bg-neutral-800 text-[rgba(186,186,182,1)]"
     >
       {/* Content */}
       <div className="flex flex-1 flex-col h-full p-2 gap-0.5 overflow-hidden">
