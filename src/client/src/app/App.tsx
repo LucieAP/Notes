@@ -8,7 +8,7 @@ import {
 
 import WorkspaceLayout from "../components/layout/WorkspaceLayout";
 import WorkspacePage from "../components/workspace/WorkspacePage";
-import NotesEditorPage from "../components/notes/NotesEditor";
+import NotesEditorPage from "../components/notes/NotesEditorPage";
 import TasksPage from "../components/tasks/TasksPage";
 import RecipesPage from "../components/recipes/RecipesPage";
 import NotFoundPage from "../components/common/pages/NotFoundPage";

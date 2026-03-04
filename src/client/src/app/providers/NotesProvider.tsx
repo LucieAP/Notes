@@ -1,6 +1,7 @@
 import { notesApi } from "@/features/notes/api";
 import { GetNoteResponse } from "@/features/notes/note";
 import { NotesContext } from "@/shared/hooks/useNotes";
+import { JSONContent } from "@tiptap/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 function NotesProvider({ children }: { children: React.ReactNode }) {
@@ -35,22 +36,35 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  //   const getNoteById = async () => {
-  //     try {
-  //       if (!params.id) return;
+  const getNoteById = useCallback(async (id: string) => {
+    try {
+      if (!id) return;
 
-  //       const note = await notesApi.getNoteById(params.id);
-  //       console.log(note);
-  //     } catch (err) {
-  //       console.log(err instanceof Error ? err.message : err);
-  //     }
-  //   };
+      const note = await notesApi.getNoteById(id);
+      return note;
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
+    }
+  }, []);
 
   const updateTitle = useCallback(
     async ({ id, title }: { id: string; title: string }) => {
       try {
         if (!id) return;
         await notesApi.updateTitle({ id, title });
+        fetchNotes();
+      } catch (err) {
+        console.log(err instanceof Error ? err.message : err);
+      }
+    },
+    [fetchNotes],
+  );
+
+  const updateContent = useCallback(
+    async ({ id, content }: { id: string; content: JSONContent }) => {
+      try {
+        if (!id) return;
+        await notesApi.updateContent({ id, content });
         fetchNotes();
       } catch (err) {
         console.log(err instanceof Error ? err.message : err);
@@ -130,7 +144,9 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
       notesData,
       fetchNotes,
       createNote,
+      getNoteById,
       updateTitle,
+      updateContent,
       deleteNote,
       trashNote,
       restoreNote,
@@ -141,7 +157,9 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
     notesData,
     fetchNotes,
     createNote,
+    getNoteById,
     updateTitle,
+    updateContent,
     deleteNote,
     trashNote,
     restoreNote,

@@ -1,12 +1,13 @@
 import { BackgroundColor } from "@/shared/enums/backgroundColor";
 import { NoteGroup } from "./noteGroup";
 import { User } from "@/shared/types/user";
+import { JSONContent } from "@tiptap/react";
 
 /** DTO для получения всех заметок (GetNoteResponse на сервере) */
 export interface GetNoteResponse {
   id: string;
   title: string;
-  content: string | null;
+  content: JSONContent | null;
   isPinned: boolean;
   createdAt: string;
   lastModifiedAt: string;
@@ -21,7 +22,7 @@ export interface GetNoteResponse {
 /** DTO для создания заметки (CreateNoteRequest на сервере) */
 export interface CreateNoteRequest {
   title: string;
-  content?: string | null;
+  content?: JSONContent | null;
   isPinned: boolean;
   backgroundColor: number;
   noteGroupId?: string | null;
@@ -30,7 +31,7 @@ export interface CreateNoteRequest {
 export interface CreateNoteResponse {
   id: string;
   title: string;
-  content: string | null;
+  content: JSONContent | null;
   isPinned: boolean;
   createdAt: string;
   lastModifiedAt: string;
@@ -55,7 +56,7 @@ export interface UpdateNoteTitleRequest {
 
 export interface UpdateNoteContentRequest {
   id: string;
-  content: string;
+  content: JSONContent;
 }
 
 export interface UpdateNoteTitleResponse {
@@ -67,7 +68,7 @@ export interface UpdateNoteTitleResponse {
 
 export interface UpdateNoteContentResponse {
   id: string;
-  content: string | null;
+  content: JSONContent | null;
   lastModifiedAt: string;
   wasUpdated: boolean;
 }
