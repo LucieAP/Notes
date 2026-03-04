@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 using server.Interfaces;
 
-public class Note : IUpdatableItem, ISoftDeletable, IUpdatableItemColor
+public class Note : ISoftDeletable, IUpdatableItemColor
 {
     public Guid Id { get; set; }
 
@@ -10,8 +11,7 @@ public class Note : IUpdatableItem, ISoftDeletable, IUpdatableItemColor
     [StringLength(100, MinimumLength = 1, ErrorMessage = "Заголовок должен содержать от 1 до 100 символов.")]
     public required string Title { get; set; }
     
-    [StringLength(65535, ErrorMessage = "Содержимое не может превышать 65535 символов.")]
-    public string? Content { get; set; }
+    public JsonDocument? Content { get; set; }
     public bool IsPinned { get; set; }
     public DateTime CreatedAt { get; set; } 
     public DateTime LastModifiedAt { get; set; }

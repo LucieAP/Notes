@@ -1,3 +1,4 @@
+using System.Text.Json;
 using server.Interfaces;
 
 namespace server.Services.Common;
@@ -40,13 +41,9 @@ internal class UpdateItemHelper
 
         if (updateNoteRequest.Content != null)
         {
-            var trimmedContent = string.IsNullOrWhiteSpace(updateNoteRequest.Content)
-                ? null
-                : updateNoteRequest.Content.Trim();
-
-            if (trimmedContent != item.Content)
+            if (!JsonEquals(updateNoteRequest.Content, item.Content))
             {
-                item.Content = trimmedContent;
+                item.Content = updateNoteRequest.Content;
                 wasUpdated = true;
                 logger.LogInformation(
                     "Описание сущности {entityName} {itemId} обновлено пользователем {userId}",
@@ -72,6 +69,21 @@ internal class UpdateItemHelper
             LastModifiedAt = item.LastModifiedAt,
             WasUpdated = wasUpdated
         });
+    }
+
+    private static bool JsonEquals(JsonDocument? left, JsonDocument? right)
+    {
+        if (ReferenceEquals(left, right))
+        {
+            return true;
+        }
+
+        if (left is null || right is null)
+        {
+            return false;
+        }
+
+        return left.RootElement.GetRawText() == right.RootElement.GetRawText();
     }
 
     public static OperationResult<UpdateItemResponse> ApplyUpdate<T>(

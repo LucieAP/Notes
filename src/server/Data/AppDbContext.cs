@@ -23,5 +23,6 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<User>().HasIndex(u => u.GoogleId).IsUnique();
         modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
+        modelBuilder.Entity<Note>().Property(n => n.Content).HasColumnType("jsonb");
     }
 }
