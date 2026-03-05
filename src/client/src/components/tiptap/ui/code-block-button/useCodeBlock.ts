@@ -5,7 +5,7 @@ import { type Editor } from "@tiptap/react"
 import { NodeSelection, TextSelection } from "@tiptap/pm/state"
 
 // --- Hooks ---
-import { useTiptapEditor } from "@/components/tiptap/hooks/use-tiptap-editor"
+import { useTiptapEditor } from "@/components/tiptap/hooks/useTiptapEditor"
 
 // --- Lib ---
 import {
@@ -18,75 +18,45 @@ import {
 } from "@/components/tiptap/lib/tiptap-utils"
 
 // --- Icons ---
-import { HeadingOneIcon } from "@/components/tiptap/icons/heading-one-icon"
-import { HeadingTwoIcon } from "@/components/tiptap/icons/heading-two-icon"
-import { HeadingThreeIcon } from "@/components/tiptap/icons/heading-three-icon"
-import { HeadingFourIcon } from "@/components/tiptap/icons/heading-four-icon"
-import { HeadingFiveIcon } from "@/components/tiptap/icons/heading-five-icon"
-import { HeadingSixIcon } from "@/components/tiptap/icons/heading-six-icon"
+import { CodeBlockIcon } from "@/components/tiptap/icons/CodeBlockIcon"
 
-export type Level = 1 | 2 | 3 | 4 | 5 | 6
+export const CODE_BLOCK_SHORTCUT_KEY = "mod+alt+c"
 
 /**
- * Configuration for the heading functionality
+ * Configuration for the code block functionality
  */
-export interface UseHeadingConfig {
+export interface UseCodeBlockConfig {
   /**
    * The Tiptap editor instance.
    */
   editor?: Editor | null
   /**
-   * The heading level.
-   */
-  level: Level
-  /**
-   * Whether the button should hide when heading is not available.
+   * Whether the button should hide when code block is not available.
    * @default false
    */
   hideWhenUnavailable?: boolean
   /**
-   * Callback function called after a successful heading toggle.
+   * Callback function called after a successful code block toggle.
    */
   onToggled?: () => void
 }
 
-export const headingIcons = {
-  1: HeadingOneIcon,
-  2: HeadingTwoIcon,
-  3: HeadingThreeIcon,
-  4: HeadingFourIcon,
-  5: HeadingFiveIcon,
-  6: HeadingSixIcon,
-}
-
-export const HEADING_SHORTCUT_KEYS: Record<Level, string> = {
-  1: "ctrl+alt+1",
-  2: "ctrl+alt+2",
-  3: "ctrl+alt+3",
-  4: "ctrl+alt+4",
-  5: "ctrl+alt+5",
-  6: "ctrl+alt+6",
-}
-
 /**
- * Checks if heading can be toggled in the current editor state
+ * Checks if code block can be toggled in the current editor state
  */
 export function canToggle(
   editor: Editor | null,
-  level?: Level,
   turnInto: boolean = true
 ): boolean {
   if (!editor || !editor.isEditable) return false
   if (
-    !isNodeInSchema("heading", editor) ||
+    !isNodeInSchema("codeBlock", editor) ||
     isNodeTypeSelected(editor, ["image"])
   )
     return false
 
   if (!turnInto) {
-    return level
-      ? editor.can().setNode("heading", { level })
-      : editor.can().setNode("heading")
+    return editor.can().toggleNode("codeBlock", "paragraph")
   }
 
   // Ensure selection is in nodes we're allowed to convert
@@ -103,44 +73,20 @@ export function canToggle(
   )
     return false
 
-  // Either we can set heading directly on the selection,
-  // or we can clear formatting/nodes to arrive at a heading.
-  return level
-    ? editor.can().setNode("heading", { level }) || editor.can().clearNodes()
-    : editor.can().setNode("heading") || editor.can().clearNodes()
+  // Either we can toggle code block directly on the selection,
+  // or we can clear formatting/nodes to arrive at a code block.
+  return (
+    editor.can().toggleNode("codeBlock", "paragraph") ||
+    editor.can().clearNodes()
+  )
 }
 
 /**
- * Checks if heading is currently active
+ * Toggles code block in the editor
  */
-export function isHeadingActive(
-  editor: Editor | null,
-  level?: Level | Level[]
-): boolean {
+export function toggleCodeBlock(editor: Editor | null): boolean {
   if (!editor || !editor.isEditable) return false
-
-  if (Array.isArray(level)) {
-    return level.some((l) => editor.isActive("heading", { level: l }))
-  }
-
-  return level
-    ? editor.isActive("heading", { level })
-    : editor.isActive("heading")
-}
-
-/**
- * Toggles heading in the editor
- */
-export function toggleHeading(
-  editor: Editor | null,
-  level: Level | Level[]
-): boolean {
-  if (!editor || !editor.isEditable) return false
-
-  const levels = Array.isArray(level) ? level : [level]
-  const toggleLevel = levels.find((l) => canToggle(editor, l))
-
-  if (!toggleLevel) return false
+  if (!canToggle(editor)) return false
 
   try {
     const view = editor.view
@@ -180,6 +126,7 @@ export function toggleHeading(
     }
 
     const selection = state.selection
+
     let chain = editor.chain().focus()
 
     // Handle NodeSelection
@@ -203,13 +150,9 @@ export function toggleHeading(
         .clearNodes()
     }
 
-    const isActive = levels.some((l) =>
-      editor.isActive("heading", { level: l })
-    )
-
-    const toggle = isActive
+    const toggle = editor.isActive("codeBlock")
       ? chain.setNode("paragraph")
-      : chain.setNode("heading", { level: toggleLevel })
+      : chain.toggleNode("codeBlock", "paragraph")
 
     toggle.run()
 
@@ -222,14 +165,13 @@ export function toggleHeading(
 }
 
 /**
- * Determines if the heading button should be shown
+ * Determines if the code block button should be shown
  */
 export function shouldShowButton(props: {
   editor: Editor | null
-  level?: Level | Level[]
   hideWhenUnavailable: boolean
 }): boolean {
-  const { editor, level, hideWhenUnavailable } = props
+  const { editor, hideWhenUnavailable } = props
 
   if (!editor || !editor.isEditable) return false
 
@@ -237,26 +179,23 @@ export function shouldShowButton(props: {
     return true
   }
 
-  if (!isNodeInSchema("heading", editor)) return false
+  if (!isNodeInSchema("codeBlock", editor)) return false
 
   if (!editor.isActive("code")) {
-    if (Array.isArray(level)) {
-      return level.some((l) => canToggle(editor, l))
-    }
-    return canToggle(editor, level)
+    return canToggle(editor)
   }
 
   return true
 }
 
 /**
- * Custom hook that provides heading functionality for Tiptap editor
+ * Custom hook that provides code block functionality for Tiptap editor
  *
  * @example
  * ```tsx
- * // Simple usage
- * function MySimpleHeadingButton() {
- *   const { isVisible, isActive, handleToggle, Icon } = useHeading({ level: 1 })
+ * // Simple usage - no params needed
+ * function MySimpleCodeBlockButton() {
+ *   const { isVisible, isActive, handleToggle } = useCodeBlock()
  *
  *   if (!isVisible) return null
  *
@@ -265,19 +204,17 @@ export function shouldShowButton(props: {
  *       onClick={handleToggle}
  *       aria-pressed={isActive}
  *     >
- *       <Icon />
- *       Heading 1
+ *       Code Block
  *     </button>
  *   )
  * }
  *
  * // Advanced usage with configuration
- * function MyAdvancedHeadingButton() {
- *   const { isVisible, isActive, handleToggle, label, Icon } = useHeading({
- *     level: 2,
+ * function MyAdvancedCodeBlockButton() {
+ *   const { isVisible, isActive, handleToggle, label } = useCodeBlock({
  *     editor: myEditor,
  *     hideWhenUnavailable: true,
- *     onToggled: (isActive) => console.log('Heading toggled:', isActive)
+ *     onToggled: (isActive) => console.log('Code block toggled:', isActive)
  *   })
  *
  *   if (!isVisible) return null
@@ -288,31 +225,29 @@ export function shouldShowButton(props: {
  *       aria-label={label}
  *       aria-pressed={isActive}
  *     >
- *       <Icon />
- *       Toggle Heading 2
+ *       Toggle Code Block
  *     </MyButton>
  *   )
  * }
  * ```
  */
-export function useHeading(config: UseHeadingConfig) {
+export function useCodeBlock(config?: UseCodeBlockConfig) {
   const {
     editor: providedEditor,
-    level,
     hideWhenUnavailable = false,
     onToggled,
-  } = config
+  } = config || {}
 
   const { editor } = useTiptapEditor(providedEditor)
   const [isVisible, setIsVisible] = useState<boolean>(true)
-  const canToggleState = canToggle(editor, level)
-  const isActive = isHeadingActive(editor, level)
+  const canToggleState = canToggle(editor)
+  const isActive = editor?.isActive("codeBlock") || false
 
   useEffect(() => {
     if (!editor) return
 
     const handleSelectionUpdate = () => {
-      setIsVisible(shouldShowButton({ editor, level, hideWhenUnavailable }))
+      setIsVisible(shouldShowButton({ editor, hideWhenUnavailable }))
     }
 
     handleSelectionUpdate()
@@ -322,25 +257,25 @@ export function useHeading(config: UseHeadingConfig) {
     return () => {
       editor.off("selectionUpdate", handleSelectionUpdate)
     }
-  }, [editor, level, hideWhenUnavailable])
+  }, [editor, hideWhenUnavailable])
 
   const handleToggle = useCallback(() => {
     if (!editor) return false
 
-    const success = toggleHeading(editor, level)
+    const success = toggleCodeBlock(editor)
     if (success) {
       onToggled?.()
     }
     return success
-  }, [editor, level, onToggled])
+  }, [editor, onToggled])
 
   return {
     isVisible,
     isActive,
     handleToggle,
     canToggle: canToggleState,
-    label: `Heading ${level}`,
-    shortcutKeys: HEADING_SHORTCUT_KEYS[level],
-    Icon: headingIcons[level],
+    label: "Code Block",
+    shortcutKeys: CODE_BLOCK_SHORTCUT_KEY,
+    Icon: CodeBlockIcon,
   }
 }

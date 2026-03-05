@@ -2,19 +2,19 @@ import { useCallback, useEffect, useState } from "react"
 import type { Editor } from "@tiptap/react"
 
 // --- Hooks ---
-import { useTiptapEditor } from "@/components/tiptap/hooks/use-tiptap-editor"
+import { useTiptapEditor } from "@/components/tiptap/hooks/useTiptapEditor"
 
 // --- Lib ---
 import { isMarkInSchema, isNodeTypeSelected } from "@/components/tiptap/lib/tiptap-utils"
 
 // --- Icons ---
-import { BoldIcon } from "@/components/tiptap/icons/bold-icon"
-import { Code2Icon } from "@/components/tiptap/icons/code2-icon"
-import { ItalicIcon } from "@/components/tiptap/icons/italic-icon"
-import { StrikeIcon } from "@/components/tiptap/icons/strike-icon"
-import { SubscriptIcon } from "@/components/tiptap/icons/subscript-icon"
-import { SuperscriptIcon } from "@/components/tiptap/icons/superscript-icon"
-import { UnderlineIcon } from "@/components/tiptap/icons/underline-icon"
+import { BoldIcon } from "@/components/tiptap/icons/BoldIcon"
+import { Code2Icon } from "@/components/tiptap/icons/Code2Icon"
+import { ItalicIcon } from "@/components/tiptap/icons/ItalicIcon"
+import { StrikeIcon } from "@/components/tiptap/icons/StrikeIcon"
+import { SubscriptIcon } from "@/components/tiptap/icons/SubscriptIcon"
+import { SuperscriptIcon } from "@/components/tiptap/icons/SuperscriptIcon"
+import { UnderlineIcon } from "@/components/tiptap/icons/UnderlineIcon"
 
 export type Mark =
   | "bold"

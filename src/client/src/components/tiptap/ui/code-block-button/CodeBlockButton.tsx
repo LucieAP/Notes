@@ -1,25 +1,25 @@
 import { forwardRef, useCallback } from "react"
 
-// --- Tiptap UI ---
-import type { UseBlockquoteConfig } from "@/components/tiptap/ui/blockquote-button"
-import {
-  BLOCKQUOTE_SHORTCUT_KEY,
-  useBlockquote,
-} from "@/components/tiptap/ui/blockquote-button"
-
 // --- Hooks ---
-import { useTiptapEditor } from "@/components/tiptap/hooks/use-tiptap-editor"
+import { useTiptapEditor } from "@/components/tiptap/hooks/useTiptapEditor"
 
 // --- Lib ---
 import { parseShortcutKeys } from "@/components/tiptap/lib/tiptap-utils"
+
+// --- Tiptap UI ---
+import type { UseCodeBlockConfig } from "@/components/tiptap/ui/code-block-button"
+import {
+  CODE_BLOCK_SHORTCUT_KEY,
+  useCodeBlock,
+} from "@/components/tiptap/ui/code-block-button"
 
 // --- UI Primitives ---
 import type { ButtonProps } from "@/components/tiptap/ui-primitive/button"
 import { Button } from "@/components/tiptap/ui-primitive/button"
 import { Badge } from "@/components/tiptap/ui-primitive/badge"
 
-export interface BlockquoteButtonProps
-  extends Omit<ButtonProps, "type">, UseBlockquoteConfig {
+export interface CodeBlockButtonProps
+  extends Omit<ButtonProps, "type">, UseCodeBlockConfig {
   /**
    * Optional text to display alongside the icon.
    */
@@ -31,8 +31,8 @@ export interface BlockquoteButtonProps
   showShortcut?: boolean
 }
 
-export function BlockquoteShortcutBadge({
-  shortcutKeys = BLOCKQUOTE_SHORTCUT_KEY,
+export function CodeBlockShortcutBadge({
+  shortcutKeys = CODE_BLOCK_SHORTCUT_KEY,
 }: {
   shortcutKeys?: string
 }) {
@@ -40,13 +40,13 @@ export function BlockquoteShortcutBadge({
 }
 
 /**
- * Button component for toggling blockquote in a Tiptap editor.
+ * Button component for toggling code block in a Tiptap editor.
  *
- * For custom button implementations, use the `useBlockquote` hook instead.
+ * For custom button implementations, use the `useCodeBlock` hook instead.
  */
-export const BlockquoteButton = forwardRef<
+export const CodeBlockButton = forwardRef<
   HTMLButtonElement,
-  BlockquoteButtonProps
+  CodeBlockButtonProps
 >(
   (
     {
@@ -70,7 +70,7 @@ export const BlockquoteButton = forwardRef<
       label,
       shortcutKeys,
       Icon,
-    } = useBlockquote({
+    } = useCodeBlock({
       editor,
       hideWhenUnavailable,
       onToggled,
@@ -95,12 +95,12 @@ export const BlockquoteButton = forwardRef<
         variant="ghost"
         data-active-state={isActive ? "on" : "off"}
         role="button"
-        tabIndex={-1}
         disabled={!canToggle}
         data-disabled={!canToggle}
+        tabIndex={-1}
         aria-label={label}
         aria-pressed={isActive}
-        tooltip="Blockquote"
+        tooltip="Code Block"
         onClick={handleClick}
         {...buttonProps}
         ref={ref}
@@ -110,7 +110,7 @@ export const BlockquoteButton = forwardRef<
             <Icon className="tiptap-button-icon" />
             {text && <span className="tiptap-button-text">{text}</span>}
             {showShortcut && (
-              <BlockquoteShortcutBadge shortcutKeys={shortcutKeys} />
+              <CodeBlockShortcutBadge shortcutKeys={shortcutKeys} />
             )}
           </>
         )}
@@ -119,4 +119,4 @@ export const BlockquoteButton = forwardRef<
   }
 )
 
-BlockquoteButton.displayName = "BlockquoteButton"
+CodeBlockButton.displayName = "CodeBlockButton"

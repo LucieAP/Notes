@@ -1,24 +1,25 @@
-"use client"
-
 import { forwardRef, useCallback } from "react"
+
+// --- Tiptap UI ---
+import type { UseBlockquoteConfig } from "@/components/tiptap/ui/blockquote-button"
+import {
+  BLOCKQUOTE_SHORTCUT_KEY,
+  useBlockquote,
+} from "@/components/tiptap/ui/blockquote-button"
+
+// --- Hooks ---
+import { useTiptapEditor } from "@/components/tiptap/hooks/useTiptapEditor"
 
 // --- Lib ---
 import { parseShortcutKeys } from "@/components/tiptap/lib/tiptap-utils"
-
-// --- Hooks ---
-import { useTiptapEditor } from "@/components/tiptap/hooks/use-tiptap-editor"
-
-// --- Tiptap UI ---
-import type { Mark, UseMarkConfig } from "@/components/tiptap/ui/mark-button"
-import { MARK_SHORTCUT_KEYS, useMark } from "@/components/tiptap/ui/mark-button"
 
 // --- UI Primitives ---
 import type { ButtonProps } from "@/components/tiptap/ui-primitive/button"
 import { Button } from "@/components/tiptap/ui-primitive/button"
 import { Badge } from "@/components/tiptap/ui-primitive/badge"
 
-export interface MarkButtonProps
-  extends Omit<ButtonProps, "type">, UseMarkConfig {
+export interface BlockquoteButtonProps
+  extends Omit<ButtonProps, "type">, UseBlockquoteConfig {
   /**
    * Optional text to display alongside the icon.
    */
@@ -30,26 +31,26 @@ export interface MarkButtonProps
   showShortcut?: boolean
 }
 
-export function MarkShortcutBadge({
-  type,
-  shortcutKeys = MARK_SHORTCUT_KEYS[type],
+export function BlockquoteShortcutBadge({
+  shortcutKeys = BLOCKQUOTE_SHORTCUT_KEY,
 }: {
-  type: Mark
   shortcutKeys?: string
 }) {
   return <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>
 }
 
 /**
- * Button component for toggling marks in a Tiptap editor.
+ * Button component for toggling blockquote in a Tiptap editor.
  *
- * For custom button implementations, use the `useMark` hook instead.
+ * For custom button implementations, use the `useBlockquote` hook instead.
  */
-export const MarkButton = forwardRef<HTMLButtonElement, MarkButtonProps>(
+export const BlockquoteButton = forwardRef<
+  HTMLButtonElement,
+  BlockquoteButtonProps
+>(
   (
     {
       editor: providedEditor,
-      type,
       text,
       hideWhenUnavailable = false,
       onToggled,
@@ -63,15 +64,14 @@ export const MarkButton = forwardRef<HTMLButtonElement, MarkButtonProps>(
     const { editor } = useTiptapEditor(providedEditor)
     const {
       isVisible,
-      handleMark,
-      label,
       canToggle,
       isActive,
-      Icon,
+      handleToggle,
+      label,
       shortcutKeys,
-    } = useMark({
+      Icon,
+    } = useBlockquote({
       editor,
-      type,
       hideWhenUnavailable,
       onToggled,
     })
@@ -80,9 +80,9 @@ export const MarkButton = forwardRef<HTMLButtonElement, MarkButtonProps>(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event)
         if (event.defaultPrevented) return
-        handleMark()
+        handleToggle()
       },
-      [handleMark, onClick]
+      [handleToggle, onClick]
     )
 
     if (!isVisible) {
@@ -92,15 +92,15 @@ export const MarkButton = forwardRef<HTMLButtonElement, MarkButtonProps>(
     return (
       <Button
         type="button"
-        disabled={!canToggle}
         variant="ghost"
         data-active-state={isActive ? "on" : "off"}
-        data-disabled={!canToggle}
         role="button"
         tabIndex={-1}
+        disabled={!canToggle}
+        data-disabled={!canToggle}
         aria-label={label}
         aria-pressed={isActive}
-        tooltip={label}
+        tooltip="Blockquote"
         onClick={handleClick}
         {...buttonProps}
         ref={ref}
@@ -110,7 +110,7 @@ export const MarkButton = forwardRef<HTMLButtonElement, MarkButtonProps>(
             <Icon className="tiptap-button-icon" />
             {text && <span className="tiptap-button-text">{text}</span>}
             {showShortcut && (
-              <MarkShortcutBadge type={type} shortcutKeys={shortcutKeys} />
+              <BlockquoteShortcutBadge shortcutKeys={shortcutKeys} />
             )}
           </>
         )}
@@ -119,4 +119,4 @@ export const MarkButton = forwardRef<HTMLButtonElement, MarkButtonProps>(
   }
 )
 
-MarkButton.displayName = "MarkButton"
+BlockquoteButton.displayName = "BlockquoteButton"

@@ -5,14 +5,14 @@ import { useHotkeys } from "react-hotkeys-hook"
 import { type Editor } from "@tiptap/react"
 
 // --- Hooks ---
-import { useTiptapEditor } from "@/components/tiptap/hooks/use-tiptap-editor"
-import { useIsBreakpoint } from "@/components/tiptap/hooks/use-is-breakpoint"
+import { useTiptapEditor } from "@/components/tiptap/hooks/useTiptapEditor"
+import { useIsBreakpoint } from "@/components/tiptap/hooks/useIsBreakpoint"
 
 // --- Lib ---
 import { isExtensionAvailable } from "@/components/tiptap/lib/tiptap-utils"
 
 // --- Icons ---
-import { ImagePlusIcon } from "@/components/tiptap/icons/image-plus-icon"
+import { ImagePlusIcon } from "@/components/tiptap/icons/ImagePlusIcon"
 
 export const IMAGE_UPLOAD_SHORTCUT_KEY = "mod+shift+i"
 

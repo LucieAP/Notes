@@ -60,17 +60,17 @@ import { TextAlignButton } from "@/components/tiptap/ui/text-align-button";
 import { UndoRedoButton } from "@/components/tiptap/ui/undo-redo-button";
 
 // --- Icons ---
-import { ArrowLeftIcon } from "@/components/tiptap/icons/arrow-left-icon";
-import { HighlighterIcon } from "@/components/tiptap/icons/highlighter-icon";
-import { LinkIcon } from "@/components/tiptap/icons/link-icon";
+import { ArrowLeftIcon } from "@/components/tiptap/icons/ArrowLeftIcon";
+import { HighlighterIcon } from "@/components/tiptap/icons/HighlighterIcon";
+import { LinkIcon } from "@/components/tiptap/icons/LinkIcon";
 
 // --- Hooks ---
-import { useIsBreakpoint } from "@/components/tiptap/hooks/use-is-breakpoint";
-import { useWindowSize } from "@/components/tiptap/hooks/use-window-size";
-import { useCursorVisibility } from "@/components/tiptap/hooks/use-cursor-visibility";
+import { useIsBreakpoint } from "@/components/tiptap/hooks/useIsBreakpoint";
+import { useWindowSize } from "@/components/tiptap/hooks/useWindowSize";
+import { useCursorVisibility } from "@/components/tiptap/hooks/useCursorVisibility";
 
 // --- Components ---
-import { ThemeToggle } from "@/components/tiptap/templates/simple/theme-toggle";
+import { ThemeToggle } from "@/components/tiptap/templates/simple/ThemeToggle";
 
 // --- Lib ---
 import {

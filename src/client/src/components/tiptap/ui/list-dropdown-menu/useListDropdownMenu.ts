@@ -4,12 +4,12 @@ import { useEffect, useMemo, useState } from "react"
 import type { Editor } from "@tiptap/react"
 
 // --- Hooks ---
-import { useTiptapEditor } from "@/components/tiptap/hooks/use-tiptap-editor"
+import { useTiptapEditor } from "@/components/tiptap/hooks/useTiptapEditor"
 
 // --- Icons ---
-import { ListIcon } from "@/components/tiptap/icons/list-icon"
-import { ListOrderedIcon } from "@/components/tiptap/icons/list-ordered-icon"
-import { ListTodoIcon } from "@/components/tiptap/icons/list-todo-icon"
+import { ListIcon } from "@/components/tiptap/icons/ListIcon"
+import { ListOrderedIcon } from "@/components/tiptap/icons/ListOrderedIcon"
+import { ListTodoIcon } from "@/components/tiptap/icons/ListTodoIcon"
 
 // --- Lib ---
 import { isNodeInSchema } from "@/components/tiptap/lib/tiptap-utils"

@@ -4,14 +4,14 @@ import { forwardRef, useCallback, useEffect, useState } from "react"
 import type { Editor } from "@tiptap/react"
 
 // --- Hooks ---
-import { useIsBreakpoint } from "@/components/tiptap/hooks/use-is-breakpoint"
-import { useTiptapEditor } from "@/components/tiptap/hooks/use-tiptap-editor"
+import { useIsBreakpoint } from "@/components/tiptap/hooks/useIsBreakpoint"
+import { useTiptapEditor } from "@/components/tiptap/hooks/useTiptapEditor"
 
 // --- Icons ---
-import { CornerDownLeftIcon } from "@/components/tiptap/icons/corner-down-left-icon"
-import { ExternalLinkIcon } from "@/components/tiptap/icons/external-link-icon"
-import { LinkIcon } from "@/components/tiptap/icons/link-icon"
-import { TrashIcon } from "@/components/tiptap/icons/trash-icon"
+import { CornerDownLeftIcon } from "@/components/tiptap/icons/CornerDownLeftIcon"
+import { ExternalLinkIcon } from "@/components/tiptap/icons/ExternalLinkIcon"
+import { LinkIcon } from "@/components/tiptap/icons/LinkIcon"
+import { TrashIcon } from "@/components/tiptap/icons/TrashIcon"
 
 // --- Tiptap UI ---
 import type { UseLinkPopoverConfig } from "@/components/tiptap/ui/link-popover"

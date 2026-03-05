@@ -2,13 +2,13 @@ import { forwardRef, useMemo, useRef, useState } from "react"
 import { type Editor } from "@tiptap/react"
 
 // --- Hooks ---
-import { useMenuNavigation } from "@/components/tiptap/hooks/use-menu-navigation"
-import { useIsBreakpoint } from "@/components/tiptap/hooks/use-is-breakpoint"
-import { useTiptapEditor } from "@/components/tiptap/hooks/use-tiptap-editor"
+import { useMenuNavigation } from "@/components/tiptap/hooks/useMenuNavigation"
+import { useIsBreakpoint } from "@/components/tiptap/hooks/useIsBreakpoint"
+import { useTiptapEditor } from "@/components/tiptap/hooks/useTiptapEditor"
 
 // --- Icons ---
-import { BanIcon } from "@/components/tiptap/icons/ban-icon"
-import { HighlighterIcon } from "@/components/tiptap/icons/highlighter-icon"
+import { BanIcon } from "@/components/tiptap/icons/BanIcon"
+import { HighlighterIcon } from "@/components/tiptap/icons/HighlighterIcon"
 
 // --- UI Primitives ---
 import type { ButtonProps } from "@/components/tiptap/ui-primitive/button"

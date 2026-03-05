@@ -1,6 +1,6 @@
 import type { Editor } from "@tiptap/react"
-import { useWindowSize } from "@/components/tiptap/hooks/use-window-size"
-import { useBodyRect } from "@/components/tiptap/hooks/use-element-rect"
+import { useWindowSize } from "@/components/tiptap/hooks/useWindowSize"
+import { useBodyRect } from "@/components/tiptap/hooks/useElementRect"
 import { useEffect } from "react"
 
 export interface CursorVisibilityOptions {

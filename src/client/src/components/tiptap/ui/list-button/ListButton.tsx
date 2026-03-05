@@ -1,30 +1,22 @@
-"use client"
-
 import { forwardRef, useCallback } from "react"
 
 // --- Lib ---
 import { parseShortcutKeys } from "@/components/tiptap/lib/tiptap-utils"
 
 // --- Hooks ---
-import { useTiptapEditor } from "@/components/tiptap/hooks/use-tiptap-editor"
-
-// --- Tiptap UI ---
-import type {
-  UndoRedoAction,
-  UseUndoRedoConfig,
-} from "@/components/tiptap/ui/undo-redo-button"
-import {
-  UNDO_REDO_SHORTCUT_KEYS,
-  useUndoRedo,
-} from "@/components/tiptap/ui/undo-redo-button"
+import { useTiptapEditor } from "@/components/tiptap/hooks/useTiptapEditor"
 
 // --- UI Primitives ---
 import type { ButtonProps } from "@/components/tiptap/ui-primitive/button"
 import { Button } from "@/components/tiptap/ui-primitive/button"
 import { Badge } from "@/components/tiptap/ui-primitive/badge"
 
-export interface UndoRedoButtonProps
-  extends Omit<ButtonProps, "type">, UseUndoRedoConfig {
+// --- Tiptap UI ---
+import type { ListType, UseListConfig } from "@/components/tiptap/ui/list-button"
+import { LIST_SHORTCUT_KEYS, useList } from "@/components/tiptap/ui/list-button"
+
+export interface ListButtonProps
+  extends Omit<ButtonProps, "type">, UseListConfig {
   /**
    * Optional text to display alongside the icon.
    */
@@ -36,32 +28,29 @@ export interface UndoRedoButtonProps
   showShortcut?: boolean
 }
 
-export function HistoryShortcutBadge({
-  action,
-  shortcutKeys = UNDO_REDO_SHORTCUT_KEYS[action],
+export function ListShortcutBadge({
+  type,
+  shortcutKeys = LIST_SHORTCUT_KEYS[type],
 }: {
-  action: UndoRedoAction
+  type: ListType
   shortcutKeys?: string
 }) {
   return <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>
 }
 
 /**
- * Button component for triggering undo/redo actions in a Tiptap editor.
+ * Button component for toggling lists in a Tiptap editor.
  *
- * For custom button implementations, use the `useHistory` hook instead.
+ * For custom button implementations, use the `useList` hook instead.
  */
-export const UndoRedoButton = forwardRef<
-  HTMLButtonElement,
-  UndoRedoButtonProps
->(
+export const ListButton = forwardRef<HTMLButtonElement, ListButtonProps>(
   (
     {
       editor: providedEditor,
-      action,
+      type,
       text,
       hideWhenUnavailable = false,
-      onExecuted,
+      onToggled,
       showShortcut = false,
       onClick,
       children,
@@ -70,21 +59,28 @@ export const UndoRedoButton = forwardRef<
     ref
   ) => {
     const { editor } = useTiptapEditor(providedEditor)
-    const { isVisible, handleAction, label, canExecute, Icon, shortcutKeys } =
-      useUndoRedo({
-        editor,
-        action,
-        hideWhenUnavailable,
-        onExecuted,
-      })
+    const {
+      isVisible,
+      canToggle,
+      isActive,
+      handleToggle,
+      label,
+      shortcutKeys,
+      Icon,
+    } = useList({
+      editor,
+      type,
+      hideWhenUnavailable,
+      onToggled,
+    })
 
     const handleClick = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event)
         if (event.defaultPrevented) return
-        handleAction()
+        handleToggle()
       },
-      [handleAction, onClick]
+      [handleToggle, onClick]
     )
 
     if (!isVisible) {
@@ -94,12 +90,14 @@ export const UndoRedoButton = forwardRef<
     return (
       <Button
         type="button"
-        disabled={!canExecute}
         variant="ghost"
-        data-disabled={!canExecute}
+        data-active-state={isActive ? "on" : "off"}
         role="button"
         tabIndex={-1}
+        disabled={!canToggle}
+        data-disabled={!canToggle}
         aria-label={label}
+        aria-pressed={isActive}
         tooltip={label}
         onClick={handleClick}
         {...buttonProps}
@@ -110,10 +108,7 @@ export const UndoRedoButton = forwardRef<
             <Icon className="tiptap-button-icon" />
             {text && <span className="tiptap-button-text">{text}</span>}
             {showShortcut && (
-              <HistoryShortcutBadge
-                action={action}
-                shortcutKeys={shortcutKeys}
-              />
+              <ListShortcutBadge type={type} shortcutKeys={shortcutKeys} />
             )}
           </>
         )}
@@ -122,4 +117,4 @@ export const UndoRedoButton = forwardRef<
   }
 )
 
-UndoRedoButton.displayName = "UndoRedoButton"
+ListButton.displayName = "ListButton"

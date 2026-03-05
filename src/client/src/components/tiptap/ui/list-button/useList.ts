@@ -1,16 +1,18 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import type { Editor } from "@tiptap/react"
+import { type Editor } from "@tiptap/react"
 import { NodeSelection, TextSelection } from "@tiptap/pm/state"
 
 // --- Hooks ---
-import { useTiptapEditor } from "@/components/tiptap/hooks/use-tiptap-editor"
+import { useTiptapEditor } from "@/components/tiptap/hooks/useTiptapEditor"
 
 // --- Icons ---
-import { BlockquoteIcon } from "@/components/tiptap/icons/blockquote-icon"
+import { ListIcon } from "@/components/tiptap/icons/ListIcon"
+import { ListOrderedIcon } from "@/components/tiptap/icons/ListOrderedIcon"
+import { ListTodoIcon } from "@/components/tiptap/icons/ListTodoIcon"
 
-// --- UI Utils ---
+// --- Lib ---
 import {
   findNodePosition,
   getSelectedBlockNodes,
@@ -20,18 +22,22 @@ import {
   selectionWithinConvertibleTypes,
 } from "@/components/tiptap/lib/tiptap-utils"
 
-export const BLOCKQUOTE_SHORTCUT_KEY = "mod+shift+b"
+export type ListType = "bulletList" | "orderedList" | "taskList"
 
 /**
- * Configuration for the blockquote functionality
+ * Configuration for the list functionality
  */
-export interface UseBlockquoteConfig {
+export interface UseListConfig {
   /**
    * The Tiptap editor instance.
    */
   editor?: Editor | null
   /**
-   * Whether the button should hide when blockquote is not available.
+   * The type of list to toggle.
+   */
+  type: ListType
+  /**
+   * Whether the button should hide when list is not available.
    * @default false
    */
   hideWhenUnavailable?: boolean
@@ -41,22 +47,47 @@ export interface UseBlockquoteConfig {
   onToggled?: () => void
 }
 
+export const listIcons = {
+  bulletList: ListIcon,
+  orderedList: ListOrderedIcon,
+  taskList: ListTodoIcon,
+}
+
+export const listLabels: Record<ListType, string> = {
+  bulletList: "Bullet List",
+  orderedList: "Ordered List",
+  taskList: "Task List",
+}
+
+export const LIST_SHORTCUT_KEYS: Record<ListType, string> = {
+  bulletList: "mod+shift+8",
+  orderedList: "mod+shift+7",
+  taskList: "mod+shift+9",
+}
+
 /**
- * Checks if blockquote can be toggled in the current editor state
+ * Checks if a list can be toggled in the current editor state
  */
-export function canToggleBlockquote(
+export function canToggleList(
   editor: Editor | null,
+  type: ListType,
   turnInto: boolean = true
 ): boolean {
   if (!editor || !editor.isEditable) return false
-  if (
-    !isNodeInSchema("blockquote", editor) ||
-    isNodeTypeSelected(editor, ["image"])
-  )
+  if (!isNodeInSchema(type, editor) || isNodeTypeSelected(editor, ["image"]))
     return false
 
   if (!turnInto) {
-    return editor.can().toggleWrap("blockquote")
+    switch (type) {
+      case "bulletList":
+        return editor.can().toggleBulletList()
+      case "orderedList":
+        return editor.can().toggleOrderedList()
+      case "taskList":
+        return editor.can().toggleList("taskList", "taskItem")
+      default:
+        return false
+    }
   }
 
   // Ensure selection is in nodes we're allowed to convert
@@ -73,17 +104,47 @@ export function canToggleBlockquote(
   )
     return false
 
-  // Either we can wrap in blockquote directly on the selection,
-  // or we can clear formatting/nodes to arrive at a blockquote.
-  return editor.can().toggleWrap("blockquote") || editor.can().clearNodes()
+  // Either we can set list directly on the selection,
+  // or we can clear formatting/nodes to arrive at a list.
+  switch (type) {
+    case "bulletList":
+      return editor.can().toggleBulletList() || editor.can().clearNodes()
+    case "orderedList":
+      return editor.can().toggleOrderedList() || editor.can().clearNodes()
+    case "taskList":
+      return (
+        editor.can().toggleList("taskList", "taskItem") ||
+        editor.can().clearNodes()
+      )
+    default:
+      return false
+  }
 }
 
 /**
- * Toggles blockquote formatting for a specific node or the current selection
+ * Checks if list is currently active
  */
-export function toggleBlockquote(editor: Editor | null): boolean {
+export function isListActive(editor: Editor | null, type: ListType): boolean {
   if (!editor || !editor.isEditable) return false
-  if (!canToggleBlockquote(editor)) return false
+
+  switch (type) {
+    case "bulletList":
+      return editor.isActive("bulletList")
+    case "orderedList":
+      return editor.isActive("orderedList")
+    case "taskList":
+      return editor.isActive("taskList")
+    default:
+      return false
+  }
+}
+
+/**
+ * Toggles list in the editor
+ */
+export function toggleList(editor: Editor | null, type: ListType): boolean {
+  if (!editor || !editor.isEditable) return false
+  if (!canToggleList(editor, type)) return false
 
   try {
     const view = editor.view
@@ -147,11 +208,27 @@ export function toggleBlockquote(editor: Editor | null): boolean {
         .clearNodes()
     }
 
-    const toggle = editor.isActive("blockquote")
-      ? chain.lift("blockquote")
-      : chain.wrapIn("blockquote")
+    if (editor.isActive(type)) {
+      // Unwrap list
+      chain
+        .liftListItem("listItem")
+        .lift("bulletList")
+        .lift("orderedList")
+        .lift("taskList")
+        .run()
+    } else {
+      // Wrap in specific list type
+      const toggleMap: Record<ListType, () => typeof chain> = {
+        bulletList: () => chain.toggleBulletList(),
+        orderedList: () => chain.toggleOrderedList(),
+        taskList: () => chain.toggleList("taskList", "taskItem"),
+      }
 
-    toggle.run()
+      const toggle = toggleMap[type]
+      if (!toggle) return false
+
+      toggle().run()
+    }
 
     editor.chain().focus().selectTextblockEnd().run()
 
@@ -162,13 +239,14 @@ export function toggleBlockquote(editor: Editor | null): boolean {
 }
 
 /**
- * Determines if the blockquote button should be shown
+ * Determines if the list button should be shown
  */
 export function shouldShowButton(props: {
   editor: Editor | null
+  type: ListType
   hideWhenUnavailable: boolean
 }): boolean {
-  const { editor, hideWhenUnavailable } = props
+  const { editor, type, hideWhenUnavailable } = props
 
   if (!editor || !editor.isEditable) return false
 
@@ -176,35 +254,36 @@ export function shouldShowButton(props: {
     return true
   }
 
-  if (!isNodeInSchema("blockquote", editor)) return false
+  if (!isNodeInSchema(type, editor)) return false
 
   if (!editor.isActive("code")) {
-    return canToggleBlockquote(editor)
+    return canToggleList(editor, type)
   }
 
   return true
 }
 
 /**
- * Custom hook that provides blockquote functionality for Tiptap editor
+ * Custom hook that provides list functionality for Tiptap editor
  *
  * @example
  * ```tsx
- * // Simple usage - no params needed
- * function MySimpleBlockquoteButton() {
- *   const { isVisible, handleToggle, isActive } = useBlockquote()
+ * // Simple usage
+ * function MySimpleListButton() {
+ *   const { isVisible, handleToggle, isActive } = useList({ type: "bulletList" })
  *
  *   if (!isVisible) return null
  *
- *   return <button onClick={handleToggle}>Blockquote</button>
+ *   return <button onClick={handleToggle}>Bullet List</button>
  * }
  *
  * // Advanced usage with configuration
- * function MyAdvancedBlockquoteButton() {
- *   const { isVisible, handleToggle, label, isActive } = useBlockquote({
+ * function MyAdvancedListButton() {
+ *   const { isVisible, handleToggle, label, isActive } = useList({
+ *     type: "orderedList",
  *     editor: myEditor,
  *     hideWhenUnavailable: true,
- *     onToggled: () => console.log('Blockquote toggled!')
+ *     onToggled: () => console.log('List toggled!')
  *   })
  *
  *   if (!isVisible) return null
@@ -215,29 +294,30 @@ export function shouldShowButton(props: {
  *       aria-label={label}
  *       aria-pressed={isActive}
  *     >
- *       Toggle Blockquote
+ *       Toggle List
  *     </MyButton>
  *   )
  * }
  * ```
  */
-export function useBlockquote(config?: UseBlockquoteConfig) {
+export function useList(config: UseListConfig) {
   const {
     editor: providedEditor,
+    type,
     hideWhenUnavailable = false,
     onToggled,
-  } = config || {}
+  } = config
 
   const { editor } = useTiptapEditor(providedEditor)
   const [isVisible, setIsVisible] = useState<boolean>(true)
-  const canToggle = canToggleBlockquote(editor)
-  const isActive = editor?.isActive("blockquote") || false
+  const canToggle = canToggleList(editor, type)
+  const isActive = isListActive(editor, type)
 
   useEffect(() => {
     if (!editor) return
 
     const handleSelectionUpdate = () => {
-      setIsVisible(shouldShowButton({ editor, hideWhenUnavailable }))
+      setIsVisible(shouldShowButton({ editor, type, hideWhenUnavailable }))
     }
 
     handleSelectionUpdate()
@@ -247,25 +327,25 @@ export function useBlockquote(config?: UseBlockquoteConfig) {
     return () => {
       editor.off("selectionUpdate", handleSelectionUpdate)
     }
-  }, [editor, hideWhenUnavailable])
+  }, [editor, type, hideWhenUnavailable])
 
   const handleToggle = useCallback(() => {
     if (!editor) return false
 
-    const success = toggleBlockquote(editor)
+    const success = toggleList(editor, type)
     if (success) {
       onToggled?.()
     }
     return success
-  }, [editor, onToggled])
+  }, [editor, type, onToggled])
 
   return {
     isVisible,
     isActive,
     handleToggle,
     canToggle,
-    label: "Blockquote",
-    shortcutKeys: BLOCKQUOTE_SHORTCUT_KEY,
-    Icon: BlockquoteIcon,
+    label: listLabels[type],
+    shortcutKeys: LIST_SHORTCUT_KEYS[type],
+    Icon: listIcons[type],
   }
 }

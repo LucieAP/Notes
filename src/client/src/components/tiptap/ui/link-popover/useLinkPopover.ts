@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from "react"
 import type { Editor } from "@tiptap/react"
 
 // --- Hooks ---
-import { useTiptapEditor } from "@/components/tiptap/hooks/use-tiptap-editor"
+import { useTiptapEditor } from "@/components/tiptap/hooks/useTiptapEditor"
 
 // --- Icons ---
-import { LinkIcon } from "@/components/tiptap/icons/link-icon"
+import { LinkIcon } from "@/components/tiptap/icons/LinkIcon"
 
 // --- Lib ---
 import {

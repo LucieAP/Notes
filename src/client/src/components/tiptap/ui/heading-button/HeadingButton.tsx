@@ -1,25 +1,26 @@
 import { forwardRef, useCallback } from "react"
 
-// --- Hooks ---
-import { useTiptapEditor } from "@/components/tiptap/hooks/use-tiptap-editor"
-
 // --- Lib ---
 import { parseShortcutKeys } from "@/components/tiptap/lib/tiptap-utils"
 
 // --- Tiptap UI ---
-import type { UseCodeBlockConfig } from "@/components/tiptap/ui/code-block-button"
+import type {
+  Level,
+  UseHeadingConfig,
+} from "@/components/tiptap/ui/heading-button"
 import {
-  CODE_BLOCK_SHORTCUT_KEY,
-  useCodeBlock,
-} from "@/components/tiptap/ui/code-block-button"
+  HEADING_SHORTCUT_KEYS,
+  useHeading,
+} from "@/components/tiptap/ui/heading-button"
 
 // --- UI Primitives ---
 import type { ButtonProps } from "@/components/tiptap/ui-primitive/button"
 import { Button } from "@/components/tiptap/ui-primitive/button"
 import { Badge } from "@/components/tiptap/ui-primitive/badge"
+import { useTiptapEditor } from "@/components/tiptap/hooks/useTiptapEditor"
 
-export interface CodeBlockButtonProps
-  extends Omit<ButtonProps, "type">, UseCodeBlockConfig {
+export interface HeadingButtonProps
+  extends Omit<ButtonProps, "type">, UseHeadingConfig {
   /**
    * Optional text to display alongside the icon.
    */
@@ -31,26 +32,26 @@ export interface CodeBlockButtonProps
   showShortcut?: boolean
 }
 
-export function CodeBlockShortcutBadge({
-  shortcutKeys = CODE_BLOCK_SHORTCUT_KEY,
+export function HeadingShortcutBadge({
+  level,
+  shortcutKeys = HEADING_SHORTCUT_KEYS[level],
 }: {
+  level: Level
   shortcutKeys?: string
 }) {
   return <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>
 }
 
 /**
- * Button component for toggling code block in a Tiptap editor.
+ * Button component for toggling heading in a Tiptap editor.
  *
- * For custom button implementations, use the `useCodeBlock` hook instead.
+ * For custom button implementations, use the `useHeading` hook instead.
  */
-export const CodeBlockButton = forwardRef<
-  HTMLButtonElement,
-  CodeBlockButtonProps
->(
+export const HeadingButton = forwardRef<HTMLButtonElement, HeadingButtonProps>(
   (
     {
       editor: providedEditor,
+      level,
       text,
       hideWhenUnavailable = false,
       onToggled,
@@ -68,10 +69,11 @@ export const CodeBlockButton = forwardRef<
       isActive,
       handleToggle,
       label,
-      shortcutKeys,
       Icon,
-    } = useCodeBlock({
+      shortcutKeys,
+    } = useHeading({
       editor,
+      level,
       hideWhenUnavailable,
       onToggled,
     })
@@ -95,12 +97,12 @@ export const CodeBlockButton = forwardRef<
         variant="ghost"
         data-active-state={isActive ? "on" : "off"}
         role="button"
+        tabIndex={-1}
         disabled={!canToggle}
         data-disabled={!canToggle}
-        tabIndex={-1}
         aria-label={label}
         aria-pressed={isActive}
-        tooltip="Code Block"
+        tooltip={label}
         onClick={handleClick}
         {...buttonProps}
         ref={ref}
@@ -110,7 +112,7 @@ export const CodeBlockButton = forwardRef<
             <Icon className="tiptap-button-icon" />
             {text && <span className="tiptap-button-text">{text}</span>}
             {showShortcut && (
-              <CodeBlockShortcutBadge shortcutKeys={shortcutKeys} />
+              <HeadingShortcutBadge level={level} shortcutKeys={shortcutKeys} />
             )}
           </>
         )}
@@ -119,4 +121,4 @@ export const CodeBlockButton = forwardRef<
   }
 )
 
-CodeBlockButton.displayName = "CodeBlockButton"
+HeadingButton.displayName = "HeadingButton"

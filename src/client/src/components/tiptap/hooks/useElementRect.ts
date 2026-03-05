@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { useThrottledCallback } from "@/components/tiptap/hooks/use-throttled-callback"
+import { useThrottledCallback } from "@/components/tiptap/hooks/useThrottledCallback"
 
 export type RectState = Omit<DOMRect, "toJSON">
 

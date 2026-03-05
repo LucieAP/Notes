@@ -1,7 +1,7 @@
 import { GetNoteResponse } from "@/features/notes/note";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { SimpleEditor } from "../tiptap/templates/simple/simple-editor";
+import { SimpleEditor } from "../tiptap/templates/simple/SimpleEditor";
 import useNotes from "@/shared/hooks/useNotes";
 import { JSONContent } from "@tiptap/core";
 import Spinner from "../common/icons/Spinner";

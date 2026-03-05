@@ -6,28 +6,19 @@ import { forwardRef, useCallback } from "react"
 import { parseShortcutKeys } from "@/components/tiptap/lib/tiptap-utils"
 
 // --- Hooks ---
-import { useTiptapEditor } from "@/components/tiptap/hooks/use-tiptap-editor"
+import { useTiptapEditor } from "@/components/tiptap/hooks/useTiptapEditor"
 
 // --- Tiptap UI ---
-import type {
-  TextAlign,
-  UseTextAlignConfig,
-} from "@/components/tiptap/ui/text-align-button"
-import {
-  TEXT_ALIGN_SHORTCUT_KEYS,
-  useTextAlign,
-} from "@/components/tiptap/ui/text-align-button"
+import type { Mark, UseMarkConfig } from "@/components/tiptap/ui/mark-button"
+import { MARK_SHORTCUT_KEYS, useMark } from "@/components/tiptap/ui/mark-button"
 
 // --- UI Primitives ---
 import type { ButtonProps } from "@/components/tiptap/ui-primitive/button"
 import { Button } from "@/components/tiptap/ui-primitive/button"
 import { Badge } from "@/components/tiptap/ui-primitive/badge"
 
-type IconProps = React.SVGProps<SVGSVGElement>
-type IconComponent = ({ className, ...props }: IconProps) => React.ReactElement
-
-export interface TextAlignButtonProps
-  extends Omit<ButtonProps, "type">, UseTextAlignConfig {
+export interface MarkButtonProps
+  extends Omit<ButtonProps, "type">, UseMarkConfig {
   /**
    * Optional text to display alongside the icon.
    */
@@ -37,41 +28,33 @@ export interface TextAlignButtonProps
    * @default false
    */
   showShortcut?: boolean
-  /**
-   * Optional custom icon component to render instead of the default.
-   */
-  icon?: React.MemoExoticComponent<IconComponent> | React.FC<IconProps>
 }
 
-export function TextAlignShortcutBadge({
-  align,
-  shortcutKeys = TEXT_ALIGN_SHORTCUT_KEYS[align],
+export function MarkShortcutBadge({
+  type,
+  shortcutKeys = MARK_SHORTCUT_KEYS[type],
 }: {
-  align: TextAlign
+  type: Mark
   shortcutKeys?: string
 }) {
   return <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>
 }
 
 /**
- * Button component for setting text alignment in a Tiptap editor.
+ * Button component for toggling marks in a Tiptap editor.
  *
- * For custom button implementations, use the `useTextAlign` hook instead.
+ * For custom button implementations, use the `useMark` hook instead.
  */
-export const TextAlignButton = forwardRef<
-  HTMLButtonElement,
-  TextAlignButtonProps
->(
+export const MarkButton = forwardRef<HTMLButtonElement, MarkButtonProps>(
   (
     {
       editor: providedEditor,
-      align,
+      type,
       text,
       hideWhenUnavailable = false,
-      onAligned,
+      onToggled,
       showShortcut = false,
       onClick,
-      icon: CustomIcon,
       children,
       ...buttonProps
     },
@@ -80,41 +63,39 @@ export const TextAlignButton = forwardRef<
     const { editor } = useTiptapEditor(providedEditor)
     const {
       isVisible,
-      handleTextAlign,
+      handleMark,
       label,
-      canAlign,
+      canToggle,
       isActive,
       Icon,
       shortcutKeys,
-    } = useTextAlign({
+    } = useMark({
       editor,
-      align,
+      type,
       hideWhenUnavailable,
-      onAligned,
+      onToggled,
     })
 
     const handleClick = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event)
         if (event.defaultPrevented) return
-        handleTextAlign()
+        handleMark()
       },
-      [handleTextAlign, onClick]
+      [handleMark, onClick]
     )
 
     if (!isVisible) {
       return null
     }
 
-    const RenderIcon = CustomIcon ?? Icon
-
     return (
       <Button
         type="button"
-        disabled={!canAlign}
+        disabled={!canToggle}
         variant="ghost"
         data-active-state={isActive ? "on" : "off"}
-        data-disabled={!canAlign}
+        data-disabled={!canToggle}
         role="button"
         tabIndex={-1}
         aria-label={label}
@@ -126,13 +107,10 @@ export const TextAlignButton = forwardRef<
       >
         {children ?? (
           <>
-            <RenderIcon className="tiptap-button-icon" />
+            <Icon className="tiptap-button-icon" />
             {text && <span className="tiptap-button-text">{text}</span>}
             {showShortcut && (
-              <TextAlignShortcutBadge
-                align={align}
-                shortcutKeys={shortcutKeys}
-              />
+              <MarkShortcutBadge type={type} shortcutKeys={shortcutKeys} />
             )}
           </>
         )}
@@ -141,4 +119,4 @@ export const TextAlignButton = forwardRef<
   }
 )
 
-TextAlignButton.displayName = "TextAlignButton"
+MarkButton.displayName = "MarkButton"
