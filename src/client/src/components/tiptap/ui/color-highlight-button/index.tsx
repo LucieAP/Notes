@@ -1,2 +1,2 @@
-export * from "./ColorHighlightButton"
-export * from "./useColorHighlight"
+export * from "./ColorHighlightButton";
+export * from "./useColorHighlight";

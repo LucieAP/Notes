@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\client",
+    "\\src\\client\\src",
+    "\\src\\client\\src\\components",
+    "\\src\\client\\src\\components\\tiptap",
+    "\\src\\client\\src\\components\\tiptap\\extensions",
+    "\\src\\client\\src\\components\\tiptap\\hooks",
+    "\\src\\client\\src\\components\\tiptap\\nodes",
+    "\\src\\client\\src\\components\\workspace"
+  ],
+  "SelectedNode": "\\src\\client\\src\\components\\workspace\\WorkspacePage.tsx",
+  "PreviewInSolutionExplorer": false
+}
