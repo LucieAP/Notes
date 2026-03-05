@@ -4,11 +4,13 @@ import { useParams } from "react-router-dom";
 import { SimpleEditor } from "../tiptap/templates/simple/simple-editor";
 import useNotes from "@/shared/hooks/useNotes";
 import { JSONContent } from "@tiptap/core";
+import Spinner from "../common/icons/Spinner";
 
 function NotesEditorPage() {
   const { id } = useParams<{ id: string }>();
   const [note, setNote] = useState<GetNoteResponse | null>(null);
   const saveTimeoutRef = useRef<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { getNoteById, updateContent } = useNotes();
 
@@ -21,6 +23,7 @@ function NotesEditorPage() {
         setNote(fetchedNote);
         console.log("note: ", fetchedNote);
       }
+      setIsLoading(false);
     })();
   }, [id, getNoteById]);
 
@@ -45,13 +48,20 @@ function NotesEditorPage() {
     [id, updateContent],
   );
 
+  if (!note) return <div>Note not found</div>;
+
   return (
     <>
-      <SimpleEditor
-        key={note?.id}
-        initialContent={note?.content}
-        onChange={handleContentChange}
-      />
+      {!isLoading ? (
+        <SimpleEditor
+          key={note?.id}
+          initialContent={note?.content}
+          noteTitle={note?.title}
+          onChange={handleContentChange}
+        />
+      ) : (
+        <Spinner />
+      )}
     </>
   );
 }

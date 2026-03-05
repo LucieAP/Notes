@@ -82,6 +82,7 @@ import {
 import "@/components/tiptap/templates/simple/simple-editor.scss";
 
 import content from "@/components/tiptap/templates/simple/data/content.json";
+import EditorHeader from "../../ui/editor-header/EditorHeader";
 
 const MainToolbarContent = ({
   onHighlighterClick,
@@ -193,10 +194,15 @@ const MobileToolbarContent = ({
 
 interface SimpleEditorProps {
   initialContent?: JSONContent | null;
+  noteTitle?: string;
   onChange?: (content: JSONContent) => void;
 }
 
-export function SimpleEditor({ initialContent, onChange }: SimpleEditorProps) {
+export function SimpleEditor({
+  initialContent,
+  noteTitle,
+  onChange,
+}: SimpleEditorProps) {
   const isMobile = useIsBreakpoint();
   const { height } = useWindowSize();
   const [mobileView, setMobileView] = useState<"main" | "highlighter" | "link">(
@@ -248,7 +254,7 @@ export function SimpleEditor({ initialContent, onChange }: SimpleEditorProps) {
     },
   });
 
-  // Обновление данных с сервера
+  // Обновление состояние редактор (содержимого)
   useEffect(() => {
     if (!editor) return;
 
@@ -271,32 +277,36 @@ export function SimpleEditor({ initialContent, onChange }: SimpleEditorProps) {
   }, [isMobile, mobileView]);
 
   return (
-    <div className="simple-editor-wrapper">
+    <div className="simple-editor-wrapper flex flex-col">
       <EditorContext.Provider value={{ editor }}>
-        <Toolbar
-          ref={toolbarRef}
-          style={{
-            ...(isMobile
-              ? {
-                  bottom: `calc(100% - ${height - rect.y}px)`,
-                }
-              : {}),
-          }}
-        >
-          {mobileView === "main" ? (
-            <MainToolbarContent
-              onHighlighterClick={() => setMobileView("highlighter")}
-              onLinkClick={() => setMobileView("link")}
-              isMobile={isMobile}
-            />
-          ) : (
-            <MobileToolbarContent
-              type={mobileView === "highlighter" ? "highlighter" : "link"}
-              onBack={() => setMobileView("main")}
-            />
-          )}
-        </Toolbar>
+        <div className="sticky top-0 z-10 bg-[var(--tt-bg-color)]">
+          <EditorHeader title={noteTitle} />
+          <Toolbar
+            ref={toolbarRef}
+            style={{
+              ...(isMobile
+                ? {
+                    bottom: `calc(100% - ${height - rect.y}px)`,
+                  }
+                : {}),
+            }}
+          >
+            {mobileView === "main" ? (
+              <MainToolbarContent
+                onHighlighterClick={() => setMobileView("highlighter")}
+                onLinkClick={() => setMobileView("link")}
+                isMobile={isMobile}
+              />
+            ) : (
+              <MobileToolbarContent
+                type={mobileView === "highlighter" ? "highlighter" : "link"}
+                onBack={() => setMobileView("main")}
+              />
+            )}
+          </Toolbar>
+        </div>
 
+        {/* Отображение контента редактора */}
         <EditorContent
           editor={editor}
           role="presentation"

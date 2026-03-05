@@ -36,16 +36,31 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const getNoteById = useCallback(async (id: string) => {
-    try {
-      if (!id) return;
+  const getNoteById = useCallback(
+    async (id: string) => {
+      try {
+        if (!id) return;
 
-      const note = await notesApi.getNoteById(id);
-      return note;
-    } catch (err) {
-      console.log(err instanceof Error ? err.message : err);
-    }
-  }, []);
+        const cachedNote = notesData.find((note) => note.id === id);
+        if (cachedNote) return cachedNote;
+
+        const note = await notesApi.getNoteById(id);
+        setNotesData((prev) => {
+          const existingIndex = prev.findIndex((item) => item.id === note.id); // -1 если не найдено
+          if (existingIndex >= 0) {
+            const next = [...prev]; // новая копия массива
+            next[existingIndex] = note; // заменяет старую заметку на новую по тому же индексу
+            return next; // новый массив с обновленной заметкой
+          }
+          return [...prev, note]; // Создает новый массив, копируя все существующие заметки и добавляет новую заметку в конец
+        });
+        return note;
+      } catch (err) {
+        console.log(err instanceof Error ? err.message : err);
+      }
+    },
+    [notesData],
+  );
 
   const updateTitle = useCallback(
     async ({ id, title }: { id: string; title: string }) => {
