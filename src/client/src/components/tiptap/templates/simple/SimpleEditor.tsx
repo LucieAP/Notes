@@ -84,6 +84,7 @@ import "@/components/tiptap/templates/simple/simple-editor.scss";
 import content from "@/components/tiptap/templates/simple/data/content.json";
 import EditorHeader from "../../ui/editor-header/EditorHeader";
 import { ActiveLine } from "../../extensions/ActiveLine";
+import useResizableEditorBorder from "@/shared/hooks/useResizableEditorBorder";
 
 const MainToolbarContent = ({
   onHighlighterClick,
@@ -199,6 +200,9 @@ interface SimpleEditorProps {
   onChange?: (content: JSONContent) => void;
 }
 
+const EDITOR_WIDTH_KEY = "editor-width";
+const DEFAULT_WIDTH = 896;
+
 export function SimpleEditor({
   initialContent,
   noteTitle,
@@ -211,6 +215,16 @@ export function SimpleEditor({
   );
   const toolbarRef = useRef<HTMLDivElement>(null);
 
+  const raw = Number(localStorage.getItem(EDITOR_WIDTH_KEY));
+  const savedWidth = Number.isFinite(raw) ? raw : DEFAULT_WIDTH; // isFinite - если число и не NaN
+  const [width, setWidth, onMouseDown] = useResizableEditorBorder({
+    initialWidth: savedWidth,
+  });
+
+  useEffect(() => {
+    localStorage.setItem(EDITOR_WIDTH_KEY, width.toString());
+  }, [width]);
+
   const editor = useEditor({
     immediatelyRender: false,
     editorProps: {
@@ -220,7 +234,7 @@ export function SimpleEditor({
         autocapitalize: "off",
         "aria-label": "Main content area, start typing to enter text.",
         class:
-          "simple-editor flex-1 p-12 pb-[30vh] max-w-full font-[DM_Sans,sans-serif] max-sm:p-4 max-sm:px-6 max-sm:pb-[30vh]",
+          "simple-editor flex-1 py-10 px-7 pb-[30vh] max-w-full font-[DM_Sans,sans-serif] max-sm:p-4 max-sm:px-6 max-sm:pb-[30vh]",
       },
     },
     extensions: [
@@ -281,7 +295,7 @@ export function SimpleEditor({
 
   return (
     <div
-      className="simple-editor-wrapper flex flex-col w-screen h-screen overflow-auto overscroll-none p-0 font-normal not-italic text-(--tt-theme-text) bg-(--tt-bg-color) [font-optical-sizing:auto]"
+      className="simple-editor-wrapper flex flex-col w-screen h-full overflow-auto overscroll-none p-0 font-normal not-italic text-(--tt-theme-text) bg-(--tt-bg-color) [font-optical-sizing:auto]"
       style={{ fontFamily: '"Inter", sans-serif' }}
     >
       <EditorContext.Provider value={{ editor }}>
@@ -312,12 +326,34 @@ export function SimpleEditor({
           </Toolbar>
         </div>
 
-        {/* Отображение контента редактора */}
-        <EditorContent
-          editor={editor}
-          role="presentation"
-          className="simple-editor-content max-w-4xl w-full mx-auto h-full flex flex-col flex-1 bg-(--tt-bg-color) "
-        />
+        <div className="max-w-full flex-1">
+          <div style={{ width }} className="relative mx-auto min-h-full">
+            {/* Resize Handler — вся область w-6 (24px) кликабельна */}
+            <div
+              className="group absolute top-0 bottom-0 -left-3 w-6 cursor-col-resize select-none"
+              onMouseDown={(e) => onMouseDown(e, "left")}
+              onDoubleClick={() => setWidth(DEFAULT_WIDTH)}
+            >
+              <div className="absolute top-0 bottom-0 left-2 w-px border border-(--tt-toolbar-border-color) group-hover:bg-neutral-700" />
+            </div>
+
+            {/* Отображение контента редактора */}
+            <EditorContent
+              editor={editor}
+              role="presentation"
+              className="simple-editor-content bg-(--tt-bg-color) "
+            />
+
+            {/* Resize Handler — вся область w-6 (24px) кликабельна */}
+            <div
+              className="group absolute top-0 bottom-0 -right-3 w-6 cursor-col-resize select-none"
+              onMouseDown={(e) => onMouseDown(e, "right")}
+              onDoubleClick={() => setWidth(DEFAULT_WIDTH)}
+            >
+              <div className="absolute top-0 bottom-0 right-2 w-px border border-(--tt-toolbar-border-color) group-hover:bg-neutral-700" />
+            </div>
+          </div>
+        </div>
       </EditorContext.Provider>
     </div>
   );
