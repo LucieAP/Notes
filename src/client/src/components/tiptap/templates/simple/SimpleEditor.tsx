@@ -83,6 +83,7 @@ import "@/components/tiptap/templates/simple/simple-editor.scss";
 
 import content from "@/components/tiptap/templates/simple/data/content.json";
 import EditorHeader from "../../ui/editor-header/EditorHeader";
+import { ActiveLine } from "../../extensions/ActiveLine";
 
 const MainToolbarContent = ({
   onHighlighterClick,
@@ -117,11 +118,11 @@ const MainToolbarContent = ({
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        <MarkButton type="bold" />
-        <MarkButton type="italic" />
-        <MarkButton type="strike" />
-        <MarkButton type="code" />
-        <MarkButton type="underline" />
+        <MarkButton type="bold" showShortcut={true} />
+        <MarkButton type="italic" showShortcut={true} />
+        <MarkButton type="strike" showShortcut={true} />
+        <MarkButton type="code" showShortcut={true} />
+        <MarkButton type="underline" showShortcut={true} />
         {!isMobile ? (
           <ColorHighlightPopover />
         ) : (
@@ -133,23 +134,23 @@ const MainToolbarContent = ({
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        <MarkButton type="superscript" />
-        <MarkButton type="subscript" />
+        <MarkButton type="superscript" showShortcut={true} />
+        <MarkButton type="subscript" showShortcut={true} />
       </ToolbarGroup>
 
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        <TextAlignButton align="left" />
-        <TextAlignButton align="center" />
-        <TextAlignButton align="right" />
-        <TextAlignButton align="justify" />
+        <TextAlignButton align="left" showShortcut={true} />
+        <TextAlignButton align="center" showShortcut={true} />
+        <TextAlignButton align="right" showShortcut={true} />
+        <TextAlignButton align="justify" showShortcut={true} />
       </ToolbarGroup>
 
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        <ImageUploadButton text="Add" />
+        <ImageUploadButton text="Add" showShortcut={true} />
       </ToolbarGroup>
 
       <Spacer />
@@ -218,7 +219,8 @@ export function SimpleEditor({
         autocorrect: "off",
         autocapitalize: "off",
         "aria-label": "Main content area, start typing to enter text.",
-        class: "simple-editor",
+        class:
+          "simple-editor flex-1 p-12 pb-[30vh] max-w-full font-[DM_Sans,sans-serif] max-sm:p-4 max-sm:px-6 max-sm:pb-[30vh]",
       },
     },
     extensions: [
@@ -246,6 +248,7 @@ export function SimpleEditor({
         upload: handleImageUpload,
         onError: (error) => console.error("Upload failed:", error),
       }),
+      ActiveLine, // Подсветка активной строки
     ],
     content: initialContent ?? content,
     onUpdate({ editor }) {
@@ -277,9 +280,12 @@ export function SimpleEditor({
   }, [isMobile, mobileView]);
 
   return (
-    <div className="simple-editor-wrapper flex flex-col">
+    <div
+      className="simple-editor-wrapper flex flex-col w-screen h-screen overflow-auto overscroll-none p-0 font-normal not-italic text-(--tt-theme-text) bg-(--tt-bg-color) [font-optical-sizing:auto]"
+      style={{ fontFamily: '"Inter", sans-serif' }}
+    >
       <EditorContext.Provider value={{ editor }}>
-        <div className="sticky top-0 z-10 bg-[var(--tt-bg-color)]">
+        <div className="sticky top-0 z-10 bg-(--tt-bg-color)">
           <EditorHeader title={noteTitle} />
           <Toolbar
             ref={toolbarRef}
@@ -310,7 +316,7 @@ export function SimpleEditor({
         <EditorContent
           editor={editor}
           role="presentation"
-          className="simple-editor-content"
+          className="simple-editor-content max-w-4xl w-full mx-auto h-full flex flex-col flex-1 bg-(--tt-bg-color)"
         />
       </EditorContext.Provider>
     </div>

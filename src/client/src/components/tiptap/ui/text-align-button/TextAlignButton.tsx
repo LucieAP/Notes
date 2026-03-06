@@ -1,56 +1,56 @@
-"use client"
+"use client";
 
-import { forwardRef, useCallback } from "react"
+import { forwardRef, useCallback } from "react";
 
 // --- Lib ---
-import { parseShortcutKeys } from "@/components/tiptap/lib/tiptap-utils"
+import { parseShortcutKeys } from "@/components/tiptap/lib/tiptap-utils";
 
 // --- Hooks ---
-import { useTiptapEditor } from "@/components/tiptap/hooks/useTiptapEditor"
+import { useTiptapEditor } from "@/components/tiptap/hooks/useTiptapEditor";
 
 // --- Tiptap UI ---
 import type {
   TextAlign,
   UseTextAlignConfig,
-} from "@/components/tiptap/ui/text-align-button"
+} from "@/components/tiptap/ui/text-align-button";
 import {
   TEXT_ALIGN_SHORTCUT_KEYS,
   useTextAlign,
-} from "@/components/tiptap/ui/text-align-button"
+} from "@/components/tiptap/ui/text-align-button";
 
 // --- UI Primitives ---
-import type { ButtonProps } from "@/components/tiptap/ui-primitive/button"
-import { Button } from "@/components/tiptap/ui-primitive/button"
-import { Badge } from "@/components/tiptap/ui-primitive/badge"
+import type { ButtonProps } from "@/components/tiptap/ui-primitive/button";
+import { Button } from "@/components/tiptap/ui-primitive/button";
+import { Badge } from "@/components/tiptap/ui-primitive/badge";
 
-type IconProps = React.SVGProps<SVGSVGElement>
-type IconComponent = ({ className, ...props }: IconProps) => React.ReactElement
+type IconProps = React.SVGProps<SVGSVGElement>;
+type IconComponent = ({ className, ...props }: IconProps) => React.ReactElement;
 
 export interface TextAlignButtonProps
   extends Omit<ButtonProps, "type">, UseTextAlignConfig {
   /**
    * Optional text to display alongside the icon.
    */
-  text?: string
+  text?: string;
   /**
    * Optional show shortcut keys in the button.
    * @default false
    */
-  showShortcut?: boolean
+  showShortcut?: boolean;
   /**
    * Optional custom icon component to render instead of the default.
    */
-  icon?: React.MemoExoticComponent<IconComponent> | React.FC<IconProps>
+  icon?: React.MemoExoticComponent<IconComponent> | React.FC<IconProps>;
 }
 
 export function TextAlignShortcutBadge({
   align,
   shortcutKeys = TEXT_ALIGN_SHORTCUT_KEYS[align],
 }: {
-  align: TextAlign
-  shortcutKeys?: string
+  align: TextAlign;
+  shortcutKeys?: string;
 }) {
-  return <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>
+  return <Badge>{parseShortcutKeys({ shortcutKeys })}</Badge>;
 }
 
 /**
@@ -75,9 +75,9 @@ export const TextAlignButton = forwardRef<
       children,
       ...buttonProps
     },
-    ref
+    ref,
   ) => {
-    const { editor } = useTiptapEditor(providedEditor)
+    const { editor } = useTiptapEditor(providedEditor);
     const {
       isVisible,
       handleTextAlign,
@@ -91,22 +91,22 @@ export const TextAlignButton = forwardRef<
       align,
       hideWhenUnavailable,
       onAligned,
-    })
+    });
 
     const handleClick = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
-        onClick?.(event)
-        if (event.defaultPrevented) return
-        handleTextAlign()
+        onClick?.(event);
+        if (event.defaultPrevented) return;
+        handleTextAlign();
       },
-      [handleTextAlign, onClick]
-    )
+      [handleTextAlign, onClick],
+    );
 
     if (!isVisible) {
-      return null
+      return null;
     }
 
-    const RenderIcon = CustomIcon ?? Icon
+    const RenderIcon = CustomIcon ?? Icon;
 
     return (
       <Button
@@ -123,22 +123,23 @@ export const TextAlignButton = forwardRef<
         onClick={handleClick}
         {...buttonProps}
         ref={ref}
+        shortcutKeys={showShortcut ? shortcutKeys : undefined}
       >
         {children ?? (
           <>
             <RenderIcon className="tiptap-button-icon" />
             {text && <span className="tiptap-button-text">{text}</span>}
-            {showShortcut && (
+            {/* {showShortcut && (
               <TextAlignShortcutBadge
                 align={align}
                 shortcutKeys={shortcutKeys}
               />
-            )}
+            )} */}
           </>
         )}
       </Button>
-    )
-  }
-)
+    );
+  },
+);
 
-TextAlignButton.displayName = "TextAlignButton"
+TextAlignButton.displayName = "TextAlignButton";

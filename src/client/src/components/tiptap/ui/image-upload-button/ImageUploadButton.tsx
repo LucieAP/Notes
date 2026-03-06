@@ -114,6 +114,7 @@ export const ImageUploadButton = forwardRef<
         onClick={handleClick}
         {...buttonProps}
         ref={ref}
+        shortcutKeys={showShortcut ? shortcutKeys : undefined}
       >
         {children ?? (
           <>
@@ -121,7 +122,7 @@ export const ImageUploadButton = forwardRef<
             {text && (
               <span className="tiptap-button-text select-none">{text}</span>
             )}
-            {showShortcut && <ImageShortcutBadge shortcutKeys={shortcutKeys} />}
+            {/* {showShortcut && <ImageShortcutBadge shortcutKeys={shortcutKeys} />} */}
           </>
         )}
       </Button>
