@@ -316,7 +316,7 @@ export function SimpleEditor({
         <EditorContent
           editor={editor}
           role="presentation"
-          className="simple-editor-content max-w-4xl w-full mx-auto h-full flex flex-col flex-1 bg-(--tt-bg-color)"
+          className="simple-editor-content max-w-4xl w-full mx-auto h-full flex flex-col flex-1 bg-(--tt-bg-color) "
         />
       </EditorContext.Provider>
     </div>
