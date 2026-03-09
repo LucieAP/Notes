@@ -10,7 +10,7 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     try {
       const data = await recipesApi.getAll();
       setRecipesData(data ?? []);
-      console.log("fetched:", data);
+      console.log("fetched recipes:", data);
     } catch (err) {
       console.log(err instanceof Error ? err.message : err);
     }
@@ -29,7 +29,7 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
       });
 
       setRecipesData((prev) => [...prev, createdRecipe]);
-      console.log(createdRecipe);
+      console.log(`createdRecipe: ${createdRecipe}`);
     } catch (err) {
       console.log(err instanceof Error ? err.message : err);
     }
@@ -141,7 +141,9 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
       const data = await recipesApi.toggleFavorite(id);
       setRecipesData((prev) =>
         prev.map((recipe) =>
-          recipe.id === id ? { ...recipe, isFavorite: data.isFavorite } : recipe,
+          recipe.id === id
+            ? { ...recipe, isFavorite: data.isFavorite }
+            : recipe,
         ),
       );
     } catch (err) {

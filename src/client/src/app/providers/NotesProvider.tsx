@@ -11,7 +11,7 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
     try {
       const data = await notesApi.getAll();
       setNotesData(data ?? []);
-      console.log("fetched:", data);
+      console.log("fetched notes:", data);
     } catch (err) {
       console.log(err instanceof Error ? err.message : err);
     }
@@ -30,7 +30,7 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
       });
 
       setNotesData((prev) => [...prev, createdNote]);
-      console.log(createdNote);
+      console.log(`createdNote: ${createdNote}`);
     } catch (err) {
       console.log(err instanceof Error ? err.message : err);
     }

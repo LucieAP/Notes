@@ -10,7 +10,7 @@ function TasksProvider({ children }: { children: React.ReactNode }) {
     try {
       const data = await tasksApi.getAll();
       setTasksData(data ?? []);
-      console.log("fetched:", data);
+      console.log("fetched tasks:", data);
     } catch (err) {
       console.log(err instanceof Error ? err.message : err);
     }
@@ -31,7 +31,7 @@ function TasksProvider({ children }: { children: React.ReactNode }) {
       });
 
       setTasksData((prev) => [...prev, createdTask]);
-      console.log(createdTask);
+      console.log(`createdTask: ${createdTask}`);
     } catch (err) {
       console.log(err instanceof Error ? err.message : err);
     }

@@ -10,6 +10,8 @@ import NoteIcon from "../common/icons/NoteIcon";
 import TaskIcon from "../common/icons/TaskIcon";
 import RecipeIcon from "../common/icons/RecipeIcon";
 import useNotes from "@/shared/hooks/useNotes";
+import useRecipes from "@/shared/hooks/useRecipes";
+import useTasks from "@/shared/hooks/useTasks";
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
 const DEFAULT_WIDTH = 240;
@@ -18,6 +20,8 @@ function Sidebar() {
   const raw = Number(localStorage.getItem(SIDEBAR_WIDTH_KEY));
   const savedWidth = Number.isFinite(raw) ? raw : DEFAULT_WIDTH; // isFinite - если число и не NaN
   const { notesData, createNote } = useNotes();
+  const { tasksData, createTask } = useTasks();
+  const { recipesData, createRecipe } = useRecipes();
 
   const privateNavItems = useMemo<NavItem[]>(
     () => [
@@ -38,14 +42,24 @@ function Sidebar() {
         icon: TaskIcon,
         label: "Tasks",
         entityType: "tasks",
-        // onCreate: createTask,
+        onCreate: createTask,
+        children: tasksData.map((task) => ({
+          itemId: task.id,
+          to: `/tasks/${task.id}`,
+          label: task.title || "Untitled",
+        })),
       },
       {
         to: "/recipes",
         icon: RecipeIcon,
         label: "Recipes",
         entityType: "recipes",
-        // onCreate: createRecipe,
+        onCreate: createRecipe,
+        children: recipesData.map((recipe) => ({
+          itemId: recipe.id,
+          to: `/recipes/${recipe.id}`,
+          label: recipe.title || "Untitled",
+        })),
       },
     ],
     [notesData, createNote],
