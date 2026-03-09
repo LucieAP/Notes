@@ -13,12 +13,13 @@ public class RecipeService : IRecipeService
         _logger = logger;
     }
 
-    public async Task<IEnumerable<GetRecipeResponse>> GetAllRecipesAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<GetRecipeResponse>> GetAllRecipesAsync(Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var recipes = await _context.Recipes
             .AsNoTracking()
             .Include(r => r.User)
             .Include(r => r.RecipeGroup)
+            .Where(r => r.CreatedBy == currentUserId && !r.IsDeleted && !r.IsTrashed)
             .Select(r => new GetRecipeResponse
             {
                 Id = r.Id,
@@ -236,6 +237,75 @@ public class RecipeService : IRecipeService
             Id = recipe.Id,
             IsTrashed = recipe.IsTrashed,
             LastModifiedAt = recipe.LastModifiedAt
+        });
+    }
+
+    public async Task<OperationResult<TrashResponse>> RestoreRecipeAsync(Guid recipeId, Guid currentUserId, CancellationToken cancellationToken = default)
+    {
+        var recipe = await _context.Recipes
+                .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted && r.IsTrashed)
+                .FirstOrDefaultAsync(cancellationToken);
+
+        if (recipe == null)
+        {
+            return OperationResult<TrashResponse>.Failure("Рецепт не найден или уже восстановлен", 404);
+        }
+
+        recipe.IsTrashed = false;
+        recipe.LastModifiedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Рецепт {RecipeId} восстановлен пользователем {UserId}", recipe.Id, currentUserId);
+
+        return OperationResult<TrashResponse>.Success(new TrashResponse
+        {
+            Id = recipe.Id,
+            IsTrashed = recipe.IsTrashed,
+            LastModifiedAt = recipe.LastModifiedAt
+        });
+    }
+
+    public async Task<OperationResult<TrashedRecipesResponse>> GetTrashedRecipesAsync(Guid currentUserId, CancellationToken cancellationToken = default)
+    {
+        var trashedRecipes = await _context.Recipes
+            .AsNoTracking()
+            .Include(r => r.User)
+            .Include(r => r.RecipeGroup)
+            .Where(r => r.IsTrashed && r.CreatedBy == currentUserId && !r.IsDeleted)
+            .OrderByDescending(r => r.LastModifiedAt)
+            .Select(r => new GetRecipeResponse
+            {
+                Id = r.Id,
+                Title = r.Title,
+                Description = r.Content,
+                IsFavorite = r.IsFavorite,
+                CreatedAt = r.CreatedAt,
+                LastModifiedAt = r.LastModifiedAt,
+                IsTrashed = r.IsTrashed,
+                IsDeleted = r.IsDeleted,
+                DeletedAt = r.DeletedAt,
+                RecipeGroup = r.RecipeGroup != null ? new GroupResponse
+                {
+                    Id = r.RecipeGroup.Id,
+                    Title = r.RecipeGroup.Title,
+                    CreatedAt = r.RecipeGroup.CreatedAt,
+                    LastModifiedAt = r.RecipeGroup.LastModifiedAt,
+                } : null,
+                CreatedBy = new GetUserResponse
+                {
+                    Id = r.User.Id,
+                    Name = r.User.Name,
+                    Email = r.User.Email,
+                    Picture = r.User.Picture,
+                    EmailVerified = r.User.EmailVerified,
+                    LastLoginAt = r.User.LastLoginAt
+                }
+            })
+            .ToListAsync(cancellationToken);
+
+        return OperationResult<TrashedRecipesResponse>.Success(new TrashedRecipesResponse
+        {
+            Recipes = trashedRecipes
         });
     }
 

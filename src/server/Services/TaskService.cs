@@ -13,12 +13,13 @@ public class TaskService : ITaskService
         _logger = logger;
     }
 
-    public async Task<IEnumerable<GetTaskResponse>> GetAllTasksAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<GetTaskResponse>> GetAllTasksAsync(Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var tasks = await _context.Tasks
             .AsNoTracking()
             .Include(t => t.User)
             .Include(t => t.TaskGroup)
+            .Where(t => t.CreatedBy == currentUserId && !t.IsDeleted && !t.IsTrashed)
             .Select(t => new GetTaskResponse
             {
                 Id = t.Id,
@@ -293,6 +294,78 @@ public class TaskService : ITaskService
             Id = task.Id,
             IsTrashed = task.IsTrashed,
             LastModifiedAt = task.LastModifiedAt
+        });
+    }
+
+    public async Task<OperationResult<TrashResponse>> RestoreTaskAsync(Guid taskId, Guid currentUserId, CancellationToken cancellationToken = default)
+    {
+        var task = await _context.Tasks
+                .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted && t.IsTrashed)
+                .FirstOrDefaultAsync(cancellationToken);
+
+        if (task == null)
+        {
+            return OperationResult<TrashResponse>.Failure("Задача не найдена или уже восстановлена", 404);
+        }
+
+        task.IsTrashed = false;
+        task.LastModifiedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Задача {TaskId} восстановлена пользователем {UserId}", task.Id, currentUserId);
+
+        return OperationResult<TrashResponse>.Success(new TrashResponse
+        {
+            Id = task.Id,
+            IsTrashed = task.IsTrashed,
+            LastModifiedAt = task.LastModifiedAt
+        });
+    }
+
+    public async Task<OperationResult<TrashedTasksResponse>> GetTrashedTasksAsync(Guid currentUserId, CancellationToken cancellationToken = default)
+    {
+        var trashedTasks = await _context.Tasks
+            .AsNoTracking()
+            .Include(t => t.User)
+            .Include(t => t.TaskGroup)
+            .Where(t => t.IsTrashed && t.CreatedBy == currentUserId && !t.IsDeleted)
+            .OrderByDescending(t => t.LastModifiedAt)
+            .Select(t => new GetTaskResponse
+            {
+                Id = t.Id,
+                Title = t.Title,
+                Description = t.Content,
+                CheckBox = t.CheckBox,
+                IsFavorite = t.IsFavorite,
+                CreatedAt = t.CreatedAt,
+                LastModifiedAt = t.LastModifiedAt,
+                IsTrashed = t.IsTrashed,
+                BackgroundColor = t.BackgroundColor,
+                IsDeleted = t.IsDeleted,
+                DeletedAt = t.DeletedAt,
+                TaskGroup = t.TaskGroup != null ? new GroupResponse
+                {
+                    Id = t.TaskGroup.Id,
+                    Title = t.TaskGroup.Title,
+                    CreatedAt = t.TaskGroup.CreatedAt,
+                    LastModifiedAt = t.TaskGroup.LastModifiedAt,
+                } : null,
+                CreatedBy = new GetUserResponse
+                {
+                    Id = t.User.Id,
+                    Name = t.User.Name,
+                    Email = t.User.Email,
+                    Picture = t.User.Picture,
+                    EmailVerified = t.User.EmailVerified,
+                    LastLoginAt = t.User.LastLoginAt
+                }
+            })
+            .ToListAsync(cancellationToken);
+
+        return OperationResult<TrashedTasksResponse>.Success(new TrashedTasksResponse
+        {
+            Tasks = trashedTasks
         });
     }
 

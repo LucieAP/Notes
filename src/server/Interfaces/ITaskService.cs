@@ -2,7 +2,7 @@ namespace server.Interfaces;
 
 public interface ITaskService
 {
-    public Task<IEnumerable<GetTaskResponse>> GetAllTasksAsync(CancellationToken cancellationToken = default);
+    public Task<IEnumerable<GetTaskResponse>> GetAllTasksAsync(Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<GetTaskResponse?> GetTaskByIdAsync(Guid taskId, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<CreateTaskResponse> CreateTaskAsync(CreateTaskRequest createTaskRequest, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<ToggleFavoriteResponse?>> ToggleFavoriteAsync(Guid taskId, Guid currentUserId, CancellationToken cancellationToken = default);
@@ -11,6 +11,8 @@ public interface ITaskService
     public Task<OperationResult<UpdateColorResponse>> UpdateColorAsync(Guid noteId, Guid currentUserId, UpdateColorRequest updateColorRequest, CancellationToken cancellationToken = default);
     public Task<OperationResult> DeleteTaskByIdAsync(Guid taskId, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<TrashResponse>> TrashTaskAsync(Guid taskId, Guid currentUserId, CancellationToken cancellationToken = default);
+    public Task<OperationResult<TrashResponse>> RestoreTaskAsync(Guid taskId, Guid currentUserId, CancellationToken cancellationToken = default);
+    public Task<OperationResult<TrashedTasksResponse>> GetTrashedTasksAsync(Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<CreateGroupResponse>> CreateTaskGroupAsync(Guid currentUserId, CreateGroupRequest createGroupRequest, CancellationToken cancellationToken = default);
     public Task<GroupResponse?> GetTaskGroupAsync(Guid groupId, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<AddToGroupResponse>> AddToGroupAsync(Guid taskId, Guid groupId, Guid currentUserId, CancellationToken cancellationToken = default);

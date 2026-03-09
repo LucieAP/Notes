@@ -24,9 +24,11 @@ public class TasksController : ControllerBase
 
     // GET: api/tasks
     [HttpGet]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<GetTaskResponse>>> GetTasks(CancellationToken cancellationToken = default)
     {
-        var tasks = await _taskService.GetAllTasksAsync(cancellationToken);
+        var currentUserId = _userService.GetUserId(User);
+        var tasks = await _taskService.GetAllTasksAsync(currentUserId, cancellationToken);
 
         return Ok(tasks);
     } 
@@ -68,6 +70,11 @@ public class TasksController : ControllerBase
         }
         catch (ArgumentException ex)
         {
+            _logger.LogWarning(
+                ex,
+                "Ошибка при создании задачи. Пользователь {UserId}. Тело запроса {@Request}",
+                currentUserId,
+                createTaskRequest);
             return BadRequest(new { message = ex.Message });
         }
         catch (InvalidOperationException ex)
@@ -170,6 +177,38 @@ public class TasksController : ControllerBase
         }
 
         return Ok(response.Value);
+    }
+
+    // PATCH: api/tasks/{id}/restore
+    [HttpPatch("{id}/restore")]
+    [Authorize]
+    public async Task<IActionResult> RestoreTask([FromRoute] Guid id, CancellationToken cancellationToken = default)
+    {
+        var currentUserId = _userService.GetUserId(User);
+        var response = await _taskService.RestoreTaskAsync(id, currentUserId, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            return StatusCode(response.StatusCode ?? 500, new { message = response.ErrorMessage });
+        }
+
+        return Ok(response.Value);
+    }
+
+    // GET: api/tasks/trashed
+    [HttpGet("trashed")]
+    [Authorize]
+    public async Task<IActionResult> GetTrashedTasks(CancellationToken cancellationToken = default)
+    {
+        var currentUserId = _userService.GetUserId(User);
+        var response = await _taskService.GetTrashedTasksAsync(currentUserId, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            return StatusCode(response.StatusCode ?? 500, new { message = response.ErrorMessage });
+        }
+
+        return Ok(response.Value!.Tasks);
     }
 
     // POST: api/tasks/group/create

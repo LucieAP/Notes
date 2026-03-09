@@ -24,9 +24,11 @@ public class RecipesController : ControllerBase
 
     // GET: api/recipes
     [HttpGet]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<GetRecipeResponse>>> GetRecipes(CancellationToken cancellationToken = default)
     {
-        var recipes = await _recipeService.GetAllRecipesAsync(cancellationToken);
+        var currentUserId = _userService.GetUserId(User);
+        var recipes = await _recipeService.GetAllRecipesAsync(currentUserId, cancellationToken);
 
         return Ok(recipes);
     } 
@@ -68,6 +70,11 @@ public class RecipesController : ControllerBase
         }
         catch (ArgumentException ex)
         {
+            _logger.LogWarning(
+                ex,
+                "Ошибка при создании рецепта. Пользователь {UserId}. Тело запроса {@Request}",
+                currentUserId,
+                createRecipeRequest);
             return BadRequest(new { message = ex.Message });
         }
         catch (InvalidOperationException ex)
@@ -125,6 +132,7 @@ public class RecipesController : ControllerBase
     }
 
     // PATCH: api/recipes/trash/{id}
+    [HttpPatch("{id}/trash")]
     [HttpPatch("trash/{id}")]
     [Authorize]
     public async Task<IActionResult> TrashRecipeById([FromRoute] Guid id, CancellationToken cancellationToken = default)
@@ -138,6 +146,38 @@ public class RecipesController : ControllerBase
         }
 
         return Ok(response.Value);
+    }
+
+    // PATCH: api/recipes/{id}/restore
+    [HttpPatch("{id}/restore")]
+    [Authorize]
+    public async Task<IActionResult> RestoreRecipe([FromRoute] Guid id, CancellationToken cancellationToken = default)
+    {
+        var currentUserId = _userService.GetUserId(User);
+        var response = await _recipeService.RestoreRecipeAsync(id, currentUserId, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            return StatusCode(response.StatusCode ?? 500, new { message = response.ErrorMessage });
+        }
+
+        return Ok(response.Value);
+    }
+
+    // GET: api/recipes/trashed
+    [HttpGet("trashed")]
+    [Authorize]
+    public async Task<IActionResult> GetTrashedRecipes(CancellationToken cancellationToken = default)
+    {
+        var currentUserId = _userService.GetUserId(User);
+        var response = await _recipeService.GetTrashedRecipesAsync(currentUserId, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            return StatusCode(response.StatusCode ?? 500, new { message = response.ErrorMessage });
+        }
+
+        return Ok(response.Value!.Recipes);
     }
 
     // Группа рецептов

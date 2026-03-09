@@ -2,13 +2,15 @@ namespace server.Interfaces;
 
 public interface IRecipeService
 {
-    public Task<IEnumerable<GetRecipeResponse>> GetAllRecipesAsync(CancellationToken cancellationToken = default);
+    public Task<IEnumerable<GetRecipeResponse>> GetAllRecipesAsync(Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<GetRecipeResponse?> GetRecipeByIdAsync(Guid recipeId, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<CreateRecipeResponse> CreateRecipeAsync(CreateRecipeRequest createRecipeRequest, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<ToggleFavoriteResponse?>> ToggleFavoriteAsync(Guid recipeId, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<UpdateItemResponse>> UpdateRecipeAsync(Guid recipeId, Guid currentUserId, UpdateItemRequest updateItemRequest, CancellationToken cancellationToken = default);
     public Task<OperationResult> DeleteRecipeByIdAsync(Guid recipeId, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<TrashResponse>> TrashRecipeByIdAsync(Guid recipeId, Guid currentUserId, CancellationToken cancellationToken = default);
+    public Task<OperationResult<TrashResponse>> RestoreRecipeAsync(Guid recipeId, Guid currentUserId, CancellationToken cancellationToken = default);
+    public Task<OperationResult<TrashedRecipesResponse>> GetTrashedRecipesAsync(Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<CreateGroupResponse>> CreateRecipeGroupAsync(Guid currentUserId, CreateGroupRequest createGroupRequest, CancellationToken cancellationToken = default);
     public Task<GroupResponse?> GetRecipeGroupByIdAsync(Guid groupId, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<AddToGroupResponse>> AddToGroupAsync(Guid recipeId, Guid groupId, Guid currentUserId, CancellationToken cancellationToken = default);

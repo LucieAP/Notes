@@ -18,6 +18,8 @@ import CallbackPage from "@/components/auth/CallbackPage";
 import AuthProvider from "./providers/AuthProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import NotesProvider from "./providers/NotesProvider";
+import TasksProvider from "./providers/TasksProvider";
+import RecipeProvider from "./providers/RecipeProvider";
 
 function App() {
   return (
@@ -32,7 +34,11 @@ function App() {
             element={
               <ProtectedRoute>
                 <NotesProvider>
-                  <WorkspaceLayout />
+                  <TasksProvider>
+                    <RecipeProvider>
+                      <WorkspaceLayout />
+                    </RecipeProvider>
+                  </TasksProvider>
                 </NotesProvider>
               </ProtectedRoute>
             }
