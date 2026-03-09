@@ -3,8 +3,12 @@ import DropdownIcon from "../common/icons/DropdownIcon";
 import NoteIcon from "../common/icons/NoteIcon";
 import { NavItem } from "./sidebar.config";
 import SidebarNavLink from "./SidebarNavLink";
-import { useEffect, useState } from "react";
-import { GetNoteResponse } from "@/features/notes/note";
+import { useMemo, useState } from "react";
+
+import useTasks from "@/shared/hooks/useTasks";
+import useRecipes from "@/shared/hooks/useRecipes";
+import RecipeIcon from "../common/icons/RecipeIcon";
+import TaskIcon from "../common/icons/TaskIcon";
 
 interface Props {
   navItems?: NavItem[];
@@ -15,18 +19,27 @@ interface Props {
 
 function SidebarSection({ navItems, title, defaultOpen = true, type }: Props) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const [pinnedNotes, setPinned] = useState<GetNoteResponse[]>([]);
 
-  const { notesData } = useNotes();
-  const [isLoading, setIsLoading] = useState(true);
+  const { notesData, isLoading: notesLoading } = useNotes();
+  const { tasksData, isLoading: tasksLoading } = useTasks();
+  const { recipesData, isLoading: recipesLoading } = useRecipes();
 
-  useEffect(() => {
-    if (type !== "favorite") return;
+  const isLoading = notesLoading || tasksLoading || recipesLoading;
 
-    const pinnedNotes = notesData.filter((n) => n.isPinned);
-    setPinned(pinnedNotes);
-    setIsLoading(false);
-  }, [notesData, type]);
+  const favoriteNotes = useMemo(
+    () => (type === "favorite" ? notesData.filter((n) => n.isPinned) : []),
+    [notesData, type],
+  );
+
+  const favoriteTasks = useMemo(
+    () => (type === "favorite" ? tasksData.filter((t) => t.isFavorite) : []),
+    [tasksData, type],
+  );
+
+  const favoriteRecipes = useMemo(
+    () => (type === "favorite" ? recipesData.filter((r) => r.isFavorite) : []),
+    [recipesData, type],
+  );
 
   return (
     <div className="flex flex-col mt-5">
@@ -66,24 +79,47 @@ function SidebarSection({ navItems, title, defaultOpen = true, type }: Props) {
           })}
         </div>
       )}
+
       {isOpen && type === "favorite" && (
         <div className="flex flex-col mt-1">
           {isLoading ? (
             <p className="text-xs text-neutral-500 px-2 py-2">Loading...</p>
-          ) : pinnedNotes.length === 0 ? (
+          ) : favoriteNotes.length === 0 &&
+            favoriteTasks.length === 0 &&
+            favoriteRecipes.length === 0 ? (
             <p className="text-xs text-neutral-500 px-2 py-2">
               No favorites yet
             </p>
           ) : (
-            pinnedNotes.map((note) => (
-              <SidebarNavLink
-                key={note.id}
-                itemId={note.id}
-                to={`/notes/${note.id}`}
-                icon={<NoteIcon />}
-                label={note.title || "Untitled"}
-              />
-            ))
+            <>
+              {favoriteNotes.map((note) => (
+                <SidebarNavLink
+                  key={note.id}
+                  itemId={note.id}
+                  to={`/notes/${note.id}`}
+                  icon={<NoteIcon />}
+                  label={note.title || "Untitled"}
+                />
+              ))}
+              {favoriteTasks.map((task) => (
+                <SidebarNavLink
+                  key={task.id}
+                  itemId={task.id}
+                  to={`/tasks/${task.id}`}
+                  icon={<TaskIcon />}
+                  label={task.title || "Untitled"}
+                />
+              ))}
+              {favoriteRecipes.map((recipe) => (
+                <SidebarNavLink
+                  key={recipe.id}
+                  itemId={recipe.id}
+                  to={`/recipes/${recipe.id}`}
+                  icon={<RecipeIcon />}
+                  label={recipe.title || "Untitled"}
+                />
+              ))}
+            </>
           )}
         </div>
       )}

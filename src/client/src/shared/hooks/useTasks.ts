@@ -3,6 +3,7 @@ import { createContext, useContext } from "react";
 
 interface TasksContextTypes {
   tasksData: GetTaskResponse[];
+  isLoading: boolean;
   fetchTasks: () => Promise<void>;
   createTask: () => Promise<void>;
   getTaskById: (id: string) => Promise<GetTaskResponse | undefined>;

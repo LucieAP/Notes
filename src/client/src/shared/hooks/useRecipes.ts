@@ -3,6 +3,7 @@ import { createContext, useContext } from "react";
 
 interface RecipesContextTypes {
   recipesData: GetRecipeResponse[];
+  isLoading: boolean;
   fetchRecipes: () => Promise<void>;
   createRecipe: () => Promise<void>;
   getRecipeById: (id: string) => Promise<GetRecipeResponse | undefined>;

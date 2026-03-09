@@ -5,14 +5,18 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 function RecipeProvider({ children }: { children: React.ReactNode }) {
   const [recipesData, setRecipesData] = useState<GetRecipeResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchRecipes = useCallback(async () => {
+    setIsLoading(true);
     try {
       const data = await recipesApi.getAll();
       setRecipesData(data ?? []);
       console.log("fetched recipes:", data);
     } catch (err) {
       console.log(err instanceof Error ? err.message : err);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -154,6 +158,7 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(() => {
     return {
       recipesData,
+      isLoading,
       fetchRecipes,
       createRecipe,
       getRecipeById,
@@ -167,6 +172,7 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     };
   }, [
     recipesData,
+    isLoading,
     fetchRecipes,
     createRecipe,
     getRecipeById,

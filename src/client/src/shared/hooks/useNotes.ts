@@ -4,6 +4,7 @@ import { createContext, useContext } from "react";
 
 interface NotesContextTypes {
   notesData: GetNoteResponse[];
+  isLoading: boolean;
   fetchNotes: () => Promise<void>;
   createNote: () => Promise<void>;
   getNoteById: (id: string) => Promise<GetNoteResponse | undefined>;

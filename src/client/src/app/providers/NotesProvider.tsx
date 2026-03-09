@@ -6,14 +6,18 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 function NotesProvider({ children }: { children: React.ReactNode }) {
   const [notesData, setNotesData] = useState<GetNoteResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchNotes = useCallback(async () => {
+    setIsLoading(true);
     try {
       const data = await notesApi.getAll();
       setNotesData(data ?? []);
       console.log("fetched notes:", data);
     } catch (err) {
       console.log(err instanceof Error ? err.message : err);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -157,6 +161,7 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(() => {
     return {
       notesData,
+      isLoading,
       fetchNotes,
       createNote,
       getNoteById,
@@ -170,6 +175,7 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
     };
   }, [
     notesData,
+    isLoading,
     fetchNotes,
     createNote,
     getNoteById,

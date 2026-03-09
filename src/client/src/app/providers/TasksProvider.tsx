@@ -5,14 +5,18 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 function TasksProvider({ children }: { children: React.ReactNode }) {
   const [tasksData, setTasksData] = useState<GetTaskResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchTasks = useCallback(async () => {
+    setIsLoading(true);
     try {
       const data = await tasksApi.getAll();
       setTasksData(data ?? []);
       console.log("fetched tasks:", data);
     } catch (err) {
       console.log(err instanceof Error ? err.message : err);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -167,6 +171,7 @@ function TasksProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(() => {
     return {
       tasksData,
+      isLoading,
       fetchTasks,
       createTask,
       getTaskById,
@@ -181,6 +186,7 @@ function TasksProvider({ children }: { children: React.ReactNode }) {
     };
   }, [
     tasksData,
+    isLoading,
     fetchTasks,
     createTask,
     getTaskById,
