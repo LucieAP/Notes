@@ -62,7 +62,7 @@ function Sidebar() {
         })),
       },
     ],
-    [notesData, createNote],
+    [notesData, tasksData, recipesData, createNote, createTask, createRecipe],
   );
 
   const [width, setWidth, onMouseDown] = useResizableSidebar({

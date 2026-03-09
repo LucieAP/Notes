@@ -19,7 +19,7 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetchNotes();
-  }, []);
+  }, [fetchNotes]);
 
   const createNote = useCallback(async () => {
     try {
