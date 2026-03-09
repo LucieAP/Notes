@@ -1,6 +1,5 @@
 import { GetNoteResponse } from "@/features/notes/note";
 import NoteIcon from "../common/icons/NoteIcon";
-import type { MouseEvent } from "react";
 
 interface Props {
   note: GetNoteResponse;
