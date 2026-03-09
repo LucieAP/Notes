@@ -4,27 +4,18 @@ import CreateItemButton from "../common/buttons/CreateItemButton";
 import useNotes from "@/shared/hooks/useNotes";
 import KebabButton from "../common/buttons/KebabButton";
 import { useRef, useState } from "react";
-import { notesApi } from "@/features/notes/api";
 
 interface Props {
   itemId?: string;
   to: string;
   icon: React.ReactNode;
   label: string;
-  showAddButton?: boolean;
+  onCreate?: () => Promise<void>;
 }
 
-function SidebarNavLink({
-  itemId,
-  to,
-  icon,
-  label,
-  showAddButton = true,
-}: Props) {
+function SidebarNavLink({ itemId, to, icon, label, onCreate }: Props) {
   const match = useMatch(to); // совпадает ли текущий URL с заданным маршрутом
   const isActive = Boolean(match);
-
-  const { createNote } = useNotes();
 
   const [value, setValue] = useState(label);
   const [isEditing, setIsEditing] = useState(false);
@@ -84,7 +75,7 @@ function SidebarNavLink({
       </div>
 
       {itemId && <KebabButton itemId={itemId} onRename={handleRenameStart} />}
-      {showAddButton && <CreateItemButton onCreateNote={createNote} />}
+      {onCreate && <CreateItemButton onCreate={onCreate} />}
     </div>
   );
 }

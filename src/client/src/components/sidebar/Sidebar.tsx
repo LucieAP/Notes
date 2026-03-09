@@ -25,6 +25,7 @@ function Sidebar() {
         to: "/notes",
         icon: NoteIcon,
         label: "Notes",
+        entityType: "notes",
         onCreate: createNote,
         children: notesData.map((note) => ({
           itemId: note.id,
@@ -32,8 +33,20 @@ function Sidebar() {
           label: note.title || "Untitled",
         })),
       },
-      { to: "/tasks", icon: TaskIcon, label: "Tasks" },
-      { to: "/recipes", icon: RecipeIcon, label: "Recipes" },
+      {
+        to: "/tasks",
+        icon: TaskIcon,
+        label: "Tasks",
+        entityType: "tasks",
+        // onCreate: createTask,
+      },
+      {
+        to: "/recipes",
+        icon: RecipeIcon,
+        label: "Recipes",
+        entityType: "recipes",
+        // onCreate: createRecipe,
+      },
     ],
     [notesData, createNote],
   );
@@ -61,7 +74,6 @@ function Sidebar() {
               to={item.to}
               icon={<item.icon />}
               label={item.label}
-              showAddButton={item.showAddButton}
             />
           ))}
 

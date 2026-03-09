@@ -48,7 +48,7 @@ function SidebarSection({ navItems, title, defaultOpen = true, type }: Props) {
                   to={item.to}
                   icon={<item.icon />}
                   label={item.label}
-                  showAddButton={item.showAddButton}
+                  onCreate={item.onCreate}
                 />
                 {/* Дочерние элементы */}
                 {item.children?.map((child) => (
@@ -58,7 +58,6 @@ function SidebarSection({ navItems, title, defaultOpen = true, type }: Props) {
                       to={child.to}
                       icon={<item.icon />}
                       label={child.label}
-                      showAddButton={false}
                     />
                   </div>
                 ))}
@@ -83,7 +82,6 @@ function SidebarSection({ navItems, title, defaultOpen = true, type }: Props) {
                 to={`/notes/${note.id}`}
                 icon={<NoteIcon />}
                 label={note.title || "Untitled"}
-                showAddButton={false}
               />
             ))
           )}

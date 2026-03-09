@@ -2,16 +2,16 @@ import PlusIcon from "../icons/PlusIcon";
 
 interface Props {
   enabled?: boolean;
-  onCreateNote?: () => void;
+  onCreate?: () => void;
 }
 
-function CreateItemButton({ enabled = true, onCreateNote }: Props) {
+function CreateItemButton({ enabled = true, onCreate }: Props) {
   if (!enabled) return null;
 
   const handleCreateItem = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    onCreateNote?.();
+    onCreate?.();
   };
 
   return (

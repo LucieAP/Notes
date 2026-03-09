@@ -1,11 +1,12 @@
+import { EntityType } from "@/shared/types/entityType";
 import WorkspaceIcon from "../common/icons/WorkspaceIcon";
 
 export interface NavItem {
   to: string;
   icon: React.ComponentType;
   label: string;
-  showAddButton?: boolean;
-  onCreate?: () => void; // своя функция для каждого пункта
+  entityType?: EntityType;
+  onCreate?: () => Promise<void>; // своя функция для каждого пункта
   children?: ChildNavItem[]; // дочерние элементы
 }
 
@@ -20,6 +21,5 @@ export const mainNavItems: NavItem[] = [
     to: "/workspace",
     icon: WorkspaceIcon,
     label: "Workspace",
-    showAddButton: false,
   },
 ];
