@@ -1,10 +1,11 @@
 import { GetNoteResponse } from "@/features/notes/note";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import { SimpleEditor } from "../tiptap/templates/simple/SimpleEditor";
 import useNotes from "@/shared/hooks/useNotes";
 import { JSONContent } from "@tiptap/core";
 import Spinner from "../common/icons/Spinner";
+import NotFoundPage from "../common/pages/NotFoundPage";
 
 function NotesEditorPage() {
   const { id } = useParams<{ id: string }>();
@@ -48,17 +49,19 @@ function NotesEditorPage() {
     [id, updateContent],
   );
 
-  if (!note) return <div>Note not found</div>;
-
   return (
     <>
       {!isLoading ? (
-        <SimpleEditor
-          key={note?.id}
-          initialContent={note?.content}
-          noteTitle={note?.title}
-          onChange={handleContentChange}
-        />
+        note ? (
+          <SimpleEditor
+            key={note?.id}
+            initialContent={note?.content}
+            noteTitle={note?.title}
+            onChange={handleContentChange}
+          />
+        ) : (
+          <div>Note not found</div>
+        )
       ) : (
         <Spinner />
       )}

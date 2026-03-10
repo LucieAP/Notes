@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useParams } from "react-router-dom";
 import NoteCard from "../notes/NoteCard";
 import useNotes from "@/shared/hooks/useNotes";
 import useTasks from "@/shared/hooks/useTasks";
@@ -8,6 +8,7 @@ import RecipeCard from "../recipes/RecipeCard";
 import TaskCard from "../tasks/TaskCard";
 
 function ContentArea() {
+  const { id } = useParams<{ id?: string }>();
   const entityType = useActiveEntityType();
   const { notesData } = useNotes();
   const { tasksData } = useTasks();
@@ -17,7 +18,7 @@ function ContentArea() {
     <>
       <Outlet />
 
-      {entityType === "notes" && (
+      {entityType === "notes" && !id && (
         <div className="flex overflow-y-auto w-full justify-center">
           <div className="flex flex-col px-24 py-20 max-w-md w-full justify-center">
             <span className="text-2xl pl-2 font-bold">Notes</span>
@@ -30,7 +31,7 @@ function ContentArea() {
         </div>
       )}
 
-      {entityType === "recipes" && (
+      {entityType === "recipes" && !id && (
         <div className="flex overflow-y-auto w-full justify-center">
           <div className="flex flex-col px-24 py-20 max-w-md w-full justify-center">
             <span className="text-2xl pl-2 font-bold">Recipes</span>
@@ -43,7 +44,7 @@ function ContentArea() {
         </div>
       )}
 
-      {entityType === "tasks" && (
+      {entityType === "tasks" && !id && (
         <div className="flex overflow-y-auto w-full justify-center">
           <div className="flex flex-col px-24 py-20 max-w-md w-full justify-center">
             <span className="text-2xl pl-2 font-bold">Tasks</span>
