@@ -17,9 +17,9 @@ interface RecipesContextTypes {
   }) => Promise<void>;
   deleteRecipe: (id: string) => Promise<void>;
   trashRecipe: (id: string) => Promise<void>;
-  getTrashed: () => Promise<GetRecipeResponse[]>;
+  getRecipesTrashed: () => Promise<GetRecipeResponse[]>;
   restoreRecipe: (id: string) => Promise<void>;
-  favoriteRecipe: (id: string) => Promise<void>;
+  toggleFavorite: (id: string) => Promise<void>;
 }
 
 export const RecipesContext = createContext<RecipesContextTypes | null>(null);

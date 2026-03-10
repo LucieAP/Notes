@@ -1,35 +1,37 @@
-import useNotes from "@/shared/hooks/useNotes";
 import FavoriteIcon from "../icons/FavoriteIcon";
+import useEntity from "@/shared/hooks/useEntity";
+import { EntityType } from "@/shared/types/entityType";
 
 interface Props {
   itemId?: string;
-  onClose?: () => void;
+  entityType?: EntityType;
+  onToggle?: () => void;
   removeLabel?: string;
   addLabel?: string;
 }
 
 function AddToFavoritesButton({
   itemId,
-  onClose,
+  entityType,
+  onToggle,
   removeLabel,
   addLabel,
 }: Props) {
-  if (!itemId) return null;
-  const { pinNote, notesData } = useNotes();
-  const isPinned = notesData.find((n) => n.id === itemId)?.isPinned ?? false;
+  if (!entityType || !itemId) return;
+
+  const { data, isFavorite } = useEntity(entityType);
+  const item = data.find((i) => i.id === itemId);
+  const favorited = item ? isFavorite(item) : false;
 
   return (
     <button
-      onClick={() => {
-        pinNote(itemId);
-        onClose?.();
-      }}
+      onClick={onToggle}
       className="flex space-x-1 rounded-lg p-1 cursor-pointer hover:bg-neutral-600"
     >
       <FavoriteIcon />
       {(addLabel || removeLabel) && (
-        <span>{isPinned ? removeLabel : addLabel}</span>
-      )}{" "}
+        <span>{favorited ? removeLabel : addLabel}</span>
+      )}
     </button>
   );
 }

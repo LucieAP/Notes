@@ -1,18 +1,24 @@
 import { useRef } from "react";
 import AddToFavoritesButton from "../buttons/AddToFavoritesButton";
-import RenameNoteButton from "../buttons/RenameNoteButton";
 import MoveToTrashButton from "../buttons/MoveToTrashButton";
 import DeleteButton from "../buttons/DeleteButton";
+import { EntityType } from "@/shared/types/entityType";
+import RenameButton from "../buttons/RenameButton";
+import useEntity from "@/shared/hooks/useEntity";
 
 interface Props {
   itemId?: string;
   position: { top: number; left: number };
+  entityType?: EntityType;
   onClose?: () => void;
   onRename?: () => void;
 }
 
-function KebabMenu({ itemId, position, onClose, onRename }: Props) {
+function KebabMenu({ itemId, position, entityType, onClose, onRename }: Props) {
   const backdropRef = useRef<HTMLDivElement>(null);
+
+  if (!entityType || !itemId) return;
+  const { toggleFav, deleteItem, trashItem } = useEntity(entityType);
 
   return (
     <div
@@ -31,13 +37,27 @@ function KebabMenu({ itemId, position, onClose, onRename }: Props) {
       >
         <AddToFavoritesButton
           itemId={itemId}
-          onClose={onClose}
+          entityType={entityType}
+          onToggle={() => {
+            toggleFav(itemId);
+            onClose?.();
+          }}
           removeLabel="Remove from favorites"
           addLabel="Add to favorites"
         />
-        <RenameNoteButton onRename={onRename} onClose={onClose} />
-        <MoveToTrashButton itemId={itemId} onClose={onClose} />
-        <DeleteButton itemId={itemId} />
+        <RenameButton
+          onRename={() => {
+            onRename?.();
+            onClose?.();
+          }}
+        />
+        <MoveToTrashButton
+          onMoveToTrash={() => {
+            trashItem?.(itemId);
+            onClose?.();
+          }}
+        />
+        <DeleteButton onDelete={() => deleteItem(itemId)} />
       </div>
     </div>
   );

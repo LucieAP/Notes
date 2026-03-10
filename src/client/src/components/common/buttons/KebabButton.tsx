@@ -2,13 +2,15 @@ import { createPortal } from "react-dom";
 import KebabIcon from "../icons/KebabIcon";
 import { useRef, useState } from "react";
 import KebabMenu from "../menus/KebabMenu";
+import { EntityType } from "@/shared/types/entityType";
 
 interface Props {
   itemId?: string;
+  entityType?: EntityType;
   onRename?: () => void;
 }
 
-function KebabButton({ itemId, onRename }: Props) {
+function KebabButton({ itemId, entityType, onRename }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -41,6 +43,7 @@ function KebabButton({ itemId, onRename }: Props) {
           <KebabMenu
             itemId={itemId}
             position={position}
+            entityType={entityType}
             onClose={() => setIsOpen(false)}
             onRename={onRename}
           />,

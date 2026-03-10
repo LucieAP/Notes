@@ -135,7 +135,7 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
     [fetchNotes],
   );
 
-  const getTrashed = useCallback(async () => {
+  const getNotesTrashed = useCallback(async () => {
     try {
       const data = await notesApi.getTrashed();
       return data ?? [];
@@ -145,7 +145,7 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const pinNote = useCallback(async (id: string) => {
+  const togglePin = useCallback(async (id: string) => {
     try {
       const data = await notesApi.togglePin(id);
       setNotesData((prev) =>
@@ -170,8 +170,8 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
       deleteNote,
       trashNote,
       restoreNote,
-      getTrashed,
-      pinNote,
+      getNotesTrashed,
+      togglePin,
     };
   }, [
     notesData,
@@ -184,8 +184,8 @@ function NotesProvider({ children }: { children: React.ReactNode }) {
     deleteNote,
     trashNote,
     restoreNote,
-    getTrashed,
-    pinNote,
+    getNotesTrashed,
+    togglePin,
   ]);
 
   return <NotesContext value={value}> {children}</NotesContext>;

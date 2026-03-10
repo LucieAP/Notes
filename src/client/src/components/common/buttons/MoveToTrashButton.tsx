@@ -1,22 +1,13 @@
-import useNotes from "@/shared/hooks/useNotes";
 import TrashIcon from "../icons/TrashIcon";
 
 interface Props {
-  itemId?: string;
-  onClose?: () => void;
+  onMoveToTrash?: () => void;
 }
 
-function MoveToTrashButton({ itemId, onClose }: Props) {
-  if (!itemId || !onClose) return;
-
-  const { trashNote } = useNotes();
-
+function MoveToTrashButton({ onMoveToTrash }: Props) {
   return (
     <button
-      onClick={() => {
-        trashNote?.(itemId);
-        onClose?.();
-      }}
+      onClick={onMoveToTrash}
       className="flex space-x-1 rounded-lg p-1 cursor-pointer hover:bg-neutral-600"
     >
       <TrashIcon />

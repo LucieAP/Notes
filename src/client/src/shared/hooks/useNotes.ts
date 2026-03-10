@@ -18,9 +18,9 @@ interface NotesContextTypes {
   }) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
   trashNote: (id: string) => Promise<void>;
-  getTrashed: () => Promise<GetNoteResponse[]>;
+  getNotesTrashed: () => Promise<GetNoteResponse[]>;
   restoreNote: (id: string) => Promise<void>;
-  pinNote: (id: string) => Promise<void>;
+  togglePin: (id: string) => Promise<void>;
 }
 
 export const NotesContext = createContext<NotesContextTypes | null>(null);

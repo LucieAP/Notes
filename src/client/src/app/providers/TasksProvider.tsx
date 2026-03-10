@@ -132,7 +132,7 @@ function TasksProvider({ children }: { children: React.ReactNode }) {
     [fetchTasks],
   );
 
-  const getTrashed = useCallback(async () => {
+  const getTasksTrashed = useCallback(async () => {
     try {
       const data = await tasksApi.getTrashed();
       return data ?? [];
@@ -142,7 +142,7 @@ function TasksProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const favoriteTask = useCallback(async (id: string) => {
+  const toggleFavorite = useCallback(async (id: string) => {
     try {
       const data = await tasksApi.toggleFavorite(id);
       setTasksData((prev) =>
@@ -179,9 +179,9 @@ function TasksProvider({ children }: { children: React.ReactNode }) {
       updateDescription,
       deleteTask,
       trashTask,
-      getTrashed,
+      getTasksTrashed,
       restoreTask,
-      favoriteTask,
+      toggleFavorite,
       toggleCheckbox,
     };
   }, [
@@ -194,9 +194,9 @@ function TasksProvider({ children }: { children: React.ReactNode }) {
     updateDescription,
     deleteTask,
     trashTask,
-    getTrashed,
+    getTasksTrashed,
     restoreTask,
-    favoriteTask,
+    toggleFavorite,
     toggleCheckbox,
   ]);
 

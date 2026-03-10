@@ -17,9 +17,9 @@ interface TasksContextTypes {
   }) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   trashTask: (id: string) => Promise<void>;
-  getTrashed: () => Promise<GetTaskResponse[]>;
+  getTasksTrashed: () => Promise<GetTaskResponse[]>;
   restoreTask: (id: string) => Promise<void>;
-  favoriteTask: (id: string) => Promise<void>;
+  toggleFavorite: (id: string) => Promise<void>;
   toggleCheckbox: (id: string) => Promise<void>;
 }
 

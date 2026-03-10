@@ -130,7 +130,7 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     [fetchRecipes],
   );
 
-  const getTrashed = useCallback(async () => {
+  const getRecipesTrashed = useCallback(async () => {
     try {
       const data = await recipesApi.getTrashed();
       return data ?? [];
@@ -140,7 +140,7 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const favoriteRecipe = useCallback(async (id: string) => {
+  const toggleFavorite = useCallback(async (id: string) => {
     try {
       const data = await recipesApi.toggleFavorite(id);
       setRecipesData((prev) =>
@@ -166,9 +166,9 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
       updateDescription,
       deleteRecipe,
       trashRecipe,
-      getTrashed,
+      getRecipesTrashed,
       restoreRecipe,
-      favoriteRecipe,
+      toggleFavorite,
     };
   }, [
     recipesData,
@@ -180,9 +180,9 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     updateDescription,
     deleteRecipe,
     trashRecipe,
-    getTrashed,
+    getRecipesTrashed,
     restoreRecipe,
-    favoriteRecipe,
+    toggleFavorite,
   ]);
 
   return <RecipesContext value={value}>{children}</RecipesContext>;

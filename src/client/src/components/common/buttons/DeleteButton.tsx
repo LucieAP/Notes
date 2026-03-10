@@ -2,15 +2,13 @@ import useNotes from "@/shared/hooks/useNotes";
 import TrashIcon from "../icons/TrashIcon";
 
 interface Props {
-  itemId?: string;
+  onDelete?: () => void | Promise<void>;
 }
 
-function DeleteButton({ itemId }: Props) {
-  const { deleteNote } = useNotes();
-
+function DeleteButton({ onDelete }: Props) {
   return (
     <button
-      onClick={() => itemId && deleteNote(itemId)}
+      onClick={onDelete}
       className="flex space-x-1 rounded-lg p-1 cursor-pointer hover:bg-neutral-600"
     >
       <TrashIcon />

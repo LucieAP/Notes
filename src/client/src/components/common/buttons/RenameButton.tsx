@@ -2,18 +2,12 @@ import RenameIcon from "../icons/RenameIcon";
 
 interface Props {
   onRename?: () => void;
-  onClose?: () => void;
 }
 
-function RenameNoteButton({ onRename, onClose }: Props) {
-  if (!onRename) return;
-
+function RenameButton({ onRename }: Props) {
   return (
     <button
-      onClick={() => {
-        onRename?.();
-        onClose?.();
-      }}
+      onClick={onRename}
       className="flex space-x-1 rounded-lg p-1 cursor-pointer hover:bg-neutral-600"
     >
       <RenameIcon />
@@ -22,4 +16,4 @@ function RenameNoteButton({ onRename, onClose }: Props) {
   );
 }
 
-export default RenameNoteButton;
+export default RenameButton;

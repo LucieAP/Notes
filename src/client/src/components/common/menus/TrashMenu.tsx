@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import SearchIcon from "../icons/SearchIcon";
 import useNotes from "@/shared/hooks/useNotes";
 import { GetNoteResponse } from "@/features/notes/note";
+import useTrashed, { TrashedItem } from "@/shared/hooks/useTrashed";
 
 interface Props {
   position?: { bottom: number; left: number };
@@ -12,28 +13,35 @@ function TrashMenu({ position, onClose }: Props) {
   const backdropRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [trashedNotes, setTrashed] = useState<GetNoteResponse[]>([]);
+  const [trashed, setTrashed] = useState<TrashedItem[]>([]);
 
-  const { deleteNote, getTrashed, restoreNote } = useNotes();
+  const { fetchTrashedItems, deleteItem, restoreItem } = useTrashed();
+
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTrashed = async () => {
-      const trashedNotes = await getTrashed();
-      setTrashed(trashedNotes);
-      setIsLoading(false);
+    const loadTrashedItems = async () => {
+      try {
+        const data = await fetchTrashedItems();
+        setTrashed(data);
+      } catch (err) {
+        console.log(err instanceof Error ? err.message : err);
+      } finally {
+        setIsLoading(false);
+      }
     };
-    fetchTrashed();
+
+    loadTrashedItems();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    await deleteNote(id);
-    setTrashed((prev) => prev.filter((n) => n.id !== id));
+  const handleDelete = async (item: TrashedItem) => {
+    await deleteItem(item.id, item.entityType);
+    setTrashed((prev) => prev.filter((n) => n.id !== item.id));
   };
 
-  const handleRestore = async (id: string) => {
-    await restoreNote(id);
-    setTrashed((prev) => prev.filter((n) => n.id !== id));
+  const handleRestore = async (item: TrashedItem) => {
+    await restoreItem(item.id, item.entityType);
+    setTrashed((prev) => prev.filter((n) => n.id !== item.id));
   };
 
   useEffect(() => {
@@ -84,28 +92,28 @@ function TrashMenu({ position, onClose }: Props) {
             <div className="text-sm text-neutral-500 text-center py-4">
               Loading...
             </div>
-          ) : trashedNotes.length === 0 ? (
+          ) : trashed.length === 0 ? (
             <div className="text-sm text-neutral-500 text-center py-4">
               No pages in Trash
             </div>
           ) : (
-            trashedNotes.map((note) => (
+            trashed.map((item) => (
               <div
-                key={note.id}
+                key={item.id}
                 className="group flex items-center justify-between px-3 py-2 hover:bg-neutral-800 text-sm"
               >
                 <span className="truncate text-neutral-200">
-                  {note.title || "Untitled"}
+                  {item.title || "Untitled"}
                 </span>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
                   <button
-                    onClick={() => handleDelete(note.id)}
+                    onClick={() => handleDelete(item)}
                     className="text-xs text-red-400 hover:text-red-300 px-1.5 py-0.5 rounded hover:bg-neutral-700"
                   >
                     Delete
                   </button>
                   <button
-                    onClick={() => handleRestore(note.id)}
+                    onClick={() => handleRestore(item)}
                     className="text-xs text-green-400 hover:text-green-300 px-1.5 py-0.5 rounded hover:bg-neutral-700"
                   >
                     Restore

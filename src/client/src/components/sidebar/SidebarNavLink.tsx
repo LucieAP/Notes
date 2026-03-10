@@ -1,19 +1,28 @@
 import cn from "@/shared/utils/cn";
 import { NavLink, useMatch } from "react-router-dom";
 import CreateItemButton from "../common/buttons/CreateItemButton";
-import useNotes from "@/shared/hooks/useNotes";
 import KebabButton from "../common/buttons/KebabButton";
 import { useRef, useState } from "react";
+import { EntityType } from "@/shared/types/entityType";
+import useEntity from "@/shared/hooks/useEntity";
 
 interface Props {
   itemId?: string;
   to: string;
   icon: React.ReactNode;
   label: string;
+  entityType?: EntityType;
   onCreate?: () => Promise<void>;
 }
 
-function SidebarNavLink({ itemId, to, icon, label, onCreate }: Props) {
+function SidebarNavLink({
+  itemId,
+  to,
+  icon,
+  label,
+  entityType,
+  onCreate,
+}: Props) {
   const match = useMatch(to); // совпадает ли текущий URL с заданным маршрутом
   const isActive = Boolean(match);
 
@@ -21,7 +30,9 @@ function SidebarNavLink({ itemId, to, icon, label, onCreate }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { updateTitle } = useNotes();
+  if (!entityType) return;
+
+  const { updateTitle } = useEntity(entityType);
 
   const handleRenameStart = () => {
     setIsEditing(true);
@@ -74,7 +85,13 @@ function SidebarNavLink({ itemId, to, icon, label, onCreate }: Props) {
         )}
       </div>
 
-      {itemId && <KebabButton itemId={itemId} onRename={handleRenameStart} />}
+      {itemId && (
+        <KebabButton
+          itemId={itemId}
+          entityType={entityType}
+          onRename={handleRenameStart}
+        />
+      )}
       {onCreate && <CreateItemButton onCreate={onCreate} />}
     </div>
   );

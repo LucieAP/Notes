@@ -1,1 +1,1 @@
-export type EntityType = null | "notes" | "tasks" | "recipes";
+export type EntityType = "notes" | "tasks" | "recipes";
