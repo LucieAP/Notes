@@ -53,7 +53,7 @@ function NotesEditorPage() {
       {!isLoading ? (
         note ? (
           <SimpleEditor
-            key={note?.id}
+            key={note.id}
             initialContent={note?.content}
             noteTitle={note?.title}
             onChange={handleContentChange}

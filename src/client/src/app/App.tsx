@@ -19,7 +19,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import NotesProvider from "./providers/NotesProvider";
 import TasksProvider from "./providers/TasksProvider";
 import RecipeProvider from "./providers/RecipeProvider";
-import RecipesEditorPage from "../components/recipes/RecipesEditor";
+import RecipesEditorPage from "@/components/recipes/RecipesEditorPage";
 
 function App() {
   return (

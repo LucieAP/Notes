@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import IngredientSection from "./IngredientSection";
 import RecipeDivider from "./RecipeDivider";
 import StepSection from "./StepSection";
@@ -5,10 +6,19 @@ import StepSection from "./StepSection";
 import "@/styles/recipes.scss";
 
 interface Props {
-  title?: string;
+  recipeTitle?: string;
+  onTitleChange?: (title: string) => void;
 }
 
-function RecipesEditor({ title }: Props) {
+function RecipesEditor({ recipeTitle, onTitleChange }: Props) {
+  const titleRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (titleRef.current && recipeTitle != titleRef.current.innerText) {
+      titleRef.current.innerText = recipeTitle ?? "";
+    }
+  }, [recipeTitle]);
+
   return (
     <div
       className="flex flex-col w-full items-center h-full"
@@ -17,6 +27,7 @@ function RecipesEditor({ title }: Props) {
       <div className="flex flex-col my-10 w-full max-w-3xl ">
         {/* ── Заголовок ── */}
         <div
+          ref={titleRef}
           className="text-[2.2rem] font-bold text-(--text-primary) outline-none mb-3 
                     min-h-10 cursor-text leading-[1.2] wrap-break-word whitespace-pre-wrap 
                     [&:empty::before]:content-[attr(data-placeholder)] 
@@ -26,7 +37,10 @@ function RecipesEditor({ title }: Props) {
           contentEditable
           suppressContentEditableWarning
           data-placeholder="Название рецепта"
-        />
+          onInput={(event) =>
+            onTitleChange?.(event.currentTarget.textContent ?? "")
+          }
+        ></div>
 
         <RecipeDivider />
 
