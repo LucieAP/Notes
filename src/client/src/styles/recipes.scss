@@ -1,0 +1,225 @@
+/* ── Тёмная тема (по умолчанию) ── */
+
+:root {
+  --bg: #1e1e1e;
+  --surface: #2a2a2a;
+  --border: #3a3a3a;
+  --text-primary: #ffffff;
+  --text-secondary: #888888;
+  --text-placeholder: #555555;
+  --accent: #ffffff;
+  --remove-btn: #666666;
+  --remove-btn-hover: #ffffff;
+  --add-btn-hover: #333333;
+  --unit-bg: #333333;
+  --unit-border: #444444;
+}
+
+// /* ── Светлая тема ── */
+// :root[data-theme="light"],
+// .light {
+//   --bg: #ffffff;
+//   --surface: #f7f7f5;
+//   --border: #e8e8e5;
+//   --text-primary: #1a1a1a;
+//   --text-secondary: #9b9b9b;
+//   --text-placeholder: #c4c4c4;
+//   --accent: #1a1a1a;
+//   --remove-btn: #c4c4c4;
+//   --remove-btn-hover: #1a1a1a;
+//   --add-btn-hover: #f0f0ee;
+//   --unit-bg: #f0f0ee;
+//   --unit-border: #e0e0dc;
+// }
+
+/* ── Секции ── */
+.section {
+  margin-bottom: 8px;
+}
+
+.sectionTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.03em;
+  margin: 0 0 12px 0;
+  text-transform: none;
+}
+
+/* ── Группа ингредиентов ── */
+.groupBlock {
+  margin-bottom: 4px;
+}
+
+.groupTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  margin-top: 12px;
+}
+
+.groupTitleInput {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: inherit;
+  flex: 1;
+}
+
+.groupTitleInput::placeholder {
+  color: var(--text-placeholder);
+}
+
+/* ── Строка ингредиента ── */
+.ingredientRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  min-height: 36px;
+}
+
+.rowNumber {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  min-width: 24px;
+  text-align: right;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.ingredientName {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  flex: 1;
+}
+
+.ingredientName::placeholder {
+  color: var(--text-placeholder);
+}
+
+.ingredientAmount {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  width: 48px;
+  text-align: right;
+}
+
+.ingredientAmount::placeholder {
+  color: var(--text-placeholder);
+}
+
+/* Убираем стрелки у number input */
+.ingredientAmount::-webkit-inner-spin-button,
+.ingredientAmount::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.unitSelect {
+  background: var(--unit-bg);
+  border: 1px solid var(--unit-border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-family: inherit;
+  padding: 3px 6px;
+  cursor: pointer;
+  outline: none;
+}
+
+/* ── Строка шага ── */
+.stepRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.stepText {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  flex: 1;
+  resize: none;
+  line-height: 1.5;
+  overflow: hidden;
+  min-height: 1.5em;
+}
+
+.stepText::placeholder {
+  color: var(--text-placeholder);
+}
+
+/* ── Кнопка удаления ── */
+.removeBtn {
+  background: transparent;
+  border: none;
+  color: var(--remove-btn);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition:
+    color 0.15s,
+    opacity 0.15s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.removeBtn:hover {
+  color: var(--remove-btn-hover);
+}
+
+/* ── Кнопки добавления ── */
+.addButtons {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.addBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.addBtn:hover {
+  background: var(--add-btn-hover);
+  color: var(--text-primary);
+}
+
+.addBtn span {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.folderIcon {
+  font-size: 0.9rem;
+}

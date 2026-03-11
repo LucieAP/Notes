@@ -10,7 +10,6 @@ import WorkspaceLayout from "../components/layout/WorkspaceLayout";
 import WorkspacePage from "../components/workspace/WorkspacePage";
 import NotesEditorPage from "../components/notes/NotesEditorPage";
 import TasksPage from "../components/tasks/TasksPage";
-import RecipesPage from "../components/recipes/RecipesPage";
 import NotFoundPage from "../components/common/pages/NotFoundPage";
 import ContentArea from "@/components/content/ContentArea";
 import LoginPage from "@/components/auth/LoginPage";
@@ -20,6 +19,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import NotesProvider from "./providers/NotesProvider";
 import TasksProvider from "./providers/TasksProvider";
 import RecipeProvider from "./providers/RecipeProvider";
+import RecipesEditorPage from "../components/recipes/RecipesEditor";
 
 function App() {
   return (
@@ -51,7 +51,10 @@ function App() {
                 <Route path=":id" element={<NotesEditorPage />} />
               </Route>
               <Route path="tasks" element={<TasksPage />} />
-              <Route path="recipes" element={<RecipesPage />} />
+
+              <Route path="recipes">
+                <Route path=":id" element={<RecipesEditorPage />} />
+              </Route>
             </Route>
           </Route>
 

@@ -1,11 +1,10 @@
 import { GetNoteResponse } from "@/features/notes/note";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { NavLink, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { SimpleEditor } from "../tiptap/templates/simple/SimpleEditor";
 import useNotes from "@/shared/hooks/useNotes";
 import { JSONContent } from "@tiptap/core";
 import Spinner from "../common/icons/Spinner";
-import NotFoundPage from "../common/pages/NotFoundPage";
 
 function NotesEditorPage() {
   const { id } = useParams<{ id: string }>();
