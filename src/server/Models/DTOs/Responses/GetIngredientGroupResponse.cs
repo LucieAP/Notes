@@ -1,4 +1,4 @@
-    public record GetIngredientGroupResponse
+public record GetIngredientGroupResponse
 {
     public Guid Id { get; set; }
     public required string Title { get; set; }
