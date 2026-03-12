@@ -70,12 +70,16 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
       try {
         if (!id) return;
         await recipesApi.updateTitle({ id, title });
-        fetchRecipes();
+        setRecipesData((prev) =>
+          prev.map((recipe) =>
+            recipe.id === id ? { ...recipe, title } : recipe,
+          ),
+        );
       } catch (err) {
         console.log(err instanceof Error ? err.message : err);
       }
     },
-    [fetchRecipes],
+    [],
   );
 
   const updateDescription = useCallback(
@@ -83,12 +87,16 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
       try {
         if (!id) return;
         await recipesApi.updateDescription({ id, description });
-        fetchRecipes();
+        setRecipesData((prev) =>
+          prev.map((recipe) =>
+            recipe.id === id ? { ...recipe, description } : recipe,
+          ),
+        );
       } catch (err) {
         console.log(err instanceof Error ? err.message : err);
       }
     },
-    [fetchRecipes],
+    [],
   );
 
   const deleteRecipe = useCallback(

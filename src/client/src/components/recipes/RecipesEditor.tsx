@@ -7,10 +7,17 @@ import "@/styles/recipes.scss";
 
 interface Props {
   recipeTitle?: string;
+  recipeDescription?: string;
   onTitleChange?: (title: string) => void;
+  onDescriptionChange?: (description: string) => void;
 }
 
-function RecipesEditor({ recipeTitle, onTitleChange }: Props) {
+function RecipesEditor({
+  recipeTitle,
+  recipeDescription,
+  onTitleChange,
+  onDescriptionChange,
+}: Props) {
   const titleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,9 +44,7 @@ function RecipesEditor({ recipeTitle, onTitleChange }: Props) {
           contentEditable
           suppressContentEditableWarning
           data-placeholder="Название рецепта"
-          onInput={(event) =>
-            onTitleChange?.(event.currentTarget.textContent ?? "")
-          }
+          onInput={(e) => onTitleChange?.(e.currentTarget.textContent ?? "")}
         ></div>
 
         <RecipeDivider />
@@ -50,6 +55,8 @@ function RecipesEditor({ recipeTitle, onTitleChange }: Props) {
          text-[0.95rem] resize-none leading-[1.6] p-0 font-inherit placeholder:text-(--text-placeholder)"
           placeholder="Описание"
           rows={3}
+          value={recipeDescription ?? ""}
+          onChange={(e) => onDescriptionChange?.(e.target.value ?? "")}
         />
         <RecipeDivider />
 

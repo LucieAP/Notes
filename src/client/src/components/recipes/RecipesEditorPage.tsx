@@ -8,9 +8,10 @@ import Spinner from "../common/icons/Spinner";
 function RecipesEditorPage() {
   const { id } = useParams<{ id: string }>();
   const [recipe, setRecipe] = useState<GetRecipeResponse | null>();
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const saveTimeoutRef = useRef<number | null>(null);
 
-  const { getRecipeById, isLoading, updateTitle } = useRecipes();
+  const { getRecipeById, updateTitle, updateDescription } = useRecipes();
 
   useEffect(() => {
     if (!id) return;
@@ -21,12 +22,15 @@ function RecipesEditorPage() {
         setRecipe(fetchedRecipe);
         console.log("recipe: ", fetchedRecipe);
       }
+      setIsInitialLoading(false);
     })();
   }, [id, getRecipeById]);
 
   const handleTitleChange = useCallback(
     (title: string) => {
       if (!id) return;
+
+      setRecipe((prev) => (prev ? { ...prev, title } : prev));
 
       // очистка предыдущего таймера
       if (saveTimeoutRef.current) {
@@ -44,14 +48,38 @@ function RecipesEditorPage() {
     [id, updateTitle],
   );
 
+  const handleDescriptionChange = useCallback(
+    (description: string) => {
+      if (!id) return;
+
+      setRecipe((prev) => (prev ? { ...prev, description } : prev));
+
+      // очистка предыдущего таймера
+      if (saveTimeoutRef.current) {
+        window.clearTimeout(saveTimeoutRef.current);
+      }
+
+      saveTimeoutRef.current = window.setTimeout(async () => {
+        try {
+          await updateDescription({ id, description });
+        } catch (err) {
+          console.log(err instanceof Error ? err.message : err);
+        }
+      }, 1000); // 1 секунда паузы после ввода
+    },
+    [id, updateDescription],
+  );
+
   return (
     <>
-      {!isLoading ? (
+      {!isInitialLoading ? (
         recipe ? (
           <RecipesEditor
             key={recipe.id}
             recipeTitle={recipe.title}
+            recipeDescription={recipe.description ?? ""}
             onTitleChange={handleTitleChange}
+            onDescriptionChange={handleDescriptionChange}
           />
         ) : (
           <div>Recipe not found</div>
