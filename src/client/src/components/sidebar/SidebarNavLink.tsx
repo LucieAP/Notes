@@ -58,7 +58,7 @@ function SidebarNavLink({
         isActive ? "bg-neutral-700" : "hover:bg-neutral-700",
       )}
     >
-      <div className="flex flex-1 items-center space-x-2">
+      <div className="flex flex-1 items-center space-x-2 min-w-0">
         {icon}
         {isEditing ? (
           <input
@@ -79,8 +79,11 @@ function SidebarNavLink({
             autoFocus
           />
         ) : (
-          <NavLink to={to} className="flex flex-1 items-center space-x-2">
-            <span>{label}</span>
+          <NavLink
+            to={to}
+            className="flex flex-1 items-center space-x-2 min-w-0"
+          >
+            <span className="truncate">{label}</span>
           </NavLink>
         )}
       </div>
