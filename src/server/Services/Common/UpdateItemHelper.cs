@@ -158,6 +158,76 @@ internal class UpdateItemHelper
         });
     }
 
+    public static OperationResult<UpdateItemResponse> ApplyRecipeUpdate(
+        Recipe item,
+        Guid currentUserId,
+        UpdateItemRequest updateItemRequest,
+        ILogger logger)
+    {
+        if (updateItemRequest.Title == null &&
+            updateItemRequest.Description == null)
+        {
+            return OperationResult<UpdateItemResponse>.Failure("Ни одного параметра не было передано", 400);
+        }
+
+        var wasUpdated = false;
+
+        if (updateItemRequest.Title != null)
+        {
+            var trimmedTitle = updateItemRequest.Title.Trim();
+
+            if (string.IsNullOrWhiteSpace(trimmedTitle))
+            {
+                return OperationResult<UpdateItemResponse>.Failure("Название не может быть пустым", 400);
+            }
+
+            if (trimmedTitle != item.Title)
+            {
+                item.Title = trimmedTitle;
+                wasUpdated = true;
+                logger.LogInformation(
+                    "Название сущности {entityName} {itemId} обновлено пользователем {userId}",
+                    "Recipe", item.Id, currentUserId
+                );
+            }
+        }
+
+        if (updateItemRequest.Description != null)
+        {
+            var trimmedDescription = string.IsNullOrWhiteSpace(updateItemRequest.Description)
+                ? null
+                : updateItemRequest.Description.Trim();
+
+            if (trimmedDescription != item.Description)
+            {
+                item.Description = trimmedDescription;
+                wasUpdated = true;
+                logger.LogInformation(
+                    "Описание сущности {entityName} {itemId} обновлено пользователем {userId}",
+                    "Recipe", item.Id, currentUserId
+                );
+            }
+        }
+
+        if (wasUpdated)
+        {
+            item.LastModifiedAt = DateTime.UtcNow;
+        }
+        else
+        {
+            logger.LogInformation("Новые данные соответствуют старым, изменения не применены.");
+        }
+
+        return OperationResult<UpdateItemResponse>.Success(new UpdateItemResponse
+        {
+            Id = item.Id,
+            Title = item.Title,
+            Description = item.Description,
+            LastModifiedAt = item.LastModifiedAt,
+            WasUpdated = wasUpdated
+        });
+    }
+
     public static OperationResult<UpdateColorResponse> ApplyColorUpdate<T>(
         T item,
         string entityName,

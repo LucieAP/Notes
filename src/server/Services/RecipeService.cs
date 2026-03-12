@@ -24,7 +24,7 @@ public class RecipeService : IRecipeService
             {
                 Id = r.Id,
                 Title = r.Title,
-                Description = r.Content,
+                Description = r.Description,
                 IsFavorite = r.IsFavorite,
                 CreatedAt = r.CreatedAt,
                 LastModifiedAt = r.LastModifiedAt,
@@ -66,7 +66,7 @@ public class RecipeService : IRecipeService
             {
                 Id = r.Id,
                 Title = r.Title,
-                Description = r.Content,
+                Description = r.Description,
                 IsFavorite = r.IsFavorite,
                 CreatedAt = r.CreatedAt,
                 LastModifiedAt = r.LastModifiedAt,
@@ -116,7 +116,7 @@ public class RecipeService : IRecipeService
         {
             Id = Guid.NewGuid(),
             Title = createRecipeRequest.Title,
-            Content = createRecipeRequest.Description,
+            Description = createRecipeRequest.Description,
             IsFavorite = createRecipeRequest.IsFavorite,
             CreatedAt = DateTime.UtcNow,
             LastModifiedAt = DateTime.UtcNow,
@@ -136,7 +136,7 @@ public class RecipeService : IRecipeService
         {
             Id = recipe.Id,
             Title = recipe.Title,
-            Description = recipe.Content,
+            Description = recipe.Description,
             IsFavorite = recipe.IsFavorite,
             CreatedAt = recipe.CreatedAt,
             LastModifiedAt = recipe.LastModifiedAt,
@@ -184,7 +184,7 @@ public class RecipeService : IRecipeService
             return OperationResult<UpdateItemResponse>.Failure("Рецепт не найден", 404);
         }
 
-        var response = UpdateItemHelper.ApplyUpdate(recipe, "Recipe", currentUserId, updateItemRequest, _logger);
+        var response = UpdateItemHelper.ApplyRecipeUpdate(recipe, currentUserId, updateItemRequest, _logger);
 
         if (response.IsSuccess && response.Value.WasUpdated)
         {
@@ -277,7 +277,7 @@ public class RecipeService : IRecipeService
             {
                 Id = r.Id,
                 Title = r.Title,
-                Description = r.Content,
+                Description = r.Description,
                 IsFavorite = r.IsFavorite,
                 CreatedAt = r.CreatedAt,
                 LastModifiedAt = r.LastModifiedAt,
