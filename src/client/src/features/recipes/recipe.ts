@@ -1,5 +1,7 @@
 import { User } from "@/shared/types/user";
 import { RecipeGroup } from "./recipeGroup";
+import { GetIngredientResponse } from "./ingredient";
+import { GetRecipeStepResponse } from "./recipeStep";
 
 export interface GetRecipeResponse {
   id: string;
@@ -13,6 +15,8 @@ export interface GetRecipeResponse {
   deletedAt: string | null;
   recipeGroup: RecipeGroup | null;
   createdBy: User;
+  ingredients: GetIngredientResponse[];
+  steps: GetRecipeStepResponse[];
 }
 
 export interface CreateRecipeRequest {

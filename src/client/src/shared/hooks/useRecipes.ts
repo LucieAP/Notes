@@ -1,5 +1,6 @@
 import { GetRecipeResponse } from "@/features/recipes/recipe";
 import { createContext, useContext } from "react";
+import { Unit } from "../enums/unit";
 
 interface RecipesContextTypes {
   recipesData: GetRecipeResponse[];
@@ -20,6 +21,11 @@ interface RecipesContextTypes {
   getRecipesTrashed: () => Promise<GetRecipeResponse[]>;
   restoreRecipe: (id: string) => Promise<void>;
   toggleFavorite: (id: string) => Promise<void>;
+  createIngredient: (id: string) => Promise<void>;
+  updateIngredientName: (id: string, name: string) => Promise<void>;
+  updateIngredientQuantity: (id: string, quantity: number) => Promise<void>;
+  updateIngredientUnit: (id: string, unit: Unit) => Promise<void>;
+  deleteIngredient: (id: string) => Promise<void>;
 }
 
 export const RecipesContext = createContext<RecipesContextTypes | null>(null);

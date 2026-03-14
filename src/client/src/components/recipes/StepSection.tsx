@@ -1,6 +1,13 @@
+import { useState } from "react";
+
 function StepSection() {
+  const [hovered, setHovered] = useState(false);
   return (
-    <section className="w-full flex flex-col items-start gap-2 py-1">
+    <section
+      className="w-full flex flex-col items-start gap-2 py-1"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       <span className="text-[#888] text-sm min-w-[24px] text-right select-none shrink-0 pt-px">
         Шаги:
       </span>
@@ -15,6 +22,7 @@ function StepSection() {
         <button
           className="text-[#666] hover:text-white text-xs px-1 py-0.5 rounded bg-transparent border-none cursor-pointer transition-all duration-150 shrink-0 mt-px"
           aria-label="Удалить шаг"
+          style={{ opacity: hovered ? 1 : 0 }}
         >
           ✕
         </button>

@@ -1,5 +1,6 @@
 import { recipesApi } from "@/features/recipes/api";
 import { GetRecipeResponse } from "@/features/recipes/recipe";
+import { Unit, unitLabels } from "@/shared/enums/unit";
 import { RecipesContext } from "@/shared/hooks/useRecipes";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -99,18 +100,16 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  const deleteRecipe = useCallback(
-    async (id: string) => {
-      try {
-        if (!id) return;
-        await recipesApi.delete(id);
-        fetchRecipes();
-      } catch (err) {
-        console.log(err instanceof Error ? err.message : err);
-      }
-    },
-    [fetchRecipes],
-  );
+  const deleteRecipe = useCallback(async (id: string) => {
+    try {
+      if (!id) return;
+      await recipesApi.delete(id);
+
+      setRecipesData((prev) => prev.filter((recipe) => recipe.id !== id));
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
+    }
+  }, []);
 
   const trashRecipe = useCallback(
     async (id: string) => {
@@ -150,6 +149,7 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
 
   const toggleFavorite = useCallback(async (id: string) => {
     try {
+      if (!id) return;
       const data = await recipesApi.toggleFavorite(id);
       setRecipesData((prev) =>
         prev.map((recipe) =>
@@ -157,6 +157,116 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
             ? { ...recipe, isFavorite: data.isFavorite }
             : recipe,
         ),
+      );
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
+    }
+  }, []);
+
+  const createIngredient = useCallback(async (id: string) => {
+    try {
+      if (!id) return;
+
+      const createdIngredient = await recipesApi.createIngredient({
+        id,
+        data: {
+          name: "New Ingredient",
+          quantity: 0,
+          unit: Unit.Default,
+        },
+      });
+
+      if (!createdIngredient) return;
+      console.log(`createdIngredient: ${createdIngredient}`);
+
+      setRecipesData((prev) =>
+        prev.map((recipe) =>
+          recipe.id === id
+            ? {
+                ...recipe,
+                ingredients: [...(recipe.ingredients ?? []), createdIngredient],
+              }
+            : recipe,
+        ),
+      );
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
+    }
+  }, []);
+
+  const updateIngredientName = useCallback(async (id: string, name: string) => {
+    try {
+      if (!id) return;
+
+      await recipesApi.updateIngredient({ id, data: { name: name } });
+
+      setRecipesData((prev) =>
+        prev.map((recipe) => ({
+          ...recipe,
+          ingredients: recipe.ingredients.map((ingredient) =>
+            ingredient.id === id ? { ...ingredient, name: name } : ingredient,
+          ),
+        })),
+      );
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
+    }
+  }, []);
+
+  const updateIngredientQuantity = useCallback(
+    async (id: string, quantity: number) => {
+      try {
+        if (!id) return;
+
+        await recipesApi.updateIngredient({ id, data: { quantity: quantity } });
+
+        setRecipesData((prev) =>
+          prev.map((recipe) => ({
+            ...recipe,
+            ingredients: recipe.ingredients.map((ingredient) =>
+              ingredient.id === id
+                ? { ...ingredient, quantity: quantity }
+                : ingredient,
+            ),
+          })),
+        );
+      } catch (err) {
+        console.log(err instanceof Error ? err.message : err);
+      }
+    },
+    [],
+  );
+
+  const updateIngredientUnit = useCallback(async (id: string, unit: Unit) => {
+    try {
+      await recipesApi.updateIngredient({ id, data: { unit: unit } });
+
+      setRecipesData((prev) =>
+        prev.map((recipe) => ({
+          ...recipe,
+          ingredients: recipe.ingredients.map((ingredient) =>
+            ingredient.id === id ? { ...ingredient, unit: unit } : ingredient,
+          ),
+        })),
+      );
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
+    }
+  }, []);
+
+  const deleteIngredient = useCallback(async (id: string) => {
+    try {
+      if (!id) return;
+
+      await recipesApi.deleteIngredient(id);
+
+      setRecipesData((prev) =>
+        prev.map((recipe) => ({
+          ...recipe,
+          ingredients: recipe.ingredients.filter(
+            (ingredient) => ingredient.id !== id,
+          ),
+        })),
       );
     } catch (err) {
       console.log(err instanceof Error ? err.message : err);
@@ -177,6 +287,11 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
       getRecipesTrashed,
       restoreRecipe,
       toggleFavorite,
+      createIngredient,
+      updateIngredientName,
+      updateIngredientQuantity,
+      updateIngredientUnit,
+      deleteIngredient,
     };
   }, [
     recipesData,
@@ -191,6 +306,11 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     getRecipesTrashed,
     restoreRecipe,
     toggleFavorite,
+    createIngredient,
+    updateIngredientName,
+    updateIngredientQuantity,
+    updateIngredientUnit,
+    deleteIngredient,
   ]);
 
   return <RecipesContext value={value}>{children}</RecipesContext>;

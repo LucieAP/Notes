@@ -7,6 +7,12 @@ import {
   UpdateRecipeResponse,
   UpdateRecipeTitleRequest,
 } from "./recipe";
+import {
+  CreateIngredientRequest,
+  CreateIngredientResponse,
+  GetIngredientResponse,
+  UpdateIngredientRequest,
+} from "./ingredient";
 
 export const recipesApi = {
   getAll(): Promise<GetRecipeResponse[]> {
@@ -53,5 +59,29 @@ export const recipesApi = {
 
   getTrashed(): Promise<GetRecipeResponse[]> {
     return api.get("/recipes/trashed");
+  },
+
+  createIngredient({
+    id,
+    data,
+  }: {
+    id: string;
+    data: CreateIngredientRequest;
+  }): Promise<CreateIngredientResponse> {
+    return api.post(`recipes/${id}/ingredient/create`, data);
+  },
+
+  updateIngredient({
+    id,
+    data,
+  }: {
+    id: string;
+    data: UpdateIngredientRequest;
+  }): Promise<void> {
+    return api.patch(`recipes/ingredient/${id}`, data);
+  },
+
+  deleteIngredient(id: string): Promise<void> {
+    return api.delete(`recipes/ingredient/delete/${id}`);
   },
 };

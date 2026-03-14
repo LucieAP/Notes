@@ -1,4 +1,4 @@
-import { Unit } from "@/shared/enums/Unit";
+import { Unit } from "@/shared/enums/unit";
 
 /** DTO для получения ингредиента (GetIngredientResponse на сервере) */
 export interface GetIngredientResponse {
@@ -34,7 +34,6 @@ export interface CreateIngredientResponse {
 
 /** DTO для обновления ингредиента (UpdateIngredientRequest на сервере) */
 export interface UpdateIngredientRequest {
-  id: string;
   name?: string | null;
   quantity?: number | null;
   unit?: Unit | null;
