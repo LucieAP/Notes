@@ -170,8 +170,6 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
       const createdIngredient = await recipesApi.createIngredient({
         id,
         data: {
-          name: "New Ingredient",
-          quantity: 0,
           unit: Unit.Default,
         },
       });

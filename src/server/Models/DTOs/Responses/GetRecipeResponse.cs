@@ -11,4 +11,5 @@ public record GetRecipeResponse
     public DateTime? DeletedAt { get; set; }
     public GroupResponse? RecipeGroup { get; set; }
     public GetUserResponse CreatedBy { get; set; }
+    public List<GetIngredientResponse> Ingredients {get; set; } = new();
 }

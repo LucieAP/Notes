@@ -46,7 +46,21 @@ public class RecipeService : IRecipeService
                     Picture = r.User.Picture,
                     EmailVerified = r.User.EmailVerified,
                     LastLoginAt = r.User.LastLoginAt
-                }
+                },
+                Ingredients = r.Ingredients
+                    .OrderBy(i => i.CreatedAt)
+                    .Select(i => new GetIngredientResponse
+                    {
+                        Id = i.Id,
+                        Name = i.Name,
+                        Quantity = i.Quantity,
+                        Unit = i.Unit,
+                        Note = i.Note,
+                        CreatedAt = i.CreatedAt,
+                        IngredientGroupId = i.IngredientGroupId,
+                        RecipeId = i.RecipeId
+                    })
+                    .ToList()
             })
             .ToListAsync(cancellationToken);
 
@@ -88,7 +102,21 @@ public class RecipeService : IRecipeService
                     Picture = r.User.Picture,
                     EmailVerified = r.User.EmailVerified,
                     LastLoginAt = r.User.LastLoginAt
-                }
+                },
+                Ingredients = r.Ingredients
+                    .OrderBy(i => i.CreatedAt)
+                    .Select(i => new GetIngredientResponse
+                    {
+                        Id = i.Id,
+                        Name = i.Name,
+                        Quantity = i.Quantity,
+                        Unit = i.Unit,
+                        Note = i.Note,
+                        CreatedAt = i.CreatedAt,
+                        IngredientGroupId = i.IngredientGroupId,
+                        RecipeId = i.RecipeId
+                    })
+                    .ToList()
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -494,13 +522,8 @@ public class RecipeService : IRecipeService
 
     public async Task<OperationResult<CreateIngredientResponse>> CreateIngredientAsync(Guid recipeId, CreateIngredientRequest createIngredientRequest, Guid currentUserId, CancellationToken cancellationToken = default)
     {
-        var trimmedName = createIngredientRequest.Name.Trim();
+        var trimmedName = createIngredientRequest.Name?.Trim();
         var trimmedNote = createIngredientRequest.Note?.Trim();
-
-        if (string.IsNullOrEmpty(trimmedName))
-        {
-            return OperationResult<CreateIngredientResponse>.Failure("Название ингредиента не может быть пустым", 400);
-        }
 
         var recipe = await _context.Recipes
             .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted)

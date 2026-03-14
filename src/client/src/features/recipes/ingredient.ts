@@ -14,9 +14,9 @@ export interface GetIngredientResponse {
 
 /** DTO для создания ингредиента (CreateIngredientRequest на сервере) */
 export interface CreateIngredientRequest {
-  name: string;
-  quantity: number;
-  unit: Unit;
+  name?: string | null;
+  quantity?: number | null;
+  unit?: Unit | null;
   note?: string | null;
   ingredientGroupId?: string | null;
 }

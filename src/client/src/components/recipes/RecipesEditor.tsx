@@ -4,27 +4,22 @@ import RecipeDivider from "./RecipeDivider";
 import StepSection from "./StepSection";
 
 import "@/styles/recipes.scss";
+import { GetRecipeResponse } from "@/features/recipes/recipe";
 
 interface Props {
-  recipeTitle?: string;
-  recipeDescription?: string;
+  recipe?: GetRecipeResponse;
   onTitleChange?: (title: string) => void;
   onDescriptionChange?: (description: string) => void;
 }
 
-function RecipesEditor({
-  recipeTitle,
-  recipeDescription,
-  onTitleChange,
-  onDescriptionChange,
-}: Props) {
+function RecipesEditor({ recipe, onTitleChange, onDescriptionChange }: Props) {
   const titleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (titleRef.current && recipeTitle != titleRef.current.innerText) {
-      titleRef.current.innerText = recipeTitle ?? "";
+    if (titleRef.current && recipe?.title != titleRef.current.innerText) {
+      titleRef.current.innerText = recipe?.title ?? "";
     }
-  }, [recipeTitle]);
+  }, [recipe?.title]);
 
   return (
     <div
@@ -55,14 +50,14 @@ function RecipesEditor({
          text-[0.95rem] resize-none leading-[1.6] p-0 font-inherit placeholder:text-(--text-placeholder)"
           placeholder="Описание"
           rows={3}
-          value={recipeDescription ?? ""}
+          value={recipe?.description ?? ""}
           onChange={(e) => onDescriptionChange?.(e.target.value ?? "")}
         />
         <RecipeDivider />
 
         {/* ── Ингредиенты ── */}
 
-        <IngredientSection />
+        <IngredientSection recipe={recipe} />
 
         <RecipeDivider />
 

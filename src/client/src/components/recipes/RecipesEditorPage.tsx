@@ -76,8 +76,7 @@ function RecipesEditorPage() {
         recipe ? (
           <RecipesEditor
             key={recipe.id}
-            recipeTitle={recipe.title}
-            recipeDescription={recipe.description ?? ""}
+            recipe={recipe}
             onTitleChange={handleTitleChange}
             onDescriptionChange={handleDescriptionChange}
           />
