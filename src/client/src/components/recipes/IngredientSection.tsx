@@ -1,35 +1,27 @@
 import IngredientRow from "./IngredientRow";
 import { GetRecipeResponse } from "@/features/recipes/recipe";
-import useRecipes from "@/shared/hooks/useRecipes";
+import { Unit } from "@/shared/enums/unit";
 
 interface Props {
   recipe?: GetRecipeResponse;
+  onIngredientNameChange?: (ingredientId: string, name: string) => void;
+  onIngredientQuantityChange?: (ingredientId: string, quantity: number) => void;
+  onIngredientUnitChange?: (ingredientId: string, unit: Unit) => void;
+  onCreateIngredient?: () => void | Promise<void>;
+  onDeleteIngredient?: (ingredientId: string) => void | Promise<void>;
 }
 
-function IngredientSection({ recipe }: Props) {
-  const { createIngredient, deleteIngredient } = useRecipes();
-
+function IngredientSection({
+  recipe,
+  onIngredientNameChange,
+  onIngredientQuantityChange,
+  onIngredientUnitChange,
+  onCreateIngredient,
+  onDeleteIngredient,
+}: Props) {
   if (!recipe) {
     return null;
   }
-
-  const handleCreateIngredient = async () => {
-    try {
-      if (!recipe.id) return;
-      await createIngredient(recipe.id);
-    } catch (err) {
-      console.log(err instanceof Error ? err.message : err);
-    }
-  };
-
-  const handleDeleteIngredient = async (id: string) => {
-    try {
-      if (!id) return;
-      await deleteIngredient(id);
-    } catch (err) {
-      console.log(err instanceof Error ? err.message : err);
-    }
-  };
 
   return (
     <section className="w-full">
@@ -42,13 +34,16 @@ function IngredientSection({ recipe }: Props) {
           key={ingredient.id}
           index={index + 1}
           ingredient={ingredient}
-          onDelete={handleDeleteIngredient}
+          onIngredientNameChange={onIngredientNameChange}
+          onIngredientQuantityChange={onIngredientQuantityChange}
+          onIngredientUnitChange={onIngredientUnitChange}
+          onDelete={onDeleteIngredient}
         />
       ))}
 
       <div className="flex gap-1 mt-2">
         <button
-          onClick={handleCreateIngredient}
+          onClick={onCreateIngredient}
           className="flex items-center gap-1 text-[#888] hover:text-white hover:bg-[#333] text-xs px-2 py-1 rounded bg-transparent border-none cursor-pointer transition-all duration-150"
         >
           <span>+</span> ингредиент

@@ -1,17 +1,44 @@
-import { useState } from "react";
-import { unitLabels } from "@/shared/enums/unit";
+import { useEffect, useState } from "react";
+import { Unit, unitLabels } from "@/shared/enums/unit";
 import { GetIngredientResponse } from "@/features/recipes/ingredient";
 
 interface Props {
   index?: number;
   ingredient?: GetIngredientResponse;
-  onDelete?: (id: string) => Promise<void>;
+  onIngredientNameChange?: (ingredientId: string, name: string) => void;
+  onIngredientQuantityChange?: (ingredientId: string, quantity: number) => void;
+  onIngredientUnitChange?: (ingredientId: string, unit: Unit) => void;
+  onDelete?: (id: string) => void | Promise<void>;
 }
 
-function IngredientRow({ index = 1, ingredient, onDelete }: Props) {
+function IngredientRow({
+  index = 1,
+  ingredient,
+  onIngredientNameChange,
+  onIngredientQuantityChange,
+  onIngredientUnitChange,
+  onDelete,
+}: Props) {
   const [hovered, setHovered] = useState(false);
+  const [name, setName] = useState(ingredient?.name ?? "");
+  const [quantity, setQuantity] = useState(
+    ingredient?.quantity?.toString() ?? "",
+  );
+  const [unit, setUnit] = useState<Unit>(ingredient?.unit ?? Unit.Default);
 
   if (!ingredient) return;
+
+  useEffect(() => {
+    setName(ingredient?.name ?? "");
+  }, [ingredient?.name]);
+
+  useEffect(() => {
+    setQuantity(ingredient?.quantity?.toString() ?? "");
+  }, [ingredient?.quantity]);
+
+  useEffect(() => {
+    setUnit(ingredient?.unit ?? Unit.Default);
+  }, [ingredient?.unit]);
 
   return (
     <section
@@ -25,24 +52,41 @@ function IngredientRow({ index = 1, ingredient, onDelete }: Props) {
 
       <input
         type="text"
-        className="bg-transparent border-none outline-none text-white text-sm flex-1 placeholder-[#555]"
+        className="bg-transparent border-none outline-none text-[#888] text-sm flex-1 placeholder-[#555]"
         placeholder="Введите ингредиент"
-        defaultValue={ingredient.name}
+        value={name}
+        onChange={(e) => {
+          const nextValue = e.target.value ?? "";
+          setName(nextValue);
+          onIngredientNameChange?.(ingredient.id, nextValue);
+        }}
       />
 
       <input
         type="number"
-        className="no-arrows bg-transparent border-none outline-none border border-[#444] text-white text-sm w-12 text-right placeholder-[#555]"
+        className="no-arrows bg-transparent border-none outline-none border border-[#444] text-[#888] text-sm w-12 text-right placeholder-[#555]"
         placeholder="0"
-        defaultValue={ingredient.quantity}
+        value={quantity}
+        onChange={(e) => {
+          const nextValue = e.target.value ?? "";
+          setQuantity(nextValue);
+          const parsed = Number(nextValue);
+          if (Number.isNaN(parsed)) return;
+          onIngredientQuantityChange?.(ingredient.id, parsed);
+        }}
       />
 
       <select
-        className="bg-[#333] border border-[#444] rounded text-white text-sm px-1.5 py-0.5 outline-none cursor-pointer"
-        defaultValue={ingredient.unit}
+        className="bg-[#333] border border-[#444] rounded text-[#888] text-sm px-1.5 py-0.5 outline-none cursor-pointer"
+        value={unit}
+        onChange={(e) => {
+          const nextUnit = Number(e.target.value) as Unit;
+          setUnit(nextUnit);
+          onIngredientUnitChange?.(ingredient.id, nextUnit);
+        }}
       >
-        {Object.values(unitLabels).map((label) => (
-          <option key={label} value={label}>
+        {Object.entries(unitLabels).map(([unitKey, label]) => (
+          <option key={unitKey} value={unitKey}>
             {label}
           </option>
         ))}

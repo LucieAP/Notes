@@ -5,14 +5,29 @@ import StepSection from "./StepSection";
 
 import "@/styles/recipes.scss";
 import { GetRecipeResponse } from "@/features/recipes/recipe";
+import { Unit } from "@/shared/enums/unit";
 
 interface Props {
   recipe?: GetRecipeResponse;
   onTitleChange?: (title: string) => void;
   onDescriptionChange?: (description: string) => void;
+  onIngredientNameChange?: (ingredientId: string, name: string) => void;
+  onIngredientQuantityChange?: (ingredientId: string, quantity: number) => void;
+  onIngredientUnitChange?: (ingredientId: string, unit: Unit) => void;
+  onCreateIngredient?: () => void | Promise<void>;
+  onDeleteIngredient?: (ingredientId: string) => void | Promise<void>;
 }
 
-function RecipesEditor({ recipe, onTitleChange, onDescriptionChange }: Props) {
+function RecipesEditor({
+  recipe,
+  onTitleChange,
+  onDescriptionChange,
+  onIngredientNameChange,
+  onIngredientQuantityChange,
+  onIngredientUnitChange,
+  onCreateIngredient,
+  onDeleteIngredient,
+}: Props) {
   const titleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -57,7 +72,14 @@ function RecipesEditor({ recipe, onTitleChange, onDescriptionChange }: Props) {
 
         {/* ── Ингредиенты ── */}
 
-        <IngredientSection recipe={recipe} />
+        <IngredientSection
+          recipe={recipe}
+          onIngredientNameChange={onIngredientNameChange}
+          onIngredientQuantityChange={onIngredientQuantityChange}
+          onIngredientUnitChange={onIngredientUnitChange}
+          onCreateIngredient={onCreateIngredient}
+          onDeleteIngredient={onDeleteIngredient}
+        />
 
         <RecipeDivider />
 
