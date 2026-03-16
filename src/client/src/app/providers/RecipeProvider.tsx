@@ -1,6 +1,6 @@
 import { recipesApi } from "@/features/recipes/api";
 import { GetRecipeResponse } from "@/features/recipes/recipe";
-import { Unit, unitLabels } from "@/shared/enums/unit";
+import { Unit } from "@/shared/enums/unit";
 import { RecipesContext } from "@/shared/hooks/useRecipes";
 import { useCallback, useEffect, useMemo, useState } from "react";
 

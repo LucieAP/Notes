@@ -9,25 +9,21 @@ import { Unit } from "@/shared/enums/unit";
 
 interface Props {
   recipe?: GetRecipeResponse;
-  onTitleChange?: (title: string) => void;
-  onDescriptionChange?: (description: string) => void;
-  onIngredientNameChange?: (ingredientId: string, name: string) => void;
-  onIngredientQuantityChange?: (ingredientId: string, quantity: number) => void;
-  onIngredientUnitChange?: (ingredientId: string, unit: Unit) => void;
-  onCreateIngredient?: () => void | Promise<void>;
-  onDeleteIngredient?: (ingredientId: string) => void | Promise<void>;
+  actions?: {
+    handleTitleChange?: (title: string) => void;
+    handleDescriptionChange?: (description: string) => void;
+    handleIngredientNameChange?: (ingredientId: string, name: string) => void;
+    handleIngredientQuantityChange?: (
+      ingredientId: string,
+      quantity: number,
+    ) => void;
+    handleIngredientUnitChange?: (ingredientId: string, unit: Unit) => void;
+    handleCreateIngredient?: () => void | Promise<void>;
+    handleDeleteIngredient?: (ingredientId: string) => void | Promise<void>;
+  };
 }
 
-function RecipesEditor({
-  recipe,
-  onTitleChange,
-  onDescriptionChange,
-  onIngredientNameChange,
-  onIngredientQuantityChange,
-  onIngredientUnitChange,
-  onCreateIngredient,
-  onDeleteIngredient,
-}: Props) {
+function RecipesEditor({ recipe, actions }: Props) {
   const titleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,7 +50,9 @@ function RecipesEditor({
           contentEditable
           suppressContentEditableWarning
           data-placeholder="Название рецепта"
-          onInput={(e) => onTitleChange?.(e.currentTarget.textContent ?? "")}
+          onInput={(e) =>
+            actions?.handleTitleChange?.(e.currentTarget.textContent ?? "")
+          }
         ></div>
 
         <RecipeDivider />
@@ -66,7 +64,9 @@ function RecipesEditor({
           placeholder="Описание"
           rows={3}
           value={recipe?.description ?? ""}
-          onChange={(e) => onDescriptionChange?.(e.target.value ?? "")}
+          onChange={(e) =>
+            actions?.handleDescriptionChange?.(e.target.value ?? "")
+          }
         />
         <RecipeDivider />
 
@@ -74,11 +74,11 @@ function RecipesEditor({
 
         <IngredientSection
           recipe={recipe}
-          onIngredientNameChange={onIngredientNameChange}
-          onIngredientQuantityChange={onIngredientQuantityChange}
-          onIngredientUnitChange={onIngredientUnitChange}
-          onCreateIngredient={onCreateIngredient}
-          onDeleteIngredient={onDeleteIngredient}
+          onIngredientNameChange={actions?.handleIngredientNameChange}
+          onIngredientQuantityChange={actions?.handleIngredientQuantityChange}
+          onIngredientUnitChange={actions?.handleIngredientUnitChange}
+          onCreateIngredient={actions?.handleCreateIngredient}
+          onDeleteIngredient={actions?.handleDeleteIngredient}
         />
 
         <RecipeDivider />
