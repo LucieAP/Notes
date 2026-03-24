@@ -814,9 +814,9 @@ public class RecipeService : IRecipeService
 
     public async Task<CreateRecipeStepResponse> CreateRecipeStepAsync(Guid recipeId, CreateRecipeStepRequest createRecipeStepRequest, Guid currentUserId, CancellationToken cancellationToken = default)
     {
-        var trimmedDescription = createRecipeStepRequest.Description.Trim();
+        var trimmedDescription = createRecipeStepRequest.Description?.Trim();
 
-        if (string.IsNullOrEmpty(trimmedDescription))
+        if (createRecipeStepRequest.Description != null && string.IsNullOrEmpty(trimmedDescription))
         {
             throw new ArgumentException("Описание не может быть пустым");
         }
@@ -865,14 +865,9 @@ public class RecipeService : IRecipeService
             return OperationResult<UpdateRecipeStepResponse>.Failure("Шаг рецепта не найден", 404);
         }
 
-        if (updateRecipeStepRequest.Description == null)
-        {
-            return OperationResult<UpdateRecipeStepResponse>.Failure("Ни одного параметра не было передано", 400);
-        }
+        var trimmedDescription = updateRecipeStepRequest.Description?.Trim();
 
-        var trimmedDescription = updateRecipeStepRequest.Description.Trim();
-
-        if (string.IsNullOrWhiteSpace(trimmedDescription))
+        if (updateRecipeStepRequest.Description != null && string.IsNullOrWhiteSpace(trimmedDescription))
         {
             return OperationResult<UpdateRecipeStepResponse>.Failure("Описание не может быть пустым", 400);
         }
