@@ -60,6 +60,15 @@ public class RecipeService : IRecipeService
                         IngredientGroupId = i.IngredientGroupId,
                         RecipeId = i.RecipeId
                     })
+                    .ToList(),
+                Steps = r.RecipeSteps
+                    .OrderBy(rs => rs.CreatedAt)
+                    .Select(rs => new GetRecipeStepResponse {
+                        Id = rs.Id,
+                        Description = rs.Description,
+                        CreatedAt = rs.CreatedAt,
+                        RecipeId = rs.RecipeId
+                    })
                     .ToList()
             })
             .ToListAsync(cancellationToken);
@@ -115,6 +124,15 @@ public class RecipeService : IRecipeService
                         CreatedAt = i.CreatedAt,
                         IngredientGroupId = i.IngredientGroupId,
                         RecipeId = i.RecipeId
+                    })
+                    .ToList(),
+                Steps = r.RecipeSteps
+                    .OrderBy(rs => rs.CreatedAt)
+                    .Select(rs => new GetRecipeStepResponse {
+                        Id = rs.Id,
+                        Description = rs.Description,
+                        CreatedAt = rs.CreatedAt,
+                        RecipeId = rs.RecipeId
                     })
                     .ToList()
             })

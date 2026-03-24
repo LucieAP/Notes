@@ -10,9 +10,12 @@ import {
 import {
   CreateIngredientRequest,
   CreateIngredientResponse,
-  GetIngredientResponse,
   UpdateIngredientRequest,
 } from "./ingredient";
+import {
+  CreateRecipeStepRequest,
+  CreateRecipeStepResponse,
+} from "./recipeStep";
 
 export const recipesApi = {
   getAll(): Promise<GetRecipeResponse[]> {
@@ -83,5 +86,19 @@ export const recipesApi = {
 
   deleteIngredient(id: string): Promise<void> {
     return api.delete(`recipes/ingredient/delete/${id}`);
+  },
+
+  createStep({
+    id,
+    data,
+  }: {
+    id: string;
+    data: CreateRecipeStepRequest;
+  }): Promise<CreateRecipeStepResponse> {
+    return api.post(`/recipes/${id}/step/create`, data);
+  },
+
+  deleteStep(id: string): Promise<void> {
+    return api.delete(`recipes/step/delete/${id}`);
   },
 };

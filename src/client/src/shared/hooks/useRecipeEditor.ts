@@ -24,6 +24,8 @@ function useRecipeEditor(id: string) {
     updateIngredientUnit,
     createIngredient,
     deleteIngredient,
+    createStep,
+    deleteStep,
   } = useRecipes();
 
   if (!id) {
@@ -38,6 +40,8 @@ function useRecipeEditor(id: string) {
         handleIngredientUnitChange: () => {},
         handleCreateIngredient: async () => {},
         handleDeleteIngredient: async () => {},
+        handleCreateStep: async () => {},
+        handleDeleteStep: async () => {},
       },
     };
   }
@@ -252,6 +256,37 @@ function useRecipeEditor(id: string) {
     [updateIngredientUnit],
   );
 
+  // ── Обработчик создания шага ──
+  const handleCreateStep = useCallback(async () => {
+    try {
+      if (!id) return;
+      await createStep(id);
+      const fetchedRecipe = await getRecipeById(id);
+      if (fetchedRecipe) {
+        setRecipe(fetchedRecipe);
+      }
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
+    }
+  }, [id, createStep, getRecipeById]);
+
+  // ── Обработчик удаления шага ──
+  const handleDeleteStep = useCallback(
+    async (stepId: string) => {
+      try {
+        if (!stepId || !id) return;
+        await deleteStep(stepId);
+        const fetchedRecipe = await getRecipeById(id);
+        if (fetchedRecipe) {
+          setRecipe(fetchedRecipe);
+        }
+      } catch (err) {
+        console.log(err instanceof Error ? err.message : err);
+      }
+    },
+    [id, deleteStep, getRecipeById],
+  );
+
   return {
     recipe,
     isLoading,
@@ -263,6 +298,8 @@ function useRecipeEditor(id: string) {
       handleIngredientUnitChange,
       handleCreateIngredient,
       handleDeleteIngredient,
+      handleCreateStep,
+      handleDeleteStep,
     },
   };
 }

@@ -1,19 +1,19 @@
 /** DTO для получения шага рецепта (GetRecipeStepResponse на сервере) */
 export interface GetRecipeStepResponse {
   id: string;
-  description: string;
+  description: string | null;
   createdAt: string;
   recipeId: string;
 }
 
 /** DTO для создания шага рецепта (CreateRecipeStepRequest на сервере) */
 export interface CreateRecipeStepRequest {
-  description: string;
+  description: string | null;
 }
 
 export interface CreateRecipeStepResponse {
   id: string;
-  description: string;
+  description: string | null;
   createdAt: string;
   recipeId: string;
 }
@@ -21,7 +21,7 @@ export interface CreateRecipeStepResponse {
 /** DTO для обновления шага рецепта (UpdateRecipeStepResponse на сервере) */
 export interface UpdateRecipeStepRequest {
   id: string;
-  description: string;
+  description: string | null;
 }
 
 export interface UpdateRecipeStepResponse {
@@ -29,4 +29,3 @@ export interface UpdateRecipeStepResponse {
   description: string | null;
   wasUpdated: boolean;
 }
-

@@ -1,41 +1,39 @@
-import { useState } from "react";
+import { GetRecipeResponse } from "@/features/recipes/recipe";
+import StepRow from "./StepRow";
 
-function StepSection() {
-  const [hovered, setHovered] = useState(false);
+interface Props {
+  recipe?: GetRecipeResponse;
+  onCreateStep?: () => void | Promise<void>;
+  // onStepChange?:
+  onDeleteStep?: (stepId: string) => void | Promise<void>;
+}
+
+function StepSection({ recipe, onCreateStep, onDeleteStep }: Props) {
+  if (!recipe) return null;
+
+  const steps = recipe.steps ?? [];
+
   return (
-    <section
-      className="w-full flex flex-col items-start gap-2 py-1"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
+    <section className="w-full flex flex-col items-start gap-2 py-1">
       <span className="text-[#888] text-sm min-w-[24px] text-right select-none shrink-0 pt-px">
         Шаги:
       </span>
 
-      <div className="flex w-full">
-        <textarea
-          className="bg-transparent border-none outline-none text-white text-sm flex-1 resize-none overflow-hidden leading-relaxed placeholder-[#555]"
-          placeholder="Введите шаг приготовления"
-          rows={1}
-        />
-
-        <button
-          className="text-[#666] hover:text-white text-xs px-1 py-0.5 rounded bg-transparent border-none cursor-pointer transition-all duration-150 shrink-0 mt-px"
-          aria-label="Удалить шаг"
-          style={{ opacity: hovered ? 1 : 0 }}
-        >
-          ✕
-        </button>
-      </div>
+      {steps.map((step) => (
+        <StepRow key={step.id} step={step} onDeleteStep={onDeleteStep} />
+      ))}
 
       <div className="flex gap-1 mt-2">
-        <button className="flex items-center gap-1 text-[#888] hover:text-white hover:bg-[#333] text-xs px-2 py-1 rounded bg-transparent border-none cursor-pointer transition-all duration-150">
+        <button
+          onClick={onCreateStep}
+          className="flex items-center gap-1 text-[#888] hover:text-white hover:bg-[#333] text-xs px-2 py-1 rounded bg-transparent border-none cursor-pointer transition-all duration-150"
+        >
           <span>+</span> шаг
         </button>
 
-        <button className="flex items-center gap-1 text-[#888] hover:text-white hover:bg-[#333] text-xs px-2 py-1 rounded bg-transparent border-none cursor-pointer transition-all duration-150">
+        {/* <button className="flex items-center gap-1 text-[#888] hover:text-white hover:bg-[#333] text-xs px-2 py-1 rounded bg-transparent border-none cursor-pointer transition-all duration-150">
           <span className="text-sm leading-none">+</span> подгруппа
-        </button>
+        </button> */}
       </div>
     </section>
   );

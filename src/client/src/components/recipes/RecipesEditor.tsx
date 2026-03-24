@@ -20,6 +20,8 @@ interface Props {
     handleIngredientUnitChange?: (ingredientId: string, unit: Unit) => void;
     handleCreateIngredient?: () => void | Promise<void>;
     handleDeleteIngredient?: (ingredientId: string) => void | Promise<void>;
+    handleCreateStep?: () => void | Promise<void>;
+    handleDeleteStep?: (stepId: string) => void | Promise<void>;
   };
 }
 
@@ -85,7 +87,11 @@ function RecipesEditor({ recipe, actions }: Props) {
 
         {/* ── Методы ── */}
 
-        <StepSection />
+        <StepSection
+          recipe={recipe}
+          onCreateStep={actions?.handleCreateStep}
+          onDeleteStep={actions?.handleDeleteStep}
+        />
       </div>
     </div>
   );

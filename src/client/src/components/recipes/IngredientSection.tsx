@@ -19,9 +19,7 @@ function IngredientSection({
   onCreateIngredient,
   onDeleteIngredient,
 }: Props) {
-  if (!recipe) {
-    return null;
-  }
+  if (!recipe) return null;
 
   return (
     <section className="w-full">
@@ -49,9 +47,9 @@ function IngredientSection({
           <span>+</span> ингредиент
         </button>
 
-        <button className="flex items-center gap-1 text-[#888] hover:text-white hover:bg-[#333] text-xs px-2 py-1 rounded bg-transparent border-none cursor-pointer transition-all duration-150">
+        {/* <button className="flex items-center gap-1 text-[#888] hover:text-white hover:bg-[#333] text-xs px-2 py-1 rounded bg-transparent border-none cursor-pointer transition-all duration-150">
           <span className="text-sm leading-none">+</span> подгруппа
-        </button>
+        </button> */}
       </div>
     </section>
   );

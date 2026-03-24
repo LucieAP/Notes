@@ -26,6 +26,8 @@ interface RecipesContextTypes {
   updateIngredientQuantity: (id: string, quantity: number) => Promise<void>;
   updateIngredientUnit: (id: string, unit: Unit) => Promise<void>;
   deleteIngredient: (id: string) => Promise<void>;
+  createStep: (id: string) => Promise<void>;
+  deleteStep: (id: string) => Promise<void>;
 }
 
 export const RecipesContext = createContext<RecipesContextTypes | null>(null);

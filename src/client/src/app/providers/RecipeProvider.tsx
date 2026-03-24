@@ -271,6 +271,51 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const createStep = useCallback(async (id: string) => {
+    try {
+      if (!id) return;
+
+      const createdStep = await recipesApi.createStep({
+        id,
+        data: {
+          description: null,
+        },
+      });
+
+      console.log("createdStep: ", createdStep);
+
+      setRecipesData((prev) =>
+        prev.map((recipe) =>
+          recipe.id === id
+            ? {
+                ...recipe,
+                steps: [...(recipe.steps ?? []), createdStep],
+              }
+            : recipe,
+        ),
+      );
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
+    }
+  }, []);
+
+  const deleteStep = useCallback(async (id: string) => {
+    try {
+      if (!id) return;
+
+      await recipesApi.deleteStep(id);
+
+      setRecipesData((prev) =>
+        prev.map((recipe) => ({
+          ...recipe,
+          steps: recipe.steps.filter((step) => step.id !== id),
+        })),
+      );
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : err);
+    }
+  }, []);
+
   const value = useMemo(() => {
     return {
       recipesData,
@@ -290,6 +335,8 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
       updateIngredientQuantity,
       updateIngredientUnit,
       deleteIngredient,
+      createStep,
+      deleteStep,
     };
   }, [
     recipesData,
@@ -309,6 +356,8 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     updateIngredientQuantity,
     updateIngredientUnit,
     deleteIngredient,
+    createStep,
+    deleteStep,
   ]);
 
   return <RecipesContext value={value}>{children}</RecipesContext>;
