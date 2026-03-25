@@ -13,7 +13,8 @@ function useRecipeEditor(id: string) {
   const ingredientQuantitySaveTimeoutsRef = useRef<Map<string, number>>(
     new Map(),
   );
-  const ingredientUnitSaveTimeoutsRef = useRef<Map<string, number>>(new Map());
+  const ingredientUnitSaveTimeoutsRef = useRef<Map<string, number>>(new Map()); // {ключ: ingredientId, значение: timeoutId, (число, которое возвращает window.setTimeout(...)}
+  const stepDescriptionSaveTimeoutsRef = useRef<Map<string, number>>(new Map());
 
   const {
     getRecipeById,
@@ -25,6 +26,7 @@ function useRecipeEditor(id: string) {
     createIngredient,
     deleteIngredient,
     createStep,
+    updateStepDescription,
     deleteStep,
   } = useRecipes();
 
@@ -41,6 +43,7 @@ function useRecipeEditor(id: string) {
         handleCreateIngredient: async () => {},
         handleDeleteIngredient: async () => {},
         handleCreateStep: async () => {},
+        handleStepDescriptionChange: () => {},
         handleDeleteStep: async () => {},
       },
     };
@@ -64,21 +67,30 @@ function useRecipeEditor(id: string) {
       if (titleSaveTimeoutRef.current) {
         window.clearTimeout(titleSaveTimeoutRef.current);
       }
+
       if (descriptionSaveTimeoutRef.current) {
         window.clearTimeout(descriptionSaveTimeoutRef.current);
       }
+
       ingredientNameSaveTimeoutsRef.current.forEach((timeoutId) => {
         window.clearTimeout(timeoutId);
       });
       ingredientNameSaveTimeoutsRef.current.clear();
+
       ingredientQuantitySaveTimeoutsRef.current.forEach((timeoutId) => {
         window.clearTimeout(timeoutId);
       });
       ingredientQuantitySaveTimeoutsRef.current.clear();
+
       ingredientUnitSaveTimeoutsRef.current.forEach((timeoutId) => {
-        window.clearTimeout(timeoutId);
+        window.clearTimeout(timeoutId); // очищает таймауты, но не удаляет их из Map автоматически
       });
-      ingredientUnitSaveTimeoutsRef.current.clear();
+      ingredientUnitSaveTimeoutsRef.current.clear(); // Удаляет все ключи и значения из Map
+
+      stepDescriptionSaveTimeoutsRef.current.forEach((timeoutId) =>
+        window.clearTimeout(timeoutId),
+      );
+      stepDescriptionSaveTimeoutsRef.current.clear();
     };
   }, []);
 
@@ -236,14 +248,18 @@ function useRecipeEditor(id: string) {
         return { ...prev, ingredients };
       });
 
+      // Проверяем, есть ли уже запланированный таймаут для этого ингредиента
       const existingTimeout =
-        ingredientUnitSaveTimeoutsRef.current.get(ingredientId);
+        ingredientUnitSaveTimeoutsRef.current.get(ingredientId); // get - получаем значение по ключу ingredientId (timoutId)
 
+      // Если есть — отменяем его
       if (existingTimeout) {
         window.clearTimeout(existingTimeout);
       }
 
+      // Устанавливаем новый таймаут (с задержкой 1 сек)
       const timeoutId = window.setTimeout(async () => {
+        // Возвращает числовой ID таймаута
         try {
           await updateIngredientUnit(ingredientId, unit);
         } catch (err) {
@@ -251,7 +267,8 @@ function useRecipeEditor(id: string) {
         }
       }, 1000);
 
-      ingredientUnitSaveTimeoutsRef.current.set(ingredientId, timeoutId);
+      // Сохраняем ID нового таймаута
+      ingredientUnitSaveTimeoutsRef.current.set(ingredientId, timeoutId); // set - сохраняет пару ключ-значение {ingredientId: timeoutId}
     },
     [updateIngredientUnit],
   );
@@ -269,6 +286,41 @@ function useRecipeEditor(id: string) {
       console.log(err instanceof Error ? err.message : err);
     }
   }, [id, createStep, getRecipeById]);
+
+  // ── Обработчик изменения шага ингредиента ──
+
+  const handleStepDescriptionChange = useCallback(
+    async (stepId: string, description: string) => {
+      setRecipe((prev) => {
+        if (!prev) return prev;
+
+        const steps = prev.steps.map((step) =>
+          step.id === stepId ? { ...step, description } : step,
+        );
+
+        return { ...prev, steps };
+      });
+
+      const existingTimeout =
+        stepDescriptionSaveTimeoutsRef.current.get(stepId);
+
+      if (existingTimeout) {
+        window.clearTimeout(existingTimeout);
+      }
+
+      const timeoutId = window.setTimeout(async () => {
+        try {
+          const normalized = description.trim() === "" ? null : description; // Нормализуем пустую строку в null
+          await updateStepDescription(stepId, normalized);
+        } catch (err) {
+          console.log(err instanceof Error ? err.message : err);
+        }
+      }, 1000);
+
+      stepDescriptionSaveTimeoutsRef.current.set(stepId, timeoutId);
+    },
+    [updateStepDescription],
+  );
 
   // ── Обработчик удаления шага ──
   const handleDeleteStep = useCallback(
@@ -299,6 +351,7 @@ function useRecipeEditor(id: string) {
       handleCreateIngredient,
       handleDeleteIngredient,
       handleCreateStep,
+      handleStepDescriptionChange,
       handleDeleteStep,
     },
   };

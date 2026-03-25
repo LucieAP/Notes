@@ -20,7 +20,6 @@ export interface CreateRecipeStepResponse {
 
 /** DTO для обновления шага рецепта (UpdateRecipeStepResponse на сервере) */
 export interface UpdateRecipeStepRequest {
-  id: string;
   description: string | null;
 }
 

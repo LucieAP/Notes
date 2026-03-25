@@ -42,9 +42,12 @@ function IngredientSection({
       <div className="flex gap-1 mt-2">
         <button
           onClick={onCreateIngredient}
-          className="flex items-center gap-1 text-[#888] hover:text-white hover:bg-[#333] text-xs px-2 py-1 rounded bg-transparent border-none cursor-pointer transition-all duration-150"
+          className="inline-flex items-center gap-1.5 text-[#c5c5c5] hover:text-white bg-[#2a2a2a]/70 hover:bg-[#353535] border border-[#3a3a3a] hover:border-[#4a4a4a] text-xs px-2.5 py-1.5 rounded-md cursor-pointer transition-all duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#444]"
         >
-          <span>+</span> ингредиент
+          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-[#2b2b2b] text-[11px] leading-none">
+            +
+          </span>
+          ингредиент
         </button>
 
         {/* <button className="flex items-center gap-1 text-[#888] hover:text-white hover:bg-[#333] text-xs px-2 py-1 rounded bg-transparent border-none cursor-pointer transition-all duration-150">

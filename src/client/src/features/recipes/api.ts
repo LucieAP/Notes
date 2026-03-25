@@ -15,6 +15,8 @@ import {
 import {
   CreateRecipeStepRequest,
   CreateRecipeStepResponse,
+  UpdateRecipeStepRequest,
+  UpdateRecipeStepResponse,
 } from "./recipeStep";
 
 export const recipesApi = {
@@ -31,33 +33,33 @@ export const recipesApi = {
   },
 
   toggleFavorite(id: string): Promise<ToggleFavoriteResponse> {
-    return api.patch(`recipes/${id}/favorite`);
+    return api.patch(`/recipes/${id}/favorite`);
   },
 
   updateTitle({
     id,
     title,
   }: UpdateRecipeTitleRequest): Promise<UpdateRecipeResponse> {
-    return api.patch(`recipes/${id}`, { title });
+    return api.patch(`/recipes/${id}`, { title });
   },
 
   updateDescription({
     id,
     description,
   }: UpdateRecipeDescriptionRequest): Promise<UpdateRecipeResponse> {
-    return api.patch(`recipes/${id}`, { description });
+    return api.patch(`/recipes/${id}`, { description });
   },
 
   delete(id: string) {
-    return api.delete(`recipes/delete/${id}`);
+    return api.delete(`/recipes/delete/${id}`);
   },
 
   trash(id: string) {
-    return api.patch(`recipes/${id}/trash`);
+    return api.patch(`/recipes/${id}/trash`);
   },
 
   restore(id: string) {
-    return api.patch(`recipes/${id}/restore`);
+    return api.patch(`/recipes/${id}/restore`);
   },
 
   getTrashed(): Promise<GetRecipeResponse[]> {
@@ -71,7 +73,7 @@ export const recipesApi = {
     id: string;
     data: CreateIngredientRequest;
   }): Promise<CreateIngredientResponse> {
-    return api.post(`recipes/${id}/ingredient/create`, data);
+    return api.post(`/recipes/${id}/ingredient/create`, data);
   },
 
   updateIngredient({
@@ -81,11 +83,11 @@ export const recipesApi = {
     id: string;
     data: UpdateIngredientRequest;
   }): Promise<void> {
-    return api.patch(`recipes/ingredient/${id}`, data);
+    return api.patch(`/recipes/ingredient/${id}`, data);
   },
 
   deleteIngredient(id: string): Promise<void> {
-    return api.delete(`recipes/ingredient/delete/${id}`);
+    return api.delete(`/recipes/ingredient/delete/${id}`);
   },
 
   createStep({
@@ -98,7 +100,17 @@ export const recipesApi = {
     return api.post(`/recipes/${id}/step/create`, data);
   },
 
+  updateStep({
+    id,
+    data,
+  }: {
+    id: string;
+    data: UpdateRecipeStepRequest;
+  }): Promise<UpdateRecipeStepResponse> {
+    return api.patch(`/recipes/step/${id}`, data);
+  },
+
   deleteStep(id: string): Promise<void> {
-    return api.delete(`recipes/step/delete/${id}`);
+    return api.delete(`/recipes/step/delete/${id}`);
   },
 };

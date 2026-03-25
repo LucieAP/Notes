@@ -27,6 +27,10 @@ interface RecipesContextTypes {
   updateIngredientUnit: (id: string, unit: Unit) => Promise<void>;
   deleteIngredient: (id: string) => Promise<void>;
   createStep: (id: string) => Promise<void>;
+  updateStepDescription: (
+    id: string,
+    description: string | null,
+  ) => Promise<void>;
   deleteStep: (id: string) => Promise<void>;
 }
 

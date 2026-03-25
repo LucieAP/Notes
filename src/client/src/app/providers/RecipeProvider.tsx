@@ -299,6 +299,28 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const updateStepDescription = useCallback(
+    async (id: string, description: string | null) => {
+      try {
+        if (!id) return;
+
+        await recipesApi.updateStep({ id, data: { description } });
+
+        setRecipesData((prev) =>
+          prev.map((recipe) => ({
+            ...recipe,
+            steps: recipe.steps.map((step) =>
+              step.id === id ? { ...step, description } : step,
+            ),
+          })),
+        );
+      } catch (err) {
+        console.log(err instanceof Error ? err.message : err);
+      }
+    },
+    [],
+  );
+
   const deleteStep = useCallback(async (id: string) => {
     try {
       if (!id) return;
@@ -336,6 +358,7 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
       updateIngredientUnit,
       deleteIngredient,
       createStep,
+      updateStepDescription,
       deleteStep,
     };
   }, [
@@ -357,6 +380,7 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     updateIngredientUnit,
     deleteIngredient,
     createStep,
+    updateStepDescription,
     deleteStep,
   ]);
 
