@@ -13,7 +13,6 @@ import TasksPage from "../components/tasks/TasksPage";
 import NotFoundPage from "../components/common/pages/NotFoundPage";
 import ContentArea from "@/components/content/ContentArea";
 import LoginPage from "@/components/auth/LoginPage";
-import CallbackPage from "@/components/auth/CallbackPage";
 import AuthProvider from "./providers/AuthProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import NotesProvider from "./providers/NotesProvider";
@@ -27,7 +26,6 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/callback" element={<CallbackPage />} />
 
           <Route
             path="/"

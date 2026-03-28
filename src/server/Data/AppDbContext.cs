@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<RecipeStep> RecipeSteps { get; set; }
     public DbSet<IngredientGroup> IngredientGroups { get; set; }
     public DbSet<Ingredient> Ingredients { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -24,5 +25,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>().HasIndex(u => u.GoogleId).IsUnique();
         modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
         modelBuilder.Entity<Note>().Property(n => n.Content).HasColumnType("jsonb");
+        modelBuilder.Entity<RefreshToken>().HasIndex(t => t.HashedToken).IsUnique();
+        modelBuilder.Entity<RefreshToken>().Property(t => t.RowVersion).IsRowVersion();
     }
 }

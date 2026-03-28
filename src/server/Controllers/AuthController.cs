@@ -11,13 +11,18 @@ namespace server.Controllers
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
-        private readonly IJwtService _jwtService;
+        private readonly ITokenService _tokenService;
         private readonly IUserService _userService;
+        private readonly IWebHostEnvironment _environment;
 
-        public AuthController(IJwtService jwtService, IUserService userService)
+        public AuthController(
+            ITokenService tokenService,
+            IUserService userService,
+            IWebHostEnvironment environment)
         {
-            _jwtService = jwtService;
+            _tokenService = tokenService;
             _userService = userService;
+            _environment = environment;
         }
 
         // Перенаправляет пользователя на страницу входа Google. 
@@ -81,20 +86,52 @@ namespace server.Controllers
              // Шаг 4: Находим или создаём пользователя
             var user = await _userService.FindOrCreateUser(userInfo, cancellationToken);
 
-            // Шаг 5: Генерируем токен
-            var jwtToken = _jwtService.GenerateJwtToken(new JwtUser 
+            // Шаг 5: Генерируем access-токен
+            var jwtToken = _tokenService.GenerateJwtToken(new JwtUser 
             {
                 Id = user.Id,
                 Name = user.Name,
                 Email = user.Email
             });
 
+            // Шаг 6: Генерируем refresh-токен
+            var refreshToken = await _tokenService.GenerateRefreshTokenAsync(user.Id);
+
+            // Шаг 7: Устанавливаем в куки refresh-токен
+            SetRefreshTokenCookie(refreshToken);
+
             // Возвращаем JWT
             // Для API просто возвращаем JSON
             // return Ok(new { Token = jwtToken });
 
-            // Redirect на React с токеном
-            return Redirect($"http://localhost:5173/callback?token={jwtToken}");
+            // Redirect
+            return Redirect($"http://localhost:5173/");
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var rawToken = Request.Cookies["refreshToken"];
+            if (rawToken is not null)
+                await _tokenService.RevokeAsync(rawToken);
+
+            Response.Cookies.Delete("refreshToken");
+            return NoContent();
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh()
+        {
+            var rawToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(rawToken))
+                return Unauthorized();
+
+            var result = await _tokenService.RefreshAsync(rawToken);
+            if (result is null)
+                return Unauthorized("Token expired or revoked");
+
+            SetRefreshTokenCookie(result.Value.refreshToken);
+            return Ok(new { token = result.Value.jwtToken });
         }
 
         [HttpGet("me")]
@@ -123,6 +160,18 @@ namespace server.Controllers
                 Picture = user.Picture,
                 EmailVerified = user.EmailVerified,
                 LastLoginAt = user.LastLoginAt
+            });
+        }
+
+        private void SetRefreshTokenCookie(string token)
+        {
+            var isSecure = !_environment.IsDevelopment();
+            Response.Cookies.Append("refreshToken", token, new CookieOptions
+            {
+                HttpOnly = true,   // недоступен из JS
+                Secure = isSecure, // только HTTPS
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddDays(30)
             });
         }
     }

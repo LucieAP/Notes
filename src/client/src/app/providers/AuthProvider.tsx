@@ -1,4 +1,9 @@
 import { authApi } from "@/features/auth/api";
+import {
+  clearAccessToken,
+  getAccessToken,
+  setAccessToken,
+} from "@/shared/api/tokenStorage";
 import { AuthContext } from "@/shared/hooks/useAuth";
 import { User } from "@/shared/types/user";
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
@@ -8,30 +13,44 @@ function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchUser = async () => {
-      const token = await cookieStore.get("token");
-
-      if (!token?.value) {
-        setLoading(false);
-        return;
-      }
-
       try {
+        let token = getAccessToken();
+
+        if (!token) {
+          const refreshRes = await authApi.refresh();
+          token = refreshRes.token;
+          setAccessToken(token);
+        }
+
         const me = await authApi.getUser();
-        setUser(me);
+        if (isMounted) {
+          setUser(me);
+        }
       } catch {
-        cookieStore.delete("token");
-        setUser(null);
+        clearAccessToken();
+        if (isMounted) {
+          setUser(null);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchUser();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const logout = useCallback(async () => {
-    await cookieStore.delete("token");
+    await authApi.logout();
+    clearAccessToken();
     setUser(null);
   }, []);
 

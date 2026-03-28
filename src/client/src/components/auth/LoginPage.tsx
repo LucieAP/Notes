@@ -9,6 +9,7 @@ function LoginPage() {
   const handleLogin = () => {
     window.location.href = `${import.meta.env.VITE_BASE_URL}/auth/google-login`;
   };
+
   return (
     <>
       <div className="min-h-screen flex items-center justify-center p-4">

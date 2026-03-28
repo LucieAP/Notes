@@ -136,7 +136,7 @@ builder.Services.AddCors(options =>
         });
     });
 
-builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<INoteService, NoteService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
