@@ -1,4 +1,8 @@
-import axios, { AxiosError, AxiosInstance, type CreateAxiosDefaults } from "axios";
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  type CreateAxiosDefaults,
+} from "axios";
 import {
   clearAccessToken,
   getAccessToken,
@@ -47,6 +51,7 @@ function setAuthHeader(requestConfig: any, token: string) {
 
 export function setupInterceptors(api: AxiosInstance) {
   let isRefreshing = false;
+  let lastRefreshToken: string | null = null;
 
   // очередь запросов на /refresh
   let refreshQueue: QueueItem[] = [];
@@ -62,8 +67,7 @@ export function setupInterceptors(api: AxiosInstance) {
     refreshQueue = [];
   }
 
-  // Динамически подставляем токен перед каждым запросом
-  // request.use() добавляет функцию, которая запускается перед отправкой любого запроса
+  // Динамически подставляем токен перед отправкой каждого запроса
   // config - объект с настройками текущего запроса (url, method, headers и т.д.)
   api.interceptors.request.use((config) => {
     const token = getAccessToken();
@@ -80,7 +84,7 @@ export function setupInterceptors(api: AxiosInstance) {
     (response) => response.data,
     async (error: AxiosError) => {
       const originalRequest = error.config as
-        | (AxiosError["config"] & { _retry?: boolean })
+        | (AxiosError["config"] & { _retry?: boolean }) // устанавливаем свойство _retry
         | undefined;
 
       if (!originalRequest) {
@@ -116,6 +120,7 @@ export function setupInterceptors(api: AxiosInstance) {
             "/auth/refresh",
           );
           const newToken = res.token;
+          lastRefreshToken = newToken;
 
           // сохраняем токен
           setAccessToken(newToken);
@@ -135,6 +140,11 @@ export function setupInterceptors(api: AxiosInstance) {
           return Promise.reject(normalizeError(refreshError));
         } finally {
           isRefreshing = false;
+          // если в окно между onRefreshed и return api.request(originalRequest); в очередь попадет еще один запрос с 401
+          if (lastRefreshToken && refreshQueue.length > 0) {
+            onRefreshed(lastRefreshToken);
+          }
+          lastRefreshToken = null;
         }
       }
 
