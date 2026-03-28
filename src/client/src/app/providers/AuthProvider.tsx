@@ -13,29 +13,33 @@ function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let isMounted = true;
+    const controller = new AbortController();
 
     const fetchUser = async () => {
       try {
         let token = getAccessToken();
 
         if (!token) {
-          const refreshRes = await authApi.refresh();
+          const refreshRes = await authApi.refresh({
+            signal: controller.signal,
+          });
           token = refreshRes.token;
-          setAccessToken(token);
+          if (!controller.signal.aborted) {
+            setAccessToken(token);
+          }
         }
 
-        const me = await authApi.getUser();
-        if (isMounted) {
+        const me = await authApi.getUser({ signal: controller.signal });
+        if (!controller.signal.aborted) {
           setUser(me);
         }
       } catch {
-        clearAccessToken();
-        if (isMounted) {
+        if (!controller.signal.aborted) {
+          clearAccessToken();
           setUser(null);
         }
       } finally {
-        if (isMounted) {
+        if (!controller.signal.aborted) {
           setLoading(false);
         }
       }
@@ -44,7 +48,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
     fetchUser();
 
     return () => {
-      isMounted = false;
+      controller.abort();
     };
   }, []);
 
