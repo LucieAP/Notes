@@ -84,7 +84,7 @@ public class RecipeService : IRecipeService
             .AsNoTracking()
             .Include(r => r.User)
             .Include(r => r.RecipeGroup)
-            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted)
+            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted && !r.IsTrashed)
             .Select(r => new GetRecipeResponse
             {
                 Id = r.Id,
@@ -196,7 +196,7 @@ public class RecipeService : IRecipeService
     public async Task<OperationResult<ToggleFavoriteResponse?>> ToggleFavoriteAsync(Guid recipeId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var recipe = await _context.Recipes
-            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted)
+            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted && !r.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (recipe == null)
@@ -222,7 +222,7 @@ public class RecipeService : IRecipeService
     public async Task<OperationResult<UpdateItemResponse>> UpdateRecipeAsync(Guid recipeId, Guid currentUserId, UpdateItemRequest updateItemRequest, CancellationToken cancellationToken = default)
     {
         var recipe = await _context.Recipes
-            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted)
+            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted && !r.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (recipe == null)
@@ -243,7 +243,7 @@ public class RecipeService : IRecipeService
     public async Task<OperationResult> DeleteRecipeByIdAsync(Guid recipeId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var recipe = await _context.Recipes
-            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted)
+            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted && !r.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (recipe == null)
@@ -418,7 +418,7 @@ public class RecipeService : IRecipeService
         }
 
         var recipe = await _context.Recipes
-            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted)
+            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted && !r.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (recipe == null)
@@ -603,7 +603,7 @@ public class RecipeService : IRecipeService
         var ingredient = await _context.Ingredients  
             .AsNoTracking()
             .Include(i => i.Recipe)
-            .Where(i => i.Id == ingredientId && i.Recipe.CreatedBy == currentUserId && !i.Recipe.IsDeleted)
+            .Where(i => i.Id == ingredientId && i.Recipe.CreatedBy == currentUserId && !i.Recipe.IsDeleted && !i.Recipe.IsTrashed)
             .Select(i => new GetIngredientResponse
             {
                 Id = i.Id,
@@ -624,7 +624,7 @@ public class RecipeService : IRecipeService
     {
         var ingredient = await _context.Ingredients
             .Include(i => i.Recipe)
-            .Where(i => i.Id == ingredientId && i.Recipe.CreatedBy == currentUserId && !i.Recipe.IsDeleted)
+            .Where(i => i.Id == ingredientId && i.Recipe.CreatedBy == currentUserId && !i.Recipe.IsDeleted && !i.Recipe.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (ingredient == null)
@@ -646,7 +646,7 @@ public class RecipeService : IRecipeService
     {
         var ingredient = await _context.Ingredients
             .Include(i => i.Recipe)
-            .Where(i => i.Id == ingredientId && i.Recipe.CreatedBy == currentUserId && !i.Recipe.IsDeleted)
+            .Where(i => i.Id == ingredientId && i.Recipe.CreatedBy == currentUserId && !i.Recipe.IsDeleted && !i.Recipe.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (ingredient == null)
@@ -678,7 +678,7 @@ public class RecipeService : IRecipeService
 
         // Проверяем, что рецепт существует и принадлежит пользователю
         var recipe = await _context.Recipes
-            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted)
+            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted && !r.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (recipe == null)
@@ -817,7 +817,7 @@ public class RecipeService : IRecipeService
         var recipeStep = await _context.RecipeSteps
             .AsNoTracking()
             .Include(rs => rs.Recipe)
-            .Where(rs => rs.Id == recipeStepId && rs.Recipe.CreatedBy == currentUserId && !rs.Recipe.IsDeleted)
+            .Where(rs => rs.Id == recipeStepId && rs.Recipe.CreatedBy == currentUserId && !rs.Recipe.IsDeleted && !rs.Recipe.IsTrashed)
             .Select(rs => new GetRecipeStepResponse
             {
                 Id = rs.Id,
@@ -841,7 +841,7 @@ public class RecipeService : IRecipeService
 
         // Проверяем, что рецепт существует и принадлежит пользователю
         var recipe = await _context.Recipes
-            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted)
+            .Where(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted && !r.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (recipe == null)
@@ -875,7 +875,7 @@ public class RecipeService : IRecipeService
     {
         var recipeStep = await _context.RecipeSteps
             .Include(rs => rs.Recipe)
-            .Where(rs => rs.Id == recipeStepId && rs.Recipe.CreatedBy == currentUserId && !rs.Recipe.IsDeleted)
+            .Where(rs => rs.Id == recipeStepId && rs.Recipe.CreatedBy == currentUserId && !rs.Recipe.IsDeleted && !rs.Recipe.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (recipeStep == null)
@@ -923,7 +923,7 @@ public class RecipeService : IRecipeService
     {
         var recipeStep = await _context.RecipeSteps
             .Include(rs => rs.Recipe)
-            .Where(rs => rs.Id == recipeStepId && rs.Recipe.CreatedBy == currentUserId && !rs.Recipe.IsDeleted)
+            .Where(rs => rs.Id == recipeStepId && rs.Recipe.CreatedBy == currentUserId && !rs.Recipe.IsDeleted && !rs.Recipe.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (recipeStep == null)

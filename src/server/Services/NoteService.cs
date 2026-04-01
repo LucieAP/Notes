@@ -155,7 +155,7 @@ public class NoteService : INoteService
     public async Task<OperationResult<TogglePinResponse?>> TogglePinAsync(Guid noteId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var note = await _context.Notes
-            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId)
+            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted && !n.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (note == null)
@@ -181,7 +181,7 @@ public class NoteService : INoteService
     public async Task<OperationResult<UpdateNoteResponse>> UpdateNoteAsync(Guid noteId, Guid currentUserId, UpdateNoteRequest updateNoteRequest, CancellationToken cancellationToken = default)
     {
         var note = await _context.Notes
-            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted)
+            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted && !n.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (note == null)
@@ -202,7 +202,7 @@ public class NoteService : INoteService
     public async Task<OperationResult<UpdateColorResponse>> UpdateColorAsync(Guid noteId, Guid currentUserId, UpdateColorRequest updateColorRequest, CancellationToken cancellationToken = default)
     {
         var note = await _context.Notes
-            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted)
+            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted && !n.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (note == null)
@@ -244,7 +244,7 @@ public class NoteService : INoteService
     public async Task<OperationResult<TrashResponse>> TrashNoteAsync(Guid noteId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var note = await _context.Notes
-                .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted)
+                .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted && !n.IsTrashed)
                 .FirstOrDefaultAsync(cancellationToken);
                 
         if (note == null)
@@ -442,7 +442,7 @@ public class NoteService : INoteService
         }
 
         var note = await _context.Notes
-            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId)
+            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted && !n.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (note == null)
@@ -487,7 +487,7 @@ public class NoteService : INoteService
     public async Task<OperationResult<RemoveFromGroupResponse>> RemoveFromGroupAsync(Guid noteId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var note = await _context.Notes
-            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted)
+            .Where(n => n.Id == noteId && n.CreatedBy == currentUserId && !n.IsDeleted && !n.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (note == null)
@@ -528,7 +528,7 @@ public class NoteService : INoteService
     public async Task<OperationResult> DeleteNoteGroupAsync(Guid groupId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var noteGroup = await _context.NoteGroups
-            .Where(n => n.Id == groupId && n.CreatedBy == currentUserId)
+            .Where(n => n.Id == groupId && n.CreatedBy == currentUserId && !n.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (noteGroup == null)
@@ -540,7 +540,7 @@ public class NoteService : INoteService
 
         // Сбрасываем NoteGroupId у всех заметок в группе и обновляем их timestamps
         var notesInGroup = await _context.Notes
-            .Where(n => n.NoteGroupId == groupId && n.CreatedBy == currentUserId && !n.IsDeleted)
+            .Where(n => n.NoteGroupId == groupId && n.CreatedBy == currentUserId && !n.IsDeleted && !n.IsTrashed)
             .ToListAsync(cancellationToken);
 
         foreach (var note in notesInGroup)

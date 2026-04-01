@@ -159,7 +159,7 @@ public class TaskService : ITaskService
     public async Task<OperationResult<ToggleFavoriteResponse?>> ToggleFavoriteAsync(Guid taskId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var task = await _context.Tasks
-            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId)
+            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted && !t.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (task == null)
@@ -185,7 +185,7 @@ public class TaskService : ITaskService
     public async Task<OperationResult<ToggleCheckboxResponse?>> ToggleCheckboxAsync(Guid taskId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var task = await _context.Tasks
-            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted)
+            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted && !t.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (task == null)
@@ -211,7 +211,7 @@ public class TaskService : ITaskService
     public async Task<OperationResult<UpdateItemResponse>> UpdateTaskAsync(Guid taskId, Guid currentUserId, UpdateItemRequest updateItemRequest, CancellationToken cancellationToken = default)
     {
         var task = await _context.Tasks
-            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted)
+            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted && !t.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (task == null)
@@ -232,7 +232,7 @@ public class TaskService : ITaskService
     public async Task<OperationResult<UpdateColorResponse>> UpdateColorAsync(Guid taskId, Guid currentUserId, UpdateColorRequest updateColorRequest, CancellationToken cancellationToken = default)
     {
         var task = await _context.Tasks
-            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted)
+            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted && !t.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (task == null)
@@ -274,7 +274,7 @@ public class TaskService : ITaskService
     public async Task<OperationResult<TrashResponse>> TrashTaskAsync(Guid taskId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var task = await _context.Tasks
-                .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted)
+                .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted && !t.IsTrashed)
                 .FirstOrDefaultAsync(cancellationToken);
 
         if (task == null)
@@ -430,7 +430,7 @@ public class TaskService : ITaskService
         }
 
         var task = await _context.Tasks
-            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId)
+            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted && !t.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (task == null)
@@ -475,7 +475,7 @@ public class TaskService : ITaskService
     public async Task<OperationResult<RemoveFromGroupResponse>> RemoveFromGroupAsync(Guid taskId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var task = await _context.Tasks
-            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted)
+            .Where(t => t.Id == taskId && t.CreatedBy == currentUserId && !t.IsDeleted && !t.IsTrashed)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (task == null)
@@ -516,7 +516,7 @@ public class TaskService : ITaskService
     public async Task<OperationResult> DeleteTaskGroupAsync(Guid groupId, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var taskGroup = await _context.TaskGroups
-            .Where(t => t.Id == groupId && t.CreatedBy == currentUserId)
+            .Where(t => t.Id == groupId && t.CreatedBy == currentUserId && !t.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (taskGroup == null)
@@ -528,7 +528,7 @@ public class TaskService : ITaskService
 
         // Сбрасываем TaskGroupId у всех задач в группе и обновляем их timestamps
         var tasksInGroup = await _context.Tasks
-            .Where(t => t.TaskGroupId == groupId && t.CreatedBy == currentUserId && !t.IsDeleted)
+            .Where(t => t.TaskGroupId == groupId && t.CreatedBy == currentUserId && !t.IsDeleted && !t.IsTrashed)
             .ToListAsync(cancellationToken);
 
         foreach (var task in tasksInGroup)
