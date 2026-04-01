@@ -342,6 +342,22 @@ public class RecipesController : ControllerBase
         return NoContent();       
     }
 
+    // PATCH: api/{recipeId}/ingredient/reorder
+    [HttpPatch("{recipeId}/ingredient/reorder")]
+    [Authorize]
+    public async Task<IActionResult> ReorderIngredients([FromRoute] Guid recipeId, [FromBody] ReorderItemsRequest reorderItemsRequest, CancellationToken cancellationToken = default)
+    {
+        var currentUserId = _userService.GetUserId(User);
+        var response = await _recipeService.ReorderIngredientsAsync(recipeId, currentUserId, reorderItemsRequest.OrderedIds, cancellationToken);
+        
+        if (!response.IsSuccess)
+        {
+            return StatusCode(response.StatusCode ?? 500, new {message = response.ErrorMessage});
+        }        
+        
+        return NoContent();
+    }
+
     // Группа ингредиентов
 
     // GET: api/recipes/ingredient/group/{id}
@@ -491,5 +507,20 @@ public class RecipesController : ControllerBase
         }
 
         return NoContent();       
+    }
+
+    [HttpPatch("{recipeId}/step/reorder")]
+    [Authorize]
+    public async Task<IActionResult> ReorderSteps([FromRoute] Guid recipeId, [FromBody] ReorderItemsRequest request, CancellationToken cancellationToken = default)
+    {
+        var currentUserId = _userService.GetUserId(User);
+        var response = await _recipeService.ReorderRecipeStepsAsync(recipeId, currentUserId, request.OrderedIds, cancellationToken);
+
+        if (!response.IsSuccess)
+        {
+            return StatusCode(response.StatusCode ?? 500, new {message = response.ErrorMessage});
+        }     
+        
+        return NoContent();
     }
 }

@@ -15,6 +15,7 @@ public class Ingredient
     [StringLength(500, ErrorMessage = "Примечание не может превышать 500 символов.")]
     public string? Note { get; set; } 
     public DateTime CreatedAt { get; set; }
+    public int Position { get ; set; }
 
     // Внешние ключи
     public Guid? IngredientGroupId { get; set; } 

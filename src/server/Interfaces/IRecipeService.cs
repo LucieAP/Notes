@@ -20,6 +20,7 @@ public interface IRecipeService
     public Task<GetIngredientResponse?> GetIngredientByIdAsync(Guid ingredientId, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<UpdateIngredientResponse>> UpdateIngredientAsync(Guid ingredientId, Guid currentUserId, UpdateIngredientRequest updateIngredientRequest, CancellationToken cancellationToken = default);
     public Task<OperationResult> DeleteIngredientByIdAsync(Guid ingredientId, Guid currentUserId, CancellationToken cancellationToken = default);
+    public Task<OperationResult> ReorderIngredientsAsync(Guid recipeId, Guid currentUserId, IReadOnlyList<Guid> orderedIds, CancellationToken cancellationToken = default);
     public Task<OperationResult<CreateIngredientGroupResponse>> CreateIngredientGroupAsync(Guid recipeId, CreateIngredientGroupRequest createIngredientGroupRequest, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<GetIngredientGroupResponse?> GetIngredientGroupByIdAsync(Guid ingredientGroupId, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<UpdateIngredientGroupResponse>> UpdateIngredientGroupAsync(Guid ingredientGroupId, Guid currentUserId, UpdateIngredientGroupRequest updateIngredientGroupRequest, CancellationToken cancellationToken = default);
@@ -28,4 +29,5 @@ public interface IRecipeService
     public Task<CreateRecipeStepResponse> CreateRecipeStepAsync(Guid recipeId, CreateRecipeStepRequest createRecipeStepRequest, Guid currentUserId, CancellationToken cancellationToken = default);
     public Task<OperationResult<UpdateRecipeStepResponse>> UpdateRecipeStepAsync(Guid recipeStepId, Guid currentUserId, UpdateRecipeStepRequest updateRecipeStepRequest, CancellationToken cancellationToken = default);
     public Task<OperationResult> DeleteRecipeStepByIdAsync(Guid recipeStepId, Guid currentUserId, CancellationToken cancellationToken = default);
+    public Task<OperationResult> ReorderRecipeStepsAsync(Guid recipeId, Guid currentUserId, IReadOnlyList<Guid> orderedIds, CancellationToken cancellationToken = default);
 }

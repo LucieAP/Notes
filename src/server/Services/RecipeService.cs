@@ -48,7 +48,8 @@ public class RecipeService : IRecipeService
                     LastLoginAt = r.User.LastLoginAt
                 },
                 Ingredients = r.Ingredients
-                    .OrderBy(i => i.CreatedAt)
+                    .OrderBy(i => i.Position)
+                    .ThenBy(i => i.CreatedAt)
                     .Select(i => new GetIngredientResponse
                     {
                         Id = i.Id,
@@ -56,16 +57,19 @@ public class RecipeService : IRecipeService
                         Quantity = i.Quantity,
                         Unit = i.Unit,
                         Note = i.Note,
+                        Position = i.Position,
                         CreatedAt = i.CreatedAt,
                         IngredientGroupId = i.IngredientGroupId,
                         RecipeId = i.RecipeId
                     })
                     .ToList(),
                 Steps = r.RecipeSteps
-                    .OrderBy(rs => rs.CreatedAt)
+                    .OrderBy(rs => rs.Position)
+                    .ThenBy(rs => rs.CreatedAt)
                     .Select(rs => new GetRecipeStepResponse {
                         Id = rs.Id,
                         Description = rs.Description,
+                        Position = rs.Position,
                         CreatedAt = rs.CreatedAt,
                         RecipeId = rs.RecipeId
                     })
@@ -113,7 +117,8 @@ public class RecipeService : IRecipeService
                     LastLoginAt = r.User.LastLoginAt
                 },
                 Ingredients = r.Ingredients
-                    .OrderBy(i => i.CreatedAt)
+                    .OrderBy(i => i.Position)
+                    .ThenBy(i => i.CreatedAt)
                     .Select(i => new GetIngredientResponse
                     {
                         Id = i.Id,
@@ -121,16 +126,19 @@ public class RecipeService : IRecipeService
                         Quantity = i.Quantity,
                         Unit = i.Unit,
                         Note = i.Note,
+                        Position = i.Position,
                         CreatedAt = i.CreatedAt,
                         IngredientGroupId = i.IngredientGroupId,
                         RecipeId = i.RecipeId
                     })
                     .ToList(),
                 Steps = r.RecipeSteps
-                    .OrderBy(rs => rs.CreatedAt)
+                    .OrderBy(rs => rs.Position)
+                    .ThenBy(rs => rs.CreatedAt)
                     .Select(rs => new GetRecipeStepResponse {
                         Id = rs.Id,
                         Description = rs.Description,
+                        Position = rs.Position,
                         CreatedAt = rs.CreatedAt,
                         RecipeId = rs.RecipeId
                     })
@@ -568,7 +576,12 @@ public class RecipeService : IRecipeService
                 return OperationResult<CreateIngredientResponse>.Failure("Группа ингредиентов не найдена", 404);
             }
         }
-        
+
+        var nextPosition = await _context.Ingredients
+            .Where(i => i.RecipeId == recipeId)
+            .Select(i => (int?)i.Position)
+            .MaxAsync(cancellationToken) ?? 0;
+
         var ingredient = new Ingredient
         {
             Id = Guid.NewGuid(),
@@ -576,6 +589,7 @@ public class RecipeService : IRecipeService
             Quantity = createIngredientRequest.Quantity,
             Unit = createIngredientRequest.Unit,
             Note = trimmedNote,
+            Position = nextPosition + 1,
             CreatedAt = DateTime.UtcNow,
             IngredientGroupId = createIngredientRequest.IngredientGroupId,
             RecipeId = recipeId
@@ -592,6 +606,7 @@ public class RecipeService : IRecipeService
             Quantity = ingredient.Quantity,
             Unit = ingredient.Unit,
             Note = ingredient.Note,
+            Position = ingredient.Position,
             CreatedAt = ingredient.CreatedAt,
             IngredientGroupId = ingredient.IngredientGroupId,
             RecipeId = ingredient.RecipeId
@@ -661,6 +676,46 @@ public class RecipeService : IRecipeService
             "Ингредиент {IngredientId} удален пользователем {UserId}",
             ingredientId, currentUserId); 
 
+
+        return OperationResult.Success();
+    }
+
+    public async Task<OperationResult> ReorderIngredientsAsync(Guid recipeId, Guid currentUserId, IReadOnlyList<Guid> orderedIds, CancellationToken cancellationToken = default)
+    {
+        var recipeExists = await _context.Recipes
+            .AnyAsync(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted && !r.IsTrashed, cancellationToken);
+        
+        if (!recipeExists) 
+        {
+            return OperationResult.Failure("Рецепт не найден", 404);
+        }
+
+        var ingredients = await _context.Ingredients
+            .Where(i => i.RecipeId == recipeId)
+            .ToListAsync(cancellationToken);
+
+        if (ingredients.Count != orderedIds.Count) {
+            return OperationResult.Failure("Неверный набор ингредиентов", 400);
+        } 
+
+        var map = ingredients.ToDictionary(x => x.Id);
+
+        if (orderedIds.Distinct().Count() != orderedIds.Count)
+        {
+            return OperationResult.Failure("orderedIds содержат дубликаты", 400);
+        }
+
+        for (int i = 0; i < orderedIds.Count; i++)
+        {
+            if (!map.TryGetValue(orderedIds[i], out var ing))
+            {
+                return OperationResult.Failure("Переданы чужие/несуществующие ингредиенты", 400);
+            } 
+
+            ing.Position = i + 1;
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
 
         return OperationResult.Success();
     }
@@ -849,10 +904,16 @@ public class RecipeService : IRecipeService
             throw new InvalidOperationException("Рецепт не найден");
         }
 
+        var nextPosition = await _context.RecipeSteps
+            .Where(rs => rs.RecipeId == recipeId)
+            .Select(rs => (int?)rs.Position)
+            .MaxAsync(cancellationToken) ?? 0;
+
         var recipeStep = new RecipeStep
         {
             Id = Guid.NewGuid(),
             Description = trimmedDescription,
+            Position = nextPosition + 1,
             CreatedAt = DateTime.UtcNow,
             RecipeId = recipeId
         };
@@ -866,6 +927,7 @@ public class RecipeService : IRecipeService
         {
             Id = recipeStep.Id,
             Description = recipeStep.Description,
+            Position = recipeStep.Position,
             CreatedAt = recipeStep.CreatedAt,
             RecipeId = recipeStep.RecipeId
         };
@@ -937,6 +999,41 @@ public class RecipeService : IRecipeService
         _logger.LogInformation(
             "Шаг рецепта {stepId} удален пользователем {userId}",
             recipeStepId, currentUserId);
+
+        return OperationResult.Success();
+    }
+
+    public async Task<OperationResult> ReorderRecipeStepsAsync(Guid recipeId, Guid currentUserId, IReadOnlyList<Guid> orderedIds, CancellationToken cancellationToken = default)
+    {
+        var recipeExists = await _context.Recipes
+            .AnyAsync(r => r.Id == recipeId && r.CreatedBy == currentUserId && !r.IsDeleted && !r.IsTrashed, cancellationToken);
+        
+        if (!recipeExists) 
+        {
+            return OperationResult.Failure("Рецепт не найден", 404);
+        }
+
+        var steps = await _context.RecipeSteps
+            .Where(i => i.RecipeId == recipeId)
+            .ToListAsync(cancellationToken);
+
+        if (steps.Count != orderedIds.Count) {
+            return OperationResult.Failure("Неверный набор шагов", 400);
+        } 
+
+        var map = steps.ToDictionary(x => x.Id);
+        
+        for (int i = 0; i < orderedIds.Count; i++)
+        {
+            if (!map.TryGetValue(orderedIds[i], out var ing))
+            {
+                return OperationResult.Failure("Переданы чужие/несуществующие шаги", 400);
+            } 
+
+            ing.Position = i + 1;
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
 
         return OperationResult.Success();
     }
