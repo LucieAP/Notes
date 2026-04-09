@@ -626,6 +626,7 @@ public class RecipeService : IRecipeService
                 Quantity = i.Quantity,
                 Unit = i.Unit,
                 Note = i.Note,
+                Position = i.Position,
                 CreatedAt = i.CreatedAt,
                 IngredientGroupId = i.IngredientGroupId,
                 RecipeId = i.RecipeId
@@ -707,12 +708,12 @@ public class RecipeService : IRecipeService
 
         for (int i = 0; i < orderedIds.Count; i++)
         {
-            if (!map.TryGetValue(orderedIds[i], out var ing))
+            if (!map.TryGetValue(orderedIds[i], out var ingredient))
             {
                 return OperationResult.Failure("Переданы чужие/несуществующие ингредиенты", 400);
             } 
 
-            ing.Position = i + 1;
+            ingredient.Position = i + 1;
         }
 
         await _context.SaveChangesAsync(cancellationToken);
@@ -877,6 +878,7 @@ public class RecipeService : IRecipeService
             {
                 Id = rs.Id,
                 Description = rs.Description,
+                Position = rs.Position,
                 CreatedAt = rs.CreatedAt,
                 RecipeId = rs.RecipeId
             })
@@ -1025,12 +1027,12 @@ public class RecipeService : IRecipeService
         
         for (int i = 0; i < orderedIds.Count; i++)
         {
-            if (!map.TryGetValue(orderedIds[i], out var ing))
+            if (!map.TryGetValue(orderedIds[i], out var ingredient))
             {
                 return OperationResult.Failure("Переданы чужие/несуществующие шаги", 400);
             } 
 
-            ing.Position = i + 1;
+            ingredient.Position = i + 1;
         }
 
         await _context.SaveChangesAsync(cancellationToken);

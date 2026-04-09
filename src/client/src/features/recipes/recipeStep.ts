@@ -2,6 +2,7 @@
 export interface GetRecipeStepResponse {
   id: string;
   description: string | null;
+  position: number;
   createdAt: string;
   recipeId: string;
 }
@@ -14,6 +15,7 @@ export interface CreateRecipeStepRequest {
 export interface CreateRecipeStepResponse {
   id: string;
   description: string | null;
+  position: number;
   createdAt: string;
   recipeId: string;
 }

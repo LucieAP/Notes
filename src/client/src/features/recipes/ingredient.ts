@@ -7,6 +7,7 @@ export interface GetIngredientResponse {
   quantity: number;
   unit: Unit;
   note: string | null;
+  position: number;
   createdAt: string;
   ingredientGroupId: string | null;
   recipeId: string;
@@ -27,6 +28,7 @@ export interface CreateIngredientResponse {
   quantity: number;
   unit: Unit;
   note: string | null;
+  position: number;
   createdAt: string;
   ingredientGroupId: string | null;
   recipeId: string;
