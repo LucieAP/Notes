@@ -3,9 +3,9 @@ import { Unit } from "@/shared/enums/unit";
 /** DTO для получения ингредиента (GetIngredientResponse на сервере) */
 export interface GetIngredientResponse {
   id: string;
-  name: string;
-  quantity: number;
-  unit: Unit;
+  name: string | null;
+  quantity: number | null;
+  unit: Unit | null;
   note: string | null;
   position: number;
   createdAt: string;
@@ -24,9 +24,9 @@ export interface CreateIngredientRequest {
 
 export interface CreateIngredientResponse {
   id: string;
-  name: string;
-  quantity: number;
-  unit: Unit;
+  name: string | null;
+  quantity: number | null;
+  unit: Unit | null;
   note: string | null;
   position: number;
   createdAt: string;

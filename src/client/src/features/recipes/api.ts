@@ -1,5 +1,6 @@
 import api from "@/shared/api/axios";
 import {
+  CreateRecipeResponse,
   CreateRecipeRequest,
   GetRecipeResponse,
   ToggleFavoriteResponse,
@@ -10,6 +11,7 @@ import {
 import {
   CreateIngredientRequest,
   CreateIngredientResponse,
+  UpdateIngredientResponse,
   UpdateIngredientRequest,
 } from "./ingredient";
 import {
@@ -28,7 +30,7 @@ export const recipesApi = {
     return api.get(`/recipes/${id}`);
   },
 
-  create(data: CreateRecipeRequest): Promise<GetRecipeResponse> {
+  create(data: CreateRecipeRequest): Promise<CreateRecipeResponse> {
     return api.post("/recipes/create", data);
   },
 
@@ -84,7 +86,7 @@ export const recipesApi = {
   }: {
     id: string;
     data: UpdateIngredientRequest;
-  }): Promise<void> {
+  }): Promise<UpdateIngredientResponse> {
     return api.patch(`/recipes/ingredient/${id}`, data);
   },
 

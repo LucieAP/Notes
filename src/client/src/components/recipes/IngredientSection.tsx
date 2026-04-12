@@ -62,7 +62,7 @@ function IngredientSection({
             onIngredientNameChange={onIngredientNameChange}
             onIngredientQuantityChange={onIngredientQuantityChange}
             onIngredientUnitChange={onIngredientUnitChange}
-            onDelete={onDeleteIngredient}
+            onDeleteIngredient={onDeleteIngredient}
           />
         ))}
       </DragDropProvider>

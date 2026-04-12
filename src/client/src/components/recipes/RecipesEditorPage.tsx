@@ -4,10 +4,10 @@ import Spinner from "../common/icons/Spinner";
 import useRecipeEditor from "@/shared/hooks/useRecipeEditor";
 
 function RecipesEditorPage() {
-  const { id } = useParams<{ id: string }>();
-  if (!id) return null;
+  const { id: recipeId } = useParams<{ id: string }>();
+  if (!recipeId) return null;
 
-  const { recipe, isLoading, actions } = useRecipeEditor(id);
+  const { recipe, isLoading, actions } = useRecipeEditor(recipeId);
 
   return (
     <>

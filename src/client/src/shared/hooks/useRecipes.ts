@@ -7,43 +7,46 @@ interface RecipesContextTypes {
   isLoading: boolean;
   fetchRecipes: () => Promise<void>;
   createRecipe: () => Promise<void>;
-  getRecipeById: (id: string) => Promise<GetRecipeResponse | undefined>;
+  getRecipeById: (recipeId: string) => Promise<GetRecipeResponse | undefined>;
   updateTitle: ({ id, title }: { id: string; title: string }) => Promise<void>;
   updateDescription: ({
-    id,
+    recipeId,
     description,
   }: {
-    id: string;
+    recipeId: string;
     description: string;
   }) => Promise<void>;
-  deleteRecipe: (id: string) => Promise<void>;
-  trashRecipe: (id: string) => Promise<void>;
+  deleteRecipe: (recipeId: string) => Promise<void>;
+  trashRecipe: (recipeId: string) => Promise<void>;
   getRecipesTrashed: () => Promise<GetRecipeResponse[]>;
-  restoreRecipe: (id: string) => Promise<void>;
-  toggleFavorite: (id: string) => Promise<void>;
-  createIngredient: (id: string) => Promise<void>;
-  updateIngredientName: (id: string, name: string) => Promise<void>;
-  updateIngredientQuantity: (id: string, quantity: number) => Promise<void>;
-  updateIngredientUnit: (id: string, unit: Unit) => Promise<void>;
-  deleteIngredient: (id: string) => Promise<void>;
+  restoreRecipe: (recipeId: string) => Promise<void>;
+  toggleFavorite: (recipeId: string) => Promise<void>;
+  createIngredient: (recipeId: string) => Promise<void>;
+  updateIngredientName: (ingredientId: string, name: string) => Promise<void>;
+  updateIngredientQuantity: (
+    ingredientId: string,
+    quantity: number,
+  ) => Promise<void>;
+  updateIngredientUnit: (ingredientId: string, unit: Unit) => Promise<void>;
+  deleteIngredient: (ingredientId: string) => Promise<void>;
   reorderIngredients: ({
-    id,
+    recipeId,
     orderedIngredientIds,
   }: {
-    id: string;
+    recipeId: string;
     orderedIngredientIds: string[];
   }) => Promise<void>;
-  createStep: (id: string) => Promise<void>;
+  createStep: (recipeId: string) => Promise<void>;
   updateStepDescription: (
-    id: string,
+    stepId: string,
     description: string | null,
   ) => Promise<void>;
-  deleteStep: (id: string) => Promise<void>;
+  deleteStep: (stepId: string) => Promise<void>;
   reorderSteps: ({
-    id,
+    recipeId,
     orderedStepIds,
   }: {
-    id: string;
+    recipeId: string;
     orderedStepIds: string[];
   }) => Promise<void>;
 }

@@ -33,22 +33,25 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
         isFavorite: false,
       });
 
-      setRecipesData((prev) => [...prev, createdRecipe]);
-      console.log(`createdRecipe: ${createdRecipe}`);
+      const fullRecipe = await recipesApi.getRecipeById(createdRecipe.id);
+      setRecipesData((prev) => [...prev, fullRecipe]);
+      console.log("createdRecipe: ", fullRecipe);
     } catch (err) {
       console.log(err instanceof Error ? err.message : err);
     }
   }, []);
 
   const getRecipeById = useCallback(
-    async (id: string) => {
+    async (recipeId: string) => {
       try {
-        if (!id) return;
+        if (!recipeId) return;
 
-        const cachedRecipe = recipesData.find((recipe) => recipe.id === id);
+        const cachedRecipe = recipesData.find(
+          (recipe) => recipe.id === recipeId,
+        );
         if (cachedRecipe) return cachedRecipe;
 
-        const recipe = await recipesApi.getRecipeById(id);
+        const recipe = await recipesApi.getRecipeById(recipeId);
         setRecipesData((prev) => {
           const existingIndex = prev.findIndex((item) => item.id === recipe.id);
           if (existingIndex >= 0) {
@@ -72,9 +75,7 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
         if (!id) return;
         await recipesApi.updateTitle({ id, title });
         setRecipesData((prev) =>
-          prev.map((recipe) =>
-            recipe.id === id ? { ...recipe, title } : recipe,
-          ),
+          prev.map((recipe) => (recipe.id === id ? { ...recipe, title } : recipe)),
         );
       } catch (err) {
         console.log(err instanceof Error ? err.message : err);
@@ -84,13 +85,19 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
   );
 
   const updateDescription = useCallback(
-    async ({ id, description }: { id: string; description: string }) => {
+    async ({
+      recipeId,
+      description,
+    }: {
+      recipeId: string;
+      description: string;
+    }) => {
       try {
-        if (!id) return;
-        await recipesApi.updateDescription({ id, description });
+        if (!recipeId) return;
+        await recipesApi.updateDescription({ id: recipeId, description });
         setRecipesData((prev) =>
           prev.map((recipe) =>
-            recipe.id === id ? { ...recipe, description } : recipe,
+            recipe.id === recipeId ? { ...recipe, description } : recipe,
           ),
         );
       } catch (err) {
@@ -100,22 +107,24 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  const deleteRecipe = useCallback(async (id: string) => {
+  const deleteRecipe = useCallback(async (recipeId: string) => {
     try {
-      if (!id) return;
-      await recipesApi.delete(id);
+      if (!recipeId) return;
+      await recipesApi.delete(recipeId);
 
-      setRecipesData((prev) => prev.filter((recipe) => recipe.id !== id));
+      setRecipesData((prev) =>
+        prev.filter((recipe) => recipe.id !== recipeId),
+      );
     } catch (err) {
       console.log(err instanceof Error ? err.message : err);
     }
   }, []);
 
   const trashRecipe = useCallback(
-    async (id: string) => {
+    async (recipeId: string) => {
       try {
-        if (!id) return;
-        await recipesApi.trash(id);
+        if (!recipeId) return;
+        await recipesApi.trash(recipeId);
         fetchRecipes();
       } catch (err) {
         console.log(err instanceof Error ? err.message : err);
@@ -125,10 +134,10 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
   );
 
   const restoreRecipe = useCallback(
-    async (id: string) => {
+    async (recipeId: string) => {
       try {
-        if (!id) return;
-        await recipesApi.restore(id);
+        if (!recipeId) return;
+        await recipesApi.restore(recipeId);
         fetchRecipes();
       } catch (err) {
         console.log(err instanceof Error ? err.message : err);
@@ -147,13 +156,13 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const toggleFavorite = useCallback(async (id: string) => {
+  const toggleFavorite = useCallback(async (recipeId: string) => {
     try {
-      if (!id) return;
-      const data = await recipesApi.toggleFavorite(id);
+      if (!recipeId) return;
+      const data = await recipesApi.toggleFavorite(recipeId);
       setRecipesData((prev) =>
         prev.map((recipe) =>
-          recipe.id === id
+          recipe.id === recipeId
             ? { ...recipe, isFavorite: data.isFavorite }
             : recipe,
         ),
@@ -165,12 +174,12 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
 
   // Ингредиенты
 
-  const createIngredient = useCallback(async (id: string) => {
+  const createIngredient = useCallback(async (recipeId: string) => {
     try {
-      if (!id) return;
+      if (!recipeId) return;
 
       const createdIngredient = await recipesApi.createIngredient({
-        id,
+        id: recipeId,
         data: {
           unit: Unit.Default,
         },
@@ -181,7 +190,7 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
 
       setRecipesData((prev) =>
         prev.map((recipe) =>
-          recipe.id === id
+          recipe.id === recipeId
             ? {
                 ...recipe,
                 ingredients: [...(recipe.ingredients ?? []), createdIngredient],
@@ -194,38 +203,19 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const updateIngredientName = useCallback(async (id: string, name: string) => {
-    try {
-      if (!id) return;
-
-      await recipesApi.updateIngredient({ id, data: { name: name } });
-
-      setRecipesData((prev) =>
-        prev.map((recipe) => ({
-          ...recipe,
-          ingredients: recipe.ingredients.map((ingredient) =>
-            ingredient.id === id ? { ...ingredient, name: name } : ingredient,
-          ),
-        })),
-      );
-    } catch (err) {
-      console.log(err instanceof Error ? err.message : err);
-    }
-  }, []);
-
-  const updateIngredientQuantity = useCallback(
-    async (id: string, quantity: number) => {
+  const updateIngredientName = useCallback(
+    async (ingredientId: string, name: string) => {
       try {
-        if (!id) return;
+        if (!ingredientId) return;
 
-        await recipesApi.updateIngredient({ id, data: { quantity: quantity } });
+        await recipesApi.updateIngredient({ id: ingredientId, data: { name } });
 
         setRecipesData((prev) =>
           prev.map((recipe) => ({
             ...recipe,
             ingredients: recipe.ingredients.map((ingredient) =>
-              ingredient.id === id
-                ? { ...ingredient, quantity: quantity }
+              ingredient.id === ingredientId
+                ? { ...ingredient, name }
                 : ingredient,
             ),
           })),
@@ -237,34 +227,66 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  const updateIngredientUnit = useCallback(async (id: string, unit: Unit) => {
+  const updateIngredientQuantity = useCallback(
+    async (ingredientId: string, quantity: number) => {
+      try {
+        if (!ingredientId) return;
+
+        await recipesApi.updateIngredient({
+          id: ingredientId,
+          data: { quantity },
+        });
+
+        setRecipesData((prev) =>
+          prev.map((recipe) => ({
+            ...recipe,
+            ingredients: recipe.ingredients.map((ingredient) =>
+              ingredient.id === ingredientId
+                ? { ...ingredient, quantity }
+                : ingredient,
+            ),
+          })),
+        );
+      } catch (err) {
+        console.log(err instanceof Error ? err.message : err);
+      }
+    },
+    [],
+  );
+
+  const updateIngredientUnit = useCallback(
+    async (ingredientId: string, unit: Unit) => {
+      try {
+        await recipesApi.updateIngredient({ id: ingredientId, data: { unit } });
+
+        setRecipesData((prev) =>
+          prev.map((recipe) => ({
+            ...recipe,
+            ingredients: recipe.ingredients.map((ingredient) =>
+              ingredient.id === ingredientId
+                ? { ...ingredient, unit }
+                : ingredient,
+            ),
+          })),
+        );
+      } catch (err) {
+        console.log(err instanceof Error ? err.message : err);
+      }
+    },
+    [],
+  );
+
+  const deleteIngredient = useCallback(async (ingredientId: string) => {
     try {
-      await recipesApi.updateIngredient({ id, data: { unit: unit } });
+      if (!ingredientId) return;
 
-      setRecipesData((prev) =>
-        prev.map((recipe) => ({
-          ...recipe,
-          ingredients: recipe.ingredients.map((ingredient) =>
-            ingredient.id === id ? { ...ingredient, unit: unit } : ingredient,
-          ),
-        })),
-      );
-    } catch (err) {
-      console.log(err instanceof Error ? err.message : err);
-    }
-  }, []);
-
-  const deleteIngredient = useCallback(async (id: string) => {
-    try {
-      if (!id) return;
-
-      await recipesApi.deleteIngredient(id);
+      await recipesApi.deleteIngredient(ingredientId);
 
       setRecipesData((prev) =>
         prev.map((recipe) => ({
           ...recipe,
           ingredients: recipe.ingredients.filter(
-            (ingredient) => ingredient.id !== id,
+            (ingredient) => ingredient.id !== ingredientId,
           ),
         })),
       );
@@ -275,20 +297,20 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
 
   const reorderIngredients = useCallback(
     async ({
-      id,
+      recipeId,
       orderedIngredientIds,
     }: {
-      id: string;
+      recipeId: string;
       orderedIngredientIds: string[];
     }) => {
-      if (!id || orderedIngredientIds.length === 0) return;
+      if (!recipeId || orderedIngredientIds.length === 0) return;
 
       let previousRecipeIngredients: GetRecipeResponse["ingredients"] | null =
         null;
 
       setRecipesData((prev) =>
         prev.map((recipe) => {
-          if (recipe.id !== id) {
+          if (recipe.id !== recipeId) {
             return recipe;
           }
 
@@ -316,7 +338,7 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
 
       try {
         await recipesApi.reorderIngredients({
-          id,
+          id: recipeId,
           orderedIds: orderedIngredientIds,
         });
       } catch (err) {
@@ -324,7 +346,7 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
         if (previousRecipeIngredients) {
           setRecipesData((prev) =>
             prev.map((recipe) =>
-              recipe.id === id
+              recipe.id === recipeId
                 ? { ...recipe, ingredients: previousRecipeIngredients! }
                 : recipe,
             ),
@@ -339,12 +361,12 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
 
   //  Шаги
 
-  const createStep = useCallback(async (id: string) => {
+  const createStep = useCallback(async (recipeId: string) => {
     try {
-      if (!id) return;
+      if (!recipeId) return;
 
       const createdStep = await recipesApi.createStep({
-        id,
+        id: recipeId,
         data: {
           description: null,
         },
@@ -354,7 +376,7 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
 
       setRecipesData((prev) =>
         prev.map((recipe) =>
-          recipe.id === id
+          recipe.id === recipeId
             ? {
                 ...recipe,
                 steps: [...(recipe.steps ?? []), createdStep],
@@ -368,17 +390,17 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateStepDescription = useCallback(
-    async (id: string, description: string | null) => {
+    async (stepId: string, description: string | null) => {
       try {
-        if (!id) return;
+        if (!stepId) return;
 
-        await recipesApi.updateStep({ id, data: { description } });
+        await recipesApi.updateStep({ id: stepId, data: { description } });
 
         setRecipesData((prev) =>
           prev.map((recipe) => ({
             ...recipe,
             steps: recipe.steps.map((step) =>
-              step.id === id ? { ...step, description } : step,
+              step.id === stepId ? { ...step, description } : step,
             ),
           })),
         );
@@ -389,16 +411,16 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  const deleteStep = useCallback(async (id: string) => {
+  const deleteStep = useCallback(async (stepId: string) => {
     try {
-      if (!id) return;
+      if (!stepId) return;
 
-      await recipesApi.deleteStep(id);
+      await recipesApi.deleteStep(stepId);
 
       setRecipesData((prev) =>
         prev.map((recipe) => ({
           ...recipe,
-          steps: recipe.steps.filter((step) => step.id !== id),
+          steps: recipe.steps.filter((step) => step.id !== stepId),
         })),
       );
     } catch (err) {
@@ -408,19 +430,19 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
 
   const reorderSteps = useCallback(
     async ({
-      id,
+      recipeId,
       orderedStepIds,
     }: {
-      id: string;
+      recipeId: string;
       orderedStepIds: string[];
     }) => {
-      if (!id || orderedStepIds.length === 0) return;
+      if (!recipeId || orderedStepIds.length === 0) return;
 
       let previousRecipeSteps: GetRecipeResponse["steps"] | null = null;
 
       setRecipesData((prev) =>
         prev.map((recipe) => {
-          if (recipe.id != id) {
+          if (recipe.id !== recipeId) {
             return recipe;
           }
 
@@ -443,12 +465,15 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
       );
 
       try {
-        await recipesApi.reorderSteps({ id, orderedIds: orderedStepIds });
+        await recipesApi.reorderSteps({
+          id: recipeId,
+          orderedIds: orderedStepIds,
+        });
       } catch (err) {
         if (previousRecipeSteps) {
           setRecipesData((prev) =>
             prev.map((recipe) =>
-              recipe.id === id
+              recipe.id === recipeId
                 ? { ...recipe, steps: previousRecipeSteps! }
                 : recipe,
             ),

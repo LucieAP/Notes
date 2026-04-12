@@ -3,7 +3,7 @@ import useRecipes from "./useRecipes";
 import { Unit } from "../enums/unit";
 import { GetRecipeResponse } from "@/features/recipes/recipe";
 
-function useRecipeEditor(id: string) {
+function useRecipeEditor(recipeId: string) {
   const [recipe, setRecipe] = useState<GetRecipeResponse | null>();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -32,7 +32,7 @@ function useRecipeEditor(id: string) {
     reorderSteps,
   } = useRecipes();
 
-  if (!id) {
+  if (!recipeId) {
     return {
       recipe: null,
       isLoading: false,
@@ -56,14 +56,14 @@ function useRecipeEditor(id: string) {
   useEffect(() => {
     (async () => {
       setIsLoading(true);
-      const fetchedRecipe = await getRecipeById(id);
+      const fetchedRecipe = await getRecipeById(recipeId);
       if (fetchedRecipe) {
         setRecipe(fetchedRecipe);
         console.log("recipe: ", fetchedRecipe);
       }
       setIsLoading(false);
     })();
-  }, [id, getRecipeById]);
+  }, [recipeId, getRecipeById]);
 
   // ── Очистка таймеров при размонтировании компонента ──
   useEffect(() => {
@@ -110,13 +110,13 @@ function useRecipeEditor(id: string) {
 
       titleSaveTimeoutRef.current = window.setTimeout(async () => {
         try {
-          await updateTitle({ id, title });
+          await updateTitle({ id: recipeId, title });
         } catch (err) {
           console.log(err instanceof Error ? err.message : err);
         }
       }, 1000); // 1 секунда паузы после ввода
     },
-    [id, updateTitle],
+    [recipeId, updateTitle],
   );
 
   // ── Обработчик изменения описания рецепта ──
@@ -131,36 +131,36 @@ function useRecipeEditor(id: string) {
 
       descriptionSaveTimeoutRef.current = window.setTimeout(async () => {
         try {
-          await updateDescription({ id, description });
+          await updateDescription({ recipeId, description });
         } catch (err) {
           console.log(err instanceof Error ? err.message : err);
         }
       }, 1000); // 1 секунда паузы после ввода
     },
-    [id, updateDescription],
+    [recipeId, updateDescription],
   );
 
   // ── Обработчик создания ингредиента ──
   const handleCreateIngredient = useCallback(async () => {
     try {
-      if (!id) return;
-      await createIngredient(id);
-      const fetchedRecipe = await getRecipeById(id);
+      if (!recipeId) return;
+      await createIngredient(recipeId);
+      const fetchedRecipe = await getRecipeById(recipeId);
       if (fetchedRecipe) {
         setRecipe(fetchedRecipe);
       }
     } catch (err) {
       console.log(err instanceof Error ? err.message : err);
     }
-  }, [id, createIngredient, getRecipeById]);
+  }, [recipeId, createIngredient, getRecipeById]);
 
   // ── Обработчик удаления ингредиента ──
   const handleDeleteIngredient = useCallback(
     async (ingredientId: string) => {
       try {
-        if (!ingredientId || !id) return;
+        if (!ingredientId || !recipeId) return;
         await deleteIngredient(ingredientId);
-        const fetchedRecipe = await getRecipeById(id);
+        const fetchedRecipe = await getRecipeById(recipeId);
         if (fetchedRecipe) {
           setRecipe(fetchedRecipe);
         }
@@ -168,7 +168,7 @@ function useRecipeEditor(id: string) {
         console.log(err instanceof Error ? err.message : err);
       }
     },
-    [id, deleteIngredient, getRecipeById],
+    [recipeId, deleteIngredient, getRecipeById],
   );
 
   // ── Обработчик изменения названия ингредиента ──
@@ -281,20 +281,20 @@ function useRecipeEditor(id: string) {
   const handleReorderIngredients = useCallback(
     async (orderedIngredientIds: string[]) => {
       try {
-        await reorderIngredients({ id, orderedIngredientIds });
+        await reorderIngredients({ recipeId, orderedIngredientIds });
       } catch (err) {
         console.log(err instanceof Error ? err.message : err);
       }
     },
-    [id, reorderIngredients],
+    [recipeId, reorderIngredients],
   );
 
   // ── Обработчик создания шага ──
   const handleCreateStep = useCallback(async () => {
     try {
-      if (!id) return;
-      await createStep(id);
-      const fetchedRecipe = await getRecipeById(id);
+      if (!recipeId) return;
+      await createStep(recipeId);
+      const fetchedRecipe = await getRecipeById(recipeId);
       if (fetchedRecipe) {
         setRecipe(fetchedRecipe);
       }
@@ -302,7 +302,7 @@ function useRecipeEditor(id: string) {
       console.log(err instanceof Error ? err.message : err);
       throw err;
     }
-  }, [id, createStep, getRecipeById]);
+  }, [recipeId, createStep, getRecipeById]);
 
   // ── Обработчик изменения шага ингредиента ──
 
@@ -343,9 +343,9 @@ function useRecipeEditor(id: string) {
   const handleDeleteStep = useCallback(
     async (stepId: string) => {
       try {
-        if (!stepId || !id) return;
+        if (!stepId || !recipeId) return;
         await deleteStep(stepId);
-        const fetchedRecipe = await getRecipeById(id);
+        const fetchedRecipe = await getRecipeById(recipeId);
         if (fetchedRecipe) {
           setRecipe(fetchedRecipe);
         }
@@ -353,19 +353,19 @@ function useRecipeEditor(id: string) {
         console.log(err instanceof Error ? err.message : err);
       }
     },
-    [id, deleteStep, getRecipeById],
+    [recipeId, deleteStep, getRecipeById],
   );
 
   // ── Обработчик сортировки шагов ──
   const handleReorderSteps = useCallback(
     async (orderedStepIds: string[]) => {
       try {
-        await reorderSteps({ id, orderedStepIds });
+        await reorderSteps({ recipeId, orderedStepIds });
       } catch (err) {
         console.log(err instanceof Error ? err.message : err);
       }
     },
-    [id, reorderSteps],
+    [recipeId, reorderSteps],
   );
 
   return {

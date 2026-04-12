@@ -10,7 +10,7 @@ interface Props {
   onIngredientNameChange?: (ingredientId: string, name: string) => void;
   onIngredientQuantityChange?: (ingredientId: string, quantity: number) => void;
   onIngredientUnitChange?: (ingredientId: string, unit: Unit) => void;
-  onDelete?: (id: string) => void | Promise<void>;
+  onDeleteIngredient?: (ingredientId: string) => void | Promise<void>;
 }
 
 function IngredientRow({
@@ -19,7 +19,7 @@ function IngredientRow({
   onIngredientNameChange,
   onIngredientQuantityChange,
   onIngredientUnitChange,
-  onDelete,
+  onDeleteIngredient,
 }: Props) {
   if (!ingredient) return;
 
@@ -107,7 +107,7 @@ function IngredientRow({
       <button
         className="text-[#666] hover:text-white text-xs px-1 py-0.5 rounded bg-transparent border-none cursor-pointer transition-all duration-150 shrink-0"
         style={{ opacity: hovered ? 1 : 0 }}
-        onClick={() => onDelete?.(ingredient.id)}
+        onClick={() => onDeleteIngredient?.(ingredient.id)}
         aria-label="Удалить ингредиент"
       >
         ✕
