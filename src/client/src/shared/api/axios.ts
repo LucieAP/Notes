@@ -49,9 +49,40 @@ function setAuthHeader(requestConfig: any, token: string) {
   requestConfig.headers.Authorization = `Bearer ${token}`;
 }
 
+function decodeJwtExp(token: string): number | null {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const json = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((char) => `%${char.charCodeAt(0).toString(16).padStart(2, "0")}`)
+        .join(""),
+    );
+
+    const parsed = JSON.parse(json) as { exp?: unknown };
+    return typeof parsed.exp === "number" ? parsed.exp : null;
+  } catch {
+    return null;
+  }
+}
+
+function isTokenExpiredOrNearExpiry(token: string, leewaySeconds = 15): boolean {
+  const exp = decodeJwtExp(token);
+  if (!exp) {
+    return false;
+  }
+
+  const nowInSeconds = Math.floor(Date.now() / 1000);
+  return exp <= nowInSeconds + leewaySeconds;
+}
+
 export function setupInterceptors(api: AxiosInstance) {
   let isRefreshing = false;
   let lastRefreshToken: string | null = null;
+  let refreshPromise: Promise<string> | null = null;
 
   // очередь запросов на /refresh
   let refreshQueue: QueueItem[] = [];
@@ -67,10 +98,43 @@ export function setupInterceptors(api: AxiosInstance) {
     refreshQueue = [];
   }
 
+  async function refreshAccessToken(): Promise<string> {
+    if (!refreshPromise) {
+      refreshPromise = axios
+        .post<GetTokenResponse>(`${BASE_URL}/auth/refresh`, undefined, {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((response) => {
+          const newToken = response.data.token;
+          setAccessToken(newToken);
+          return newToken;
+        })
+        .finally(() => {
+          refreshPromise = null;
+        });
+    }
+
+    return refreshPromise;
+  }
+
   // Динамически подставляем токен перед отправкой каждого запроса
   // config - объект с настройками текущего запроса (url, method, headers и т.д.)
-  api.interceptors.request.use((config) => {
-    const token = getAccessToken();
+  api.interceptors.request.use(async (config) => {
+    const requestUrl = config.url ?? "";
+    const isRefreshRequest = requestUrl.includes("/auth/refresh");
+
+    let token = getAccessToken();
+
+    if (!isRefreshRequest && token && isTokenExpiredOrNearExpiry(token)) {
+      try {
+        token = await refreshAccessToken();
+      } catch {
+        clearAccessToken();
+      }
+    }
 
     if (token) {
       setAuthHeader(config, token);
@@ -116,14 +180,9 @@ export function setupInterceptors(api: AxiosInstance) {
         isRefreshing = true;
 
         try {
-          const res = await api.post<GetTokenResponse, GetTokenResponse>(
-            "/auth/refresh",
-          );
-          const newToken = res.token;
+          const newToken = await refreshAccessToken();
           lastRefreshToken = newToken;
 
-          // сохраняем токен
-          setAccessToken(newToken);
           onRefreshed(newToken);
 
           // Обновляем заголовок Authorization в конфиге оригинального запроса перед повтором
