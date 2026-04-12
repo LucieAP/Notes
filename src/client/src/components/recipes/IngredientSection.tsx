@@ -1,6 +1,8 @@
 import IngredientRow from "./IngredientRow";
 import { GetRecipeResponse } from "@/features/recipes/recipe";
 import { Unit } from "@/shared/enums/unit";
+import { DragDropProvider, type DragEndEvent } from "@dnd-kit/react";
+import { isSortableOperation } from "@dnd-kit/react/sortable";
 
 interface Props {
   recipe?: GetRecipeResponse;
@@ -9,6 +11,9 @@ interface Props {
   onIngredientUnitChange?: (ingredientId: string, unit: Unit) => void;
   onCreateIngredient?: () => void | Promise<void>;
   onDeleteIngredient?: (ingredientId: string) => void | Promise<void>;
+  onReorderIngredients?: (
+    orderedIngredientIds: string[],
+  ) => void | Promise<void>;
 }
 
 function IngredientSection({
@@ -18,8 +23,29 @@ function IngredientSection({
   onIngredientUnitChange,
   onCreateIngredient,
   onDeleteIngredient,
+  onReorderIngredients,
 }: Props) {
   if (!recipe) return null;
+
+  const handleDragEnd: DragEndEvent = async (event) => {
+    const { operation, canceled } = event;
+    if (canceled || !isSortableOperation(operation)) return;
+
+    const from = operation.source?.initialIndex; // индекс элемента в момент начала перетаскивания
+    const to = operation.source?.index; // индекс этого же элемента в момент окончания drag (куда он “встал” после сортировки)
+
+    if (from == null || to == null || from === to) return;
+
+    const next = [...recipe.ingredients]; // дублируем чтобы избежать мутации
+    const [moved] = next.splice(from, 1); // возвращает массив удаленных элементов
+    next.splice(to, 0, moved); // вставляет элемент moved в массив next по индексу targetIndex
+
+    const orderedIngredientIds = next.map((ingredient) => ingredient.id);
+
+    console.log("orderedIngredientIds", orderedIngredientIds);
+
+    await onReorderIngredients?.(orderedIngredientIds);
+  };
 
   return (
     <section className="w-full">
@@ -27,17 +53,19 @@ function IngredientSection({
         Ингредиенты:
       </span>
 
-      {recipe.ingredients.map((ingredient, index) => (
-        <IngredientRow
-          key={ingredient.id}
-          index={index + 1}
-          ingredient={ingredient}
-          onIngredientNameChange={onIngredientNameChange}
-          onIngredientQuantityChange={onIngredientQuantityChange}
-          onIngredientUnitChange={onIngredientUnitChange}
-          onDelete={onDeleteIngredient}
-        />
-      ))}
+      <DragDropProvider onDragEnd={handleDragEnd}>
+        {recipe.ingredients.map((ingredient, index) => (
+          <IngredientRow
+            key={ingredient.id}
+            index={index}
+            ingredient={ingredient}
+            onIngredientNameChange={onIngredientNameChange}
+            onIngredientQuantityChange={onIngredientQuantityChange}
+            onIngredientUnitChange={onIngredientUnitChange}
+            onDelete={onDeleteIngredient}
+          />
+        ))}
+      </DragDropProvider>
 
       <div className="flex gap-1 mt-2">
         <button

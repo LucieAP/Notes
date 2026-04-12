@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import IngredientSection from "./IngredientSection";
 import RecipeDivider from "./RecipeDivider";
 import StepSection from "./StepSection";
@@ -20,9 +20,13 @@ interface Props {
     handleIngredientUnitChange?: (ingredientId: string, unit: Unit) => void;
     handleCreateIngredient?: () => void | Promise<void>;
     handleDeleteIngredient?: (ingredientId: string) => void | Promise<void>;
+    handleReorderIngredients?: (
+      orderedIngredientIds: string[],
+    ) => void | Promise<void>;
     handleCreateStep?: () => void | Promise<void>;
     handleStepDescriptionChange?: (stepId: string, description: string) => void;
     handleDeleteStep?: (stepId: string) => void | Promise<void>;
+    handleReorderSteps?: (orderedStepIds: string[]) => void | Promise<void>;
   };
 }
 
@@ -86,6 +90,7 @@ function RecipesEditor({ recipe, actions }: Props) {
           onIngredientUnitChange={actions?.handleIngredientUnitChange}
           onCreateIngredient={actions?.handleCreateIngredient}
           onDeleteIngredient={actions?.handleDeleteIngredient}
+          onReorderIngredients={actions?.handleReorderIngredients}
         />
 
         <RecipeDivider />
@@ -97,6 +102,7 @@ function RecipesEditor({ recipe, actions }: Props) {
           onCreateStep={actions?.handleCreateStep}
           onChangeStep={actions?.handleStepDescriptionChange}
           onDeleteStep={actions?.handleDeleteStep}
+          onReorderSteps={actions?.handleReorderSteps}
         />
       </div>
     </div>

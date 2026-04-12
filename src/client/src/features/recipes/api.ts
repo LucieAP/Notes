@@ -66,6 +66,8 @@ export const recipesApi = {
     return api.get("/recipes/trashed");
   },
 
+  // Ингредиенты
+
   createIngredient({
     id,
     data,
@@ -90,6 +92,18 @@ export const recipesApi = {
     return api.delete(`/recipes/ingredient/delete/${id}`);
   },
 
+  reorderIngredients({
+    id,
+    orderedIds,
+  }: {
+    id: string;
+    orderedIds: string[];
+  }): Promise<void> {
+    return api.patch(`/recipes/${id}/ingredient/reorder`, { orderedIds });
+  },
+
+  // Шаги
+
   createStep({
     id,
     data,
@@ -112,5 +126,15 @@ export const recipesApi = {
 
   deleteStep(id: string): Promise<void> {
     return api.delete(`/recipes/step/delete/${id}`);
+  },
+
+  reorderSteps({
+    id,
+    orderedIds,
+  }: {
+    id: string;
+    orderedIds: string[];
+  }): Promise<void> {
+    return api.patch(`/recipes/${id}/step/reorder`, { orderedIds });
   },
 };

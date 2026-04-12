@@ -163,6 +163,8 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Ингредиенты
+
   const createIngredient = useCallback(async (id: string) => {
     try {
       if (!id) return;
@@ -271,6 +273,72 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const reorderIngredients = useCallback(
+    async ({
+      id,
+      orderedIngredientIds,
+    }: {
+      id: string;
+      orderedIngredientIds: string[];
+    }) => {
+      if (!id || orderedIngredientIds.length === 0) return;
+
+      let previousRecipeIngredients: GetRecipeResponse["ingredients"] | null =
+        null;
+
+      setRecipesData((prev) =>
+        prev.map((recipe) => {
+          if (recipe.id !== id) {
+            return recipe;
+          }
+
+          const byId = new Map(
+            recipe.ingredients.map((ingredient) => [ingredient.id, ingredient]),
+          );
+
+          if (orderedIngredientIds.length !== recipe.ingredients.length) {
+            throw new Error("Invalid ingredients length");
+          }
+
+          const next = orderedIngredientIds.map((ingredientId) => {
+            const ingredient = byId.get(ingredientId);
+            if (!ingredient) {
+              throw new Error(`Ingredient with id ${ingredientId} not found`);
+            }
+            return ingredient;
+          });
+
+          previousRecipeIngredients = recipe.ingredients; // снимок до перестановки
+
+          return { ...recipe, ingredients: next };
+        }),
+      );
+
+      try {
+        await recipesApi.reorderIngredients({
+          id,
+          orderedIds: orderedIngredientIds,
+        });
+      } catch (err) {
+        // откат
+        if (previousRecipeIngredients) {
+          setRecipesData((prev) =>
+            prev.map((recipe) =>
+              recipe.id === id
+                ? { ...recipe, ingredients: previousRecipeIngredients! }
+                : recipe,
+            ),
+          );
+        }
+        console.log(err instanceof Error ? err.message : err);
+        throw err;
+      }
+    },
+    [],
+  );
+
+  //  Шаги
+
   const createStep = useCallback(async (id: string) => {
     try {
       if (!id) return;
@@ -338,6 +406,61 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const reorderSteps = useCallback(
+    async ({
+      id,
+      orderedStepIds,
+    }: {
+      id: string;
+      orderedStepIds: string[];
+    }) => {
+      if (!id || orderedStepIds.length === 0) return;
+
+      let previousRecipeSteps: GetRecipeResponse["steps"] | null = null;
+
+      setRecipesData((prev) =>
+        prev.map((recipe) => {
+          if (recipe.id != id) {
+            return recipe;
+          }
+
+          if (orderedStepIds.length !== recipe.steps.length) {
+            throw new Error("Invalid steps length");
+          }
+
+          const byId = new Map(recipe.steps.map((step) => [step.id, step]));
+
+          const next = orderedStepIds.map((stepId) => {
+            const step = byId.get(stepId);
+            if (!step) throw new Error(`Step with id ${stepId} not found`);
+            return step;
+          });
+
+          previousRecipeSteps = recipe.steps;
+
+          return { ...recipe, steps: next };
+        }),
+      );
+
+      try {
+        await recipesApi.reorderSteps({ id, orderedIds: orderedStepIds });
+      } catch (err) {
+        if (previousRecipeSteps) {
+          setRecipesData((prev) =>
+            prev.map((recipe) =>
+              recipe.id === id
+                ? { ...recipe, steps: previousRecipeSteps! }
+                : recipe,
+            ),
+          );
+        }
+        console.log(err instanceof Error ? err.message : err);
+        throw err;
+      }
+    },
+    [],
+  );
+
   const value = useMemo(() => {
     return {
       recipesData,
@@ -357,9 +480,11 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
       updateIngredientQuantity,
       updateIngredientUnit,
       deleteIngredient,
+      reorderIngredients,
       createStep,
       updateStepDescription,
       deleteStep,
+      reorderSteps,
     };
   }, [
     recipesData,
@@ -379,9 +504,11 @@ function RecipeProvider({ children }: { children: React.ReactNode }) {
     updateIngredientQuantity,
     updateIngredientUnit,
     deleteIngredient,
+    reorderIngredients,
     createStep,
     updateStepDescription,
     deleteStep,
+    reorderSteps,
   ]);
 
   return <RecipesContext value={value}>{children}</RecipesContext>;

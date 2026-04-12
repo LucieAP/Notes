@@ -25,9 +25,11 @@ function useRecipeEditor(id: string) {
     updateIngredientUnit,
     createIngredient,
     deleteIngredient,
+    reorderIngredients,
     createStep,
     updateStepDescription,
     deleteStep,
+    reorderSteps,
   } = useRecipes();
 
   if (!id) {
@@ -42,9 +44,11 @@ function useRecipeEditor(id: string) {
         handleIngredientUnitChange: () => {},
         handleCreateIngredient: async () => {},
         handleDeleteIngredient: async () => {},
+        handleReorderIngredients: async () => {},
         handleCreateStep: async () => {},
         handleStepDescriptionChange: () => {},
         handleDeleteStep: async () => {},
+        handleReorderSteps: async () => {},
       },
     };
   }
@@ -273,6 +277,18 @@ function useRecipeEditor(id: string) {
     [updateIngredientUnit],
   );
 
+  // ── Обработчик сортировки ингредиентов ──
+  const handleReorderIngredients = useCallback(
+    async (orderedIngredientIds: string[]) => {
+      try {
+        await reorderIngredients({ id, orderedIngredientIds });
+      } catch (err) {
+        console.log(err instanceof Error ? err.message : err);
+      }
+    },
+    [id, reorderIngredients],
+  );
+
   // ── Обработчик создания шага ──
   const handleCreateStep = useCallback(async () => {
     try {
@@ -284,6 +300,7 @@ function useRecipeEditor(id: string) {
       }
     } catch (err) {
       console.log(err instanceof Error ? err.message : err);
+      throw err;
     }
   }, [id, createStep, getRecipeById]);
 
@@ -339,6 +356,18 @@ function useRecipeEditor(id: string) {
     [id, deleteStep, getRecipeById],
   );
 
+  // ── Обработчик сортировки шагов ──
+  const handleReorderSteps = useCallback(
+    async (orderedStepIds: string[]) => {
+      try {
+        await reorderSteps({ id, orderedStepIds });
+      } catch (err) {
+        console.log(err instanceof Error ? err.message : err);
+      }
+    },
+    [id, reorderSteps],
+  );
+
   return {
     recipe,
     isLoading,
@@ -350,9 +379,11 @@ function useRecipeEditor(id: string) {
       handleIngredientUnitChange,
       handleCreateIngredient,
       handleDeleteIngredient,
+      handleReorderIngredients,
       handleCreateStep,
       handleStepDescriptionChange,
       handleDeleteStep,
+      handleReorderSteps,
     },
   };
 }

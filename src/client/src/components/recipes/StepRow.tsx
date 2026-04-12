@@ -1,20 +1,29 @@
 import { GetRecipeStepResponse } from "@/features/recipes/recipeStep";
+import { useSortable } from "@dnd-kit/react/sortable";
 import { useEffect, useRef, useState } from "react";
+import DragAndDropButton from "../common/buttons/DragAndDropButton";
 
 interface Props {
-  index?: number;
+  index: number;
   step?: GetRecipeStepResponse;
   onChangeStep?: (stepId: string, description: string) => void;
   onDeleteStep?: (stepId: string) => void | Promise<void>;
 }
 
-function StepRow({ index = 1, step, onChangeStep, onDeleteStep }: Props) {
+function StepRow({ index, step, onChangeStep, onDeleteStep }: Props) {
   const [hovered, setHovered] = useState(false);
   const [description, setDescription] = useState<string>(
     step?.description ?? "",
   );
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   if (!step) return null;
+  const displayIndex = index + 1;
+  const handleRef = useRef<HTMLButtonElement | null>(null);
+  const sortable = useSortable({
+    id: step.id,
+    index: index,
+    handle: handleRef,
+  });
 
   const resizeTextarea = () => {
     const el = textareaRef.current;
@@ -33,12 +42,15 @@ function StepRow({ index = 1, step, onChangeStep, onDeleteStep }: Props) {
 
   return (
     <section
+      ref={sortable.ref}
       className="flex items-center w-full gap-2 py-1 min-h-[36px]"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div className="ml-4 mr-1 text-md min-w-[24px] text-right select-none shrink-0">
-        <span className="text-[#888]">{index}.</span>
+      <DragAndDropButton ref={handleRef} isDragging={sortable.isDragging} />
+
+      <div className="mr-1 text-md min-w-[24px] text-right select-none shrink-0">
+        <span className="text-[#888]">{displayIndex}.</span>
       </div>
 
       <textarea
@@ -57,6 +69,7 @@ function StepRow({ index = 1, step, onChangeStep, onDeleteStep }: Props) {
         }}
         style={{ overflow: "hidden" }}
       />
+
       <button
         onClick={() => {
           onDeleteStep?.(step.id);

@@ -1,11 +1,14 @@
 import { GetRecipeResponse } from "@/features/recipes/recipe";
 import StepRow from "./StepRow";
+import { DragDropProvider, DragEndEvent } from "@dnd-kit/react";
+import { isSortableOperation } from "@dnd-kit/react/sortable";
 
 interface Props {
   recipe?: GetRecipeResponse;
   onCreateStep?: () => void | Promise<void>;
   onChangeStep?: (stepId: string, description: string) => void;
   onDeleteStep?: (stepId: string) => void | Promise<void>;
+  onReorderSteps?: (orderedStepIds: string[]) => void | Promise<void>;
 }
 
 function StepSection({
@@ -13,10 +16,28 @@ function StepSection({
   onCreateStep,
   onChangeStep,
   onDeleteStep,
+  onReorderSteps,
 }: Props) {
   if (!recipe) return null;
 
-  const steps = recipe.steps ?? [];
+  const handleDragEnd: DragEndEvent = async (event) => {
+    const { operation, canceled } = event;
+    if (canceled || !isSortableOperation(operation)) return;
+
+    const from = operation.source?.initialIndex;
+    const to = operation.source?.index;
+
+    if (from == null || to == null || from === to) return;
+
+    const next = [...recipe.steps];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+
+    const orderedStepIds = next.map((step) => step.id);
+
+    console.log("orderedStepIds", orderedStepIds);
+    await onReorderSteps?.(orderedStepIds);
+  };
 
   return (
     <section className="w-full">
@@ -24,15 +45,17 @@ function StepSection({
         Шаги:
       </span>
 
-      {steps.map((step, index) => (
-        <StepRow
-          key={step.id}
-          index={index + 1}
-          step={step}
-          onDeleteStep={onDeleteStep}
-          onChangeStep={onChangeStep}
-        />
-      ))}
+      <DragDropProvider onDragEnd={handleDragEnd}>
+        {recipe.steps.map((step, index) => (
+          <StepRow
+            key={step.id}
+            index={index}
+            step={step}
+            onDeleteStep={onDeleteStep}
+            onChangeStep={onChangeStep}
+          />
+        ))}
+      </DragDropProvider>
 
       <div className="flex gap-1 mt-2">
         <button

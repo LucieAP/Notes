@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Unit, unitLabels } from "@/shared/enums/unit";
 import { GetIngredientResponse } from "@/features/recipes/ingredient";
+import { useSortable } from "@dnd-kit/react/sortable";
+import DragAndDropButton from "../common/buttons/DragAndDropButton";
 
 interface Props {
-  index?: number;
+  index: number;
   ingredient?: GetIngredientResponse;
   onIngredientNameChange?: (ingredientId: string, name: string) => void;
   onIngredientQuantityChange?: (ingredientId: string, quantity: number) => void;
@@ -12,42 +14,52 @@ interface Props {
 }
 
 function IngredientRow({
-  index = 1,
+  index,
   ingredient,
   onIngredientNameChange,
   onIngredientQuantityChange,
   onIngredientUnitChange,
   onDelete,
 }: Props) {
-  const [hovered, setHovered] = useState(false);
-  const [name, setName] = useState(ingredient?.name ?? "");
-  const [quantity, setQuantity] = useState(
-    ingredient?.quantity?.toString() ?? "",
-  );
-  const [unit, setUnit] = useState<Unit>(ingredient?.unit ?? Unit.Default);
-
   if (!ingredient) return;
 
-  useEffect(() => {
-    setName(ingredient?.name ?? "");
-  }, [ingredient?.name]);
+  const [hovered, setHovered] = useState(false);
+  const [name, setName] = useState(ingredient.name ?? "");
+  const [quantity, setQuantity] = useState(
+    ingredient.quantity?.toString() ?? "",
+  );
+  const [unit, setUnit] = useState<Unit>(ingredient.unit ?? Unit.Default);
+  const displayIndex = index + 1;
+  const handleRef = useRef<HTMLButtonElement | null>(null);
+  const sortable = useSortable({
+    id: ingredient.id,
+    index: index,
+    handle: handleRef,
+  });
 
   useEffect(() => {
-    setQuantity(ingredient?.quantity?.toString() ?? "");
-  }, [ingredient?.quantity]);
+    setName(ingredient.name ?? "");
+  }, [ingredient.name]);
 
   useEffect(() => {
-    setUnit(ingredient?.unit ?? Unit.Default);
-  }, [ingredient?.unit]);
+    setQuantity(ingredient.quantity?.toString() ?? "");
+  }, [ingredient.quantity]);
+
+  useEffect(() => {
+    setUnit(ingredient.unit ?? Unit.Default);
+  }, [ingredient.unit]);
 
   return (
     <section
+      ref={sortable.ref}
       className="flex items-center gap-2 py-1 min-h-[36px]"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div className="ml-4 mr-1 text-md min-w-[24px] text-right select-none shrink-0">
-        <span className="text-[#888]">{index}.</span>
+      <DragAndDropButton ref={handleRef} isDragging={sortable.isDragging} />
+
+      <div className="mr-1 text-md min-w-[24px] text-right select-none shrink-0">
+        <span className="text-[#888]">{displayIndex}.</span>
       </div>
 
       <input
